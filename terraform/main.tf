@@ -14,16 +14,17 @@ terraform {
 
   # Where Terraform stores its state to keep track of resources it manages
   backend "s3" {
-    bucket = "terraform-7558ab8d-ca46-4bb7-a57c-a0cfa36f8e7e"
+    bucket = "<unique_bucket_name>"
     key    = "terraform.tfstate"
     region = "ap-southeast-1"
   }
 }
+
 # Create an archive file for the Python lambda package
 # data "archive_file" "python_lambda_package" {
 #   type        = "zip"
-#   source_file = "code/handler.py"
-#   output_path = "build/handler.zip"
+#   source_file = "/code/handler.py"
+#   output_path = "/build/handler.zip"
 # }
 
 # Configure AWS Provider
@@ -31,98 +32,92 @@ provider "aws" {
   region = "ap-southeast-1"
 }
 
-resource "aws_iam_group" "developers" {
-  name = "developers"
-}
-resource "aws_iam_group_membership" "team" {
-  name = "developers"
-  users = [aws_iam_user.bradley.name,
-    aws_iam_user.marcus.name,
-    aws_iam_user.minh_vu.name,
-    aws_iam_user.michelle.name,
-    aws_iam_user.jennifer.name,
-  aws_iam_user.elizabeth.name]
+# resource "aws_iam_group" "developers" {
+#   name = "developers"
+# }
+# resource "aws_iam_group_membership" "team" {
+#   name = "developers"
+#   users = [aws_iam_user.bradley.name,
+#     aws_iam_user.marcus.name,
+#     aws_iam_user.minh_vu.name,
+#     aws_iam_user.michelle.name,
+#     aws_iam_user.jennifer.name,
+#   aws_iam_user.elizabeth.name]
 
-  group = aws_iam_group.developers.name
-}
+#   group = aws_iam_group.developers.name
+# }
 
-resource "aws_iam_user" "bradley" {
-  name = "bradley"
-}
+# resource "aws_iam_user" "bradley" {
+#   name = "bradley"
+# }
 
-resource "aws_iam_user" "marcus" {
-  name = "marcus"
-}
+# resource "aws_iam_user" "marcus" {
+#   name = "marcus"
+# }
 
-resource "aws_iam_user" "minh_vu" {
-  name = "minh_vu"
-}
-resource "aws_iam_user" "michelle" {
-  name = "michelle"
-}
-resource "aws_iam_user" "jennifer" {
-  name = "jennifer"
-}
-resource "aws_iam_user" "elizabeth" {
-  name = "elizabeth"
-}
+# resource "aws_iam_user" "minh_vu" {
+#   name = "minh_vu"
+# }
+# resource "aws_iam_user" "michelle" {
+#   name = "michelle"
+# }
+# resource "aws_iam_user" "jennifer" {
+#   name = "jennifer"
+# }
+# resource "aws_iam_user" "elizabeth" {
+#   name = "elizabeth"
+# }
 
-resource "aws_iam_policy" "policy" {
-  name        = "developer-policy"
-  description = "Policy for all developers in g1t1"
-  policy      = jsonencode(
-    {
-      "Version" : "2012-10-17",
-      "Statement" : [
-        {
-          "Sid" : "VisualEditor0",
-          "Effect" : "Allow",
-          "Action" : [
-            "rds:*",
-            "cloudtrail:*",
-            "dynamodb:*",
-            "sqs:*",
-            "rolesanywhere:*",
-            "cloudfront:*",
-            "access-analyzer:*",
-            "kms:*",
-            "kinesis:*",
-            "events:*",
-            "sns:*",
-            "states:*",
-            "rds-db:*",
-            "cognito-identity:*",
-            "dax:*",
-            "s3:*",
-            "apigateway:*",
-            "rds-data:*",
-            "amplifybackend:*",
-            "appsync:*",
-            "sts:*",
-            "iam:*",
-            "cloudwatch:*",
-            "sso:*",
-            "lambda:*",
-            "route53:*",
-            "cognito-idp:*"
-          ],
-          "Resource" : "*"
-        }
-      ]
-    }
-  )
-}
+# resource "aws_iam_policy" "policy" {
+#   name        = "developer-policy"
+#   description = "Policy for all developers in g1t1"
+#   policy      = jsonencode(
+#     {
+#       "Version" : "2012-10-17",
+#       "Statement" : [
+#         {
+#           "Sid" : "VisualEditor0",
+#           "Effect" : "Allow",
+#           "Action" : [
+#             "rds:*",
+#             "cloudtrail:*",
+#             "dynamodb:*",
+#             "sqs:*",
+#             "rolesanywhere:*",
+#             "cloudfront:*",
+#             "access-analyzer:*",
+#             "kms:*",
+#             "kinesis:*",
+#             "events:*",
+#             "sns:*",
+#             "states:*",
+#             "rds-db:*",
+#             "cognito-identity:*",
+#             "dax:*",
+#             "s3:*",
+#             "apigateway:*",
+#             "rds-data:*",
+#             "amplifybackend:*",
+#             "appsync:*",
+#             "sts:*",
+#             "iam:*",
+#             "cloudwatch:*",
+#             "sso:*",
+#             "lambda:*",
+#             "route53:*",
+#             "cognito-idp:*"
+#           ],
+#           "Resource" : "*"
+#         }
+#       ]
+#     }
+#   )
+# }
 
-resource "aws_iam_group_policy_attachment" "for-developers" {
-  group      = aws_iam_group.developers.name
-  policy_arn = aws_iam_policy.policy.arn
-}
-
-
-
-
-
-
+# resource "aws_iam_group_policy_attachment" "for-developers" {
+#   group      = aws_iam_group.developers.name
+#   policy_arn = aws_iam_policy.policy.arn
+# }
 
 
 # Create AWS IAM Role for Lambda Function
@@ -179,13 +174,13 @@ resource "aws_iam_role_policy" "lambda_policy" {
 
 # Create S3 Bucket to store different versions of the code
 resource "aws_s3_bucket" "lambda_function_bucket" {
-  bucket        = "lambda-archive-8de7e6fe-776a-4481-80c4-e4959b3dfc42"
+  bucket        = "<unique_bucket_name>"
   force_destroy = true
 }
 
 # Create S3 Bucket that accepts files
 resource "aws_s3_bucket" "file_upload_bucket" {
-  bucket        = "file-upload-8de7e6fe-776a-4481-80c4-e4959b3dfc42"
+  bucket        = "<unique_bucket_name>"
   force_destroy = true
 }
 
@@ -253,7 +248,7 @@ resource "aws_s3_bucket_notification" "file_upload_trigger" {
     lambda_function_arn = aws_lambda_function.file_upload.arn
     events              = ["s3:ObjectCreated:*"]
     #filter_prefix       = "foldername"
-    #filter_suffix = ".csv"
+    #filter_suffix       = ".csv"
   }
 
   depends_on = [aws_lambda_permission.s3_permission_to_trigger_lambda]
