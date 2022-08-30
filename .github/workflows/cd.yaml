@@ -45,10 +45,10 @@ jobs:
           cd ..
 
       - name: Upload to S3
-        run: aws s3 cp terraform/build/${{ github.run_id }}.zip s3://lambda-archive-8de7e6fe-776a-4481-80c4-e4959b3dfc43/${{ github.run_id }}.zip
+        run: aws s3 cp terraform/build/${{ github.run_id }}.zip s3://${{ secrets.S3_BUCKET_NAME }}/${{ github.run_id }}.zip
 
       - name: Update lambda function code
-        run: aws lambda update-function-code --function-name test-file-upload --s3-bucket lambda-archive-8de7e6fe-776a-4481-80c4-e4959b3dfc43 --s3-key ${{ github.run_id }}.zip
+        run: aws lambda update-function-code --function-name test-file-upload --s3-bucket ${{ secrets.S3_BUCKET_NAME }} --s3-key ${{ github.run_id }}.zip
 
       - name: Sleep for 5 seconds
         run: sleep 5s
