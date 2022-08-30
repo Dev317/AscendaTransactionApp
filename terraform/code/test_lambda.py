@@ -17,7 +17,7 @@ S3_TEST_FILE_CONTENT = [
         "id": "7ce56f44-659a-453f-8bc4-5a102faada42",
         "cardId": "0fd148a9-a350-4567-9e6d-d768ab9c1932",
         "merchant": "Collier",
-        "mcc": 4642,
+        "mcc": "4642",
         "currency": "SGD",
         "amount": 285.96,
         "sgdAmount": 0.0,
