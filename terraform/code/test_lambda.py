@@ -47,7 +47,7 @@ class TestLambdaFunction(unittest.TestCase):
 
         # DynamoDB Mock Setup
         self.dynamodb = boto3.client('dynamodb', region_name='ap-southeast-1')
-        
+
         self.table_dict = self.dynamodb.create_table(
             TableName=DYNAMODB_TABLE_NAME,
             KeySchema=[

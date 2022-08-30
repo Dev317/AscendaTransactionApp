@@ -9,6 +9,8 @@ import os
 import logging
 import boto3
 from decimal import Decimal
+import csv
+import io
 
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
@@ -27,26 +29,24 @@ def get_data_from_file(bucket, key):
     response = S3_CLIENT.get_object(Bucket=bucket, Key=key)
 
     content = response['Body'].read().decode("utf-8")
-    records = content.split("\r\n")
-    records = list(filter(None, records))
-    records.pop(0)
+    reader = csv.reader(io.StringIO(content))
+    next(reader)
 
     data = []
-    for record in records:
-        record_data = record.split(',')
+    for row in reader:
         item = {
-                "id": str(record_data[0]),
-                "cardId": str(record_data[1]),
-                "merchant": str(record_data[2]),
-                "mcc": int(record_data[3]),
-                "currency": str(record_data[4]),
-                "amount": float(record_data[5]),
-                "sgdAmount": float(record_data[6]),
-                "transactionId": str(record_data[7]),
-                "date": str(record_data[8]),
-                "cardPan": str(record_data[9]),
-                "cardType": str(record_data[10])
-            }
+            "id": str(row[0]),
+            "cardId": str(row[1]),
+            "merchant": str(row[2]),
+            "mcc": str(row[3]),
+            "currency": str(row[4]),
+            "amount": float(row[5]),
+            "sgdAmount": float(row[6]),
+            "transactionId": str(row[7]),
+            "date": str(row[8]),
+            "cardPan": str(row[9]),
+            "cardType": str(row[10])
+        }
         data.append(item)
         LOGGER.info('Processing: %s', item)
 
@@ -73,6 +73,7 @@ def handler(event, context):
         s3_file = record['s3']['object']['key']
 
         data = get_data_from_file(s3_bucket, s3_file)
+        LOGGER.info('Length of data is %s', len(data))
 
         for item in data:
             save_data_to_db(item)

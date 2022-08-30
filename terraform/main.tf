@@ -217,6 +217,7 @@ resource "aws_lambda_function" "file_upload" {
   memory_size      = 128
   publish          = true
   handler          = "handler.handler"
+  timeout          = 100
 
 
   lifecycle {
