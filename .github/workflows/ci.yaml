@@ -15,12 +15,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd code
+          cd terraform/code
           pip install -r requirements_test.txt
 
       - name: Run tests
         run: |
           pwd
           ls
-          cd code
+          cd terraform/code
           coverage run -m pytest
