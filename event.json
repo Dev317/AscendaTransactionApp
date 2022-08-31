@@ -1,40 +1,40 @@
 {
-    "Event structure" : {
-        "Records": [
-            {
-                "eventVersion": "2.1",
-                "eventSource": "aws:s3",
-                "awsRegion": "ap-southeast-1",
-                "eventTime": "2022-08-30T12: 41: 53.179Z",
-                "eventName": "ObjectCreated:Put",
-                "userIdentity": {
-                    "principalId": "AWS: 717942231127:minh_vu"
-                },
-                "requestParameters": {
-                    "sourceIPAddress": "122.11.191.34"
-                },
-                "responseElements": {
-                    "x-amz-request-id": "0DSJ5XPMHPSQCV11",
-                    "x-amz-id-2": "aL6Z4Ws8z3Ud0ke9fmXSHejaGhUGdTq+aLcVCI3m3FZHQVwiGvVXTMKWzY1Bb8Jc4T9VogKVFXUujP0Olv4o3psYCjn/9wn3"
-                },
-                "s3": {
-                    "s3SchemaVersion": "1.0",
-                    "configurationId": "tf-s3-lambda-20220830095149324300000001",
-                    "bucket": {
-                        "name": "file-upload-8de7e6fe-776a-4481-80c4-e4959b3dfc43",
-                        "ownerIdentity": {
-                            "principalId": "A9PNURZPWIYG0"
-                        },
-                        "arn": "arn:aws:s3: : :file-upload-8de7e6fe-776a-4481-80c4-e4959b3dfc43"
-                    },
-                    "object": {
-                        "key": "dataset_1.csv",
-                        "size": 235432,
-                        "eTag": "f89c6da7a619167b4f87ac1fa4ba765f",
-                        "sequencer": "00630E05911660E397"
-                    }
-                }
-            }
-        ]
-    }
+  "Event structure": {
+    "Records": [
+      {
+        "eventVersion": "2.1",
+        "eventSource": "aws:s3",
+        "awsRegion": "ap-southeast-1",
+        "eventTime": "2022-08-30T12: 41: 53.179Z",
+        "eventName": "ObjectCreated:Put",
+        "userIdentity": {
+          "principalId": "AWS: 717942231127:minh_vu"
+        },
+        "requestParameters": {
+          "sourceIPAddress": "122.11.191.34"
+        },
+        "responseElements": {
+          "x-amz-request-id": "0DSJ5XPMHPSQCV11",
+          "x-amz-id-2": "aL6Z4Ws8z3Ud0ke9fmXSHejaGhUGdTq+aLcVCI3m3FZHQVwiGvVXTMKWzY1Bb8Jc4T9VogKVFXUujP0Olv4o3psYCjn/9wn3"
+        },
+        "s3": {
+          "s3SchemaVersion": "1.0",
+          "configurationId": "tf-s3-lambda-20220830095149324300000001",
+          "bucket": {
+            "name": "file-upload-8de7e6fe-776a-4481-80c4-e4959b3dfc43",
+            "ownerIdentity": {
+              "principalId": "A9PNURZPWIYG0"
+            },
+            "arn": "arn:aws:s3: : :file-upload-8de7e6fe-776a-4481-80c4-e4959b3dfc43"
+          },
+          "object": {
+            "key": "dataset_1.csv",
+            "size": 235432,
+            "eTag": "f89c6da7a619167b4f87ac1fa4ba765f",
+            "sequencer": "00630E05911660E397"
+          }
+        }
+      }
+    ]
+  }
 }

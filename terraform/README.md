@@ -6,19 +6,19 @@ The Terraform configuration language is declarative that describes the intended 
 
 ## Installation
 
-* MacOS: use homebrew to install
+- MacOS: use homebrew to install
 
 ```bash
 brew install terraform
 ```
 
-* Window: use chocolatey to install
+- Window: use chocolatey to install
 
 ```bash
 choco install terraform
 ```
 
-* Check for Terraform version
+- Check for Terraform version
 
 ```bash
 terraform -v
@@ -26,7 +26,7 @@ terraform -v
 
 ## S3 Bucket Configuration
 
-* Replace the name of all the s3 bucket resources with a globally unique name
+- Replace the name of all the s3 bucket resources with a globally unique name
 
 ```python
 terraform {
@@ -56,23 +56,23 @@ resource "aws_s3_bucket" "file_upload_bucket" {
 
 ```
 
-## Run Terraform 
+## Run Terraform
 
-1. ```cd terraform``` folder and initialize Terraform to download the defined provider
+1. `cd terraform` folder and initialize Terraform to download the defined provider
 
-```
+```bash
 terraform init
 ```
 
 2. Dry run the code to see any changes
 
-```
+```bash
 terraform plan
 ```
 
 3. Run the code to instantiate all the declared resources
 
-```
+```bash
 terraform apply
 ```
 
