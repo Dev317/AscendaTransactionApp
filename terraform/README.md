@@ -64,13 +64,13 @@ resource "aws_s3_bucket" "file_upload_bucket" {
 terraform init
 ```
 
-2. Dry run the code to see any changes
+1. Dry run the code to see any changes
 
 ```bash
 terraform plan
 ```
 
-3. Run the code to instantiate all the declared resources
+1. Run the code to instantiate all the declared resources
 
 ```bash
 terraform apply
