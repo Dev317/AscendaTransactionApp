@@ -58,19 +58,19 @@ resource "aws_s3_bucket" "file_upload_bucket" {
 
 ## Run Terraform
 
-1. `cd terraform` folder and initialize Terraform to download the defined provider
+`cd terraform` folder and initialize Terraform to download the defined provider
 
 ```bash
 terraform init
 ```
 
-1. Dry run the code to see any changes
+Dry run the code to see any changes
 
 ```bash
 terraform plan
 ```
 
-1. Run the code to instantiate all the declared resources
+Run the code to instantiate all the declared resources
 
 ```bash
 terraform apply
