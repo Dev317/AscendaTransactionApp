@@ -19,7 +19,10 @@ terraform {
     region = "ap-southeast-1"
   }
 }
-
+# Configure AWS Provider
+provider "aws" {
+  region = var.aws_region
+}
 # Create an archive file for the Python lambda package
 # data "archive_file" "python_lambda_package" {
 #   type        = "zip"
@@ -27,10 +30,7 @@ terraform {
 #   output_path = "/build/handler.zip"
 # }
 
-# Configure AWS Provider
-provider "aws" {
-  region = "ap-southeast-1"
-}
+
 
 # resource "aws_iam_group" "developers" {
 #   name = "developers"
@@ -122,7 +122,7 @@ provider "aws" {
 
 # Create AWS IAM Role for Lambda Function
 resource "aws_iam_role" "iam_lambda_role" {
-  name = "iam-lambda-role"
+  name = var.lambda_role
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -175,13 +175,13 @@ resource "aws_iam_role_policy" "lambda_policy" {
 # Create S3 Bucket to store different versions of the code
 resource "aws_s3_bucket" "lambda_function_bucket" {
   bucket        = "<unique_bucket_name>"
-  force_destroy = true
+  force_destroy = var.force_destroy
 }
 
 # Create S3 Bucket that accepts files
 resource "aws_s3_bucket" "file_upload_bucket" {
   bucket        = "<unique_bucket_name>"
-  force_destroy = true
+  force_destroy = var.force_destroy
 }
 
 # Create DynamoDB to store records
