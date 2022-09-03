@@ -48,47 +48,7 @@ provider "aws" {
 # resource "aws_iam_policy" "policy" {
 #   name        = "developer-policy"
 #   description = "Policy for all developers in g1t1"
-#   policy      = jsonencode(
-#     {
-#       "Version" : "2012-10-17",
-#       "Statement" : [
-#         {
-#           "Sid" : "VisualEditor0",
-#           "Effect" : "Allow",
-#           "Action" : [
-#             "rds:*",
-#             "cloudtrail:*",
-#             "dynamodb:*",
-#             "sqs:*",
-#             "rolesanywhere:*",
-#             "cloudfront:*",
-#             "access-analyzer:*",
-#             "kms:*",
-#             "kinesis:*",
-#             "events:*",
-#             "sns:*",
-#             "states:*",
-#             "rds-db:*",
-#             "cognito-identity:*",
-#             "dax:*",
-#             "s3:*",
-#             "apigateway:*",
-#             "rds-data:*",
-#             "amplifybackend:*",
-#             "appsync:*",
-#             "sts:*",
-#             "iam:*",
-#             "cloudwatch:*",
-#             "sso:*",
-#             "lambda:*",
-#             "route53:*",
-#             "cognito-idp:*"
-#           ],
-#           "Resource" : "*"
-#         }
-#       ]
-#     }
-#   )
+#   policy      = data.aws_iam_policy_document.developer_policy.json
 # }
 
 # resource "aws_iam_group_policy_attachment" "for-developers" {
@@ -115,38 +75,9 @@ resource "aws_iam_role" "iam_lambda_role" {
 }
 
 resource "aws_iam_role_policy" "lambda_policy" {
-  name = "lambda-role-policy"
-  role = aws_iam_role.iam_lambda_role.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          # S3 policies
-          "s3:DeleteObject",
-          "s3:ListBucket",
-          "s3:HeadObject",
-          "s3:GetObject",
-          "s3:GetObjectVersion",
-          "s3:PutObject",
-          # add DynamoDB policies
-          "dynamodb:BatchGetItem",
-          "dynamodb:GetItem",
-          "dynamodb:Query",
-          "dynamodb:Scan",
-          "dynamodb:BatchWriteItem",
-          "dynamodb:PutItem",
-          "dynamodb:UpdateItem"
-        ],
-        Resource = "*"
-      }
-    ]
-  })
+  name   = "lambda-role-policy"
+  role   = aws_iam_role.iam_lambda_role.id
+  policy = data.aws_iam_policy_document.lambda_policy.json
 }
 
 # Create S3 Bucket to store different versions of the code
@@ -195,7 +126,6 @@ resource "aws_lambda_function" "file_upload" {
   publish          = true
   handler          = "handler.handler"
   timeout          = 100
-
 
   lifecycle {
     ignore_changes = [
