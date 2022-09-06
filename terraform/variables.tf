@@ -71,7 +71,9 @@ data "iam_policy_document" "developer_policy" {
       "sso:*",
       "lambda:*",
       "route53:*",
-    "cognito-idp:*"]
+      "cognito-idp:*",
+      "aws-portal:*",
+    "billingconductor:*"]
     resources = "*"
     effect    = "Allow"
   }
