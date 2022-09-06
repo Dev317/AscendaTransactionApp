@@ -3,10 +3,11 @@ provider "aws" {
   region = var.aws_region
 }
 
-resource "aws_budgets_budget" "under_10_SGD" {
+resource "aws_budgets_budget" "under_10_USD" {
+  name         = "Under 10 USD"
   budget_type  = "COST"
   limit_amount = "10"
-  limit_unit   = "SGD"
+  limit_unit   = "USD"
   time_unit    = "MONTHLY"
 }
 
