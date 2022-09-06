@@ -2,6 +2,13 @@
 provider "aws" {
   region = var.aws_region
 }
+
+resource "aws_budgets_budget" "under_10_SGD" {
+  budget_type  = "COST"
+  limit_amount = "10"
+  limit_unit   = "SGD"
+}
+
 # Create an archive file for the Python lambda package
 data "archive_file" "python_lambda_package" {
   type        = "zip"
