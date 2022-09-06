@@ -34,6 +34,7 @@ jobs:
           mkdir package
           pip install --target ./package -r requirements_dev.txt
           echo "Create build folder..."
+          rm -rf ../build
           mkdir ../build
           echo "Zip package directory..."
           cd package
