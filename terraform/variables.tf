@@ -43,7 +43,7 @@ data "aws_iam_policy_document" "lambda_policy" {
   }
 }
 
-data "iam_policy_document" "developer_policy" {
+data "aws_iam_policy_document" "developer_policy" {
   statement {
     actions = ["rds:*",
       "cloudtrail:*",
@@ -74,7 +74,7 @@ data "iam_policy_document" "developer_policy" {
       "cognito-idp:*",
       "aws-portal:*",
     "billingconductor:*"]
-    resources = "*"
+    resources = ["*"]
     effect    = "Allow"
   }
 }
