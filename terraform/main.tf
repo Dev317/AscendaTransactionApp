@@ -7,14 +7,15 @@ resource "aws_budgets_budget" "under_10_SGD" {
   budget_type  = "COST"
   limit_amount = "10"
   limit_unit   = "SGD"
+  time_unit    = "MONTHLY"
 }
 
 # Create an archive file for the Python lambda package
-data "archive_file" "python_lambda_package" {
-  type        = "zip"
-  source_file = "/code/handler.py"
-  output_path = "/build/handler.zip"
-}
+# data "archive_file" "python_lambda_package" {
+#   type        = "zip"
+#   source_file = "/code/handler.py"
+#   output_path = "/build/handler.zip"
+# }
 
 resource "aws_iam_group" "developers" {
   name = "developers"
@@ -23,7 +24,7 @@ resource "aws_iam_group_membership" "team" {
   name = "developers"
   users = [aws_iam_user.bradley.name,
     aws_iam_user.marcus.name,
-    aws_iam_user.minh_vu.name,
+    aws_iam_user.minh.name,
     aws_iam_user.michelle.name,
     aws_iam_user.jennifer.name,
   aws_iam_user.elizabeth.name]
@@ -39,8 +40,8 @@ resource "aws_iam_user" "marcus" {
   name = "marcus"
 }
 
-resource "aws_iam_user" "minh_vu" {
-  name = "minh_vu"
+resource "aws_iam_user" "minh" {
+  name = "minh"
 }
 resource "aws_iam_user" "michelle" {
   name = "michelle"
