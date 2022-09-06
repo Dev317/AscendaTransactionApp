@@ -89,13 +89,13 @@ resource "aws_iam_role_policy" "lambda_policy" {
 
 # Create S3 Bucket to store different versions of the code
 resource "aws_s3_bucket" "lambda_function_bucket" {
-  bucket        = "<unique_bucket_name>"
+  bucket        = "lambda-archive-g1t1"
   force_destroy = var.force_destroy
 }
 
 # Create S3 Bucket that accepts files
 resource "aws_s3_bucket" "file_upload_bucket" {
-  bucket        = "<unique_bucket_name>"
+  bucket        = "file-upload-g1t1"
   force_destroy = var.force_destroy
 }
 
