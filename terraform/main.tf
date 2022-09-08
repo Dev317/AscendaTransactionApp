@@ -23,7 +23,7 @@ resource "aws_iam_role" "amplify-github" {
 resource "aws_amplify_app" "Waftech" {
   name                        = "Waftech"
   description                 = "frontend for Waftech"
-  repository                  = "https://github.com/BradleyYeo/react-test"
+  repository                  = "https://github.com/cs301-itsa/project-2022-23t1-g1-t1-waffles"
   access_token                = var.github_token
   iam_service_role_arn        = aws_iam_role.amplify-github.arn
   enable_auto_branch_creation = true
