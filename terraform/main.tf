@@ -3,6 +3,60 @@ provider "aws" {
   region = var.aws_region
 }
 
+data "aws_iam_policy_document" "assume_role" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["amplify.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "amplify-github" {
+  name                = "AmplifyGithub"
+  assume_role_policy  = join("", data.aws_iam_policy_document.assume_role.*.json)
+  managed_policy_arns = ["arn:aws:iam::aws:policy/AWSCodeCommitReadOnly"]
+}
+
+resource "aws_amplify_app" "Waftech" {
+  name                     = "Waftech"
+  repository               = "https://github.com/cs301-itsa/project-2022-23t1-g1-t1-waffles/tree/fe"
+  access_token             = var.github_token
+  iam_service_role_arn     = aws_iam_role.amplify-github.arn
+  enable_branch_auto_build = true
+
+  build_spec = <<-EOT
+    version: 0.1
+    frontend:
+      phases:
+        preBuild:
+          commands:
+            - npm install
+        build:
+          commands:
+            - npm run build
+      artifacts:
+        baseDirectory: build
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
+  EOT
+
+  custom_rule {
+    source = "/<*>"
+    status = "404"
+    target = "/index.html"
+  }
+
+  environment_variables = {
+    ENV = "test"
+  }
+}
+
 resource "aws_budgets_budget" "under_10_USD" {
   name         = "Under 10 USD"
   budget_type  = "COST"
