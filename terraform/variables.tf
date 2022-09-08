@@ -4,6 +4,12 @@ variable "aws_region" {
   default     = "ap-southeast-1"
 }
 
+variable "github_token" {
+  description = "Github access token"
+  type        = string
+  sensitive   = true
+}
+
 variable "lambda_role" {
   description = "Name of IAM lambda role"
   type        = string
