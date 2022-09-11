@@ -6,3 +6,5 @@
 **/.terraform.lock.hcl
 *.tfvars
 .trunk
+.env
+node_modules
