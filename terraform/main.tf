@@ -158,117 +158,245 @@ resource "aws_amplify_app" "Waftech" {
 #   policy_arn = aws_iam_policy.policy.arn
 # }
 
+# ------------------------------------------------------
+# File Processing Resources
+# ------------------------------------------------------
 
-# # Create AWS IAM Role for Lambda Function
-# resource "aws_iam_role" "iam_lambda_role" {
-#   name = var.lambda_role
+# Create AWS IAM Role for Lambda Function
+resource "aws_iam_role" "iam_lambda_role" {
+  name = var.lambda_role
 
-#   assume_role_policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [{
-#       Action = "sts:AssumeRole"
-#       Effect = "Allow"
-#       Sid    = ""
-#       Principal = {
-#         Service = "lambda.amazonaws.com"
-#       }
-#     }]
-#   })
-# }
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Sid    = ""
+      Principal = {
+        Service = "lambda.amazonaws.com"
+      }
+    }]
+  })
+}
 
-# resource "aws_iam_role_policy" "lambda_policy" {
-#   name   = "lambda-role-policy"
-#   role   = aws_iam_role.iam_lambda_role.id
-#   policy = data.aws_iam_policy_document.lambda_policy.json
-# }
+resource "aws_iam_role_policy" "lambda_policy" {
+  name   = "lambda-role-policy"
+  role   = aws_iam_role.iam_lambda_role.id
+  policy = data.aws_iam_policy_document.lambda_policy.json
+}
 
-# # Create S3 Bucket to store different versions of the code
-# resource "aws_s3_bucket" "lambda_function_bucket" {
-#   bucket        = "lambda-archive-g1t1"
-#   force_destroy = var.force_destroy
-# }
+# Create S3 Bucket to store different versions of the code
+resource "aws_s3_bucket" "lambda_function_bucket" {
+  bucket        = "lambda-archive-g1t1"
+  force_destroy = var.force_destroy
+}
 
-# # Create S3 Bucket that accepts files
-# resource "aws_s3_bucket" "file_upload_bucket" {
-#   bucket        = "file-upload-g1t1"
-#   force_destroy = var.force_destroy
-# }
+# Create S3 Bucket that accepts files
+resource "aws_s3_bucket" "file_upload_bucket" {
+  bucket        = "file-upload-g1t1"
+  force_destroy = var.force_destroy
+}
 
-# # Create DynamoDB to store records
-# resource "aws_dynamodb_table" "transactions_records_table" {
-#   name           = "transaction-records-table"
-#   billing_mode   = "PROVISIONED"
-#   read_capacity  = "30"
-#   write_capacity = "30"
-#   hash_key       = "id"
+# Create DynamoDB to store records
+resource "aws_dynamodb_table" "transactions_records_table" {
+  name           = "transaction-records-table"
+  billing_mode   = "PROVISIONED"
+  read_capacity  = "30"
+  write_capacity = "30"
+  hash_key       = "id"
 
-#   attribute {
-#     name = "id"
-#     type = "S"
-#   }
+  attribute {
+    name = "id"
+    type = "S"
+  }
 
-#   ttl {
-#     enabled        = true
-#     attribute_name = "expiryPeriod"
-#   }
-#   point_in_time_recovery { enabled = true }
-#   server_side_encryption { enabled = true }
-#   lifecycle { ignore_changes = [write_capacity, read_capacity] }
-# }
+  ttl {
+    enabled        = true
+    attribute_name = "expiryPeriod"
+  }
+  point_in_time_recovery { enabled = true }
+  server_side_encryption { enabled = true }
+  lifecycle { ignore_changes = [write_capacity, read_capacity] }
+}
 
-# # Create AWS Lambda Function
+# Lambda function to trigger execution of step function
+resource "aws_lambda_function" "stepfunction_trigger" {
+  function_name    = "stepfunction-trigger"
+  role             = aws_iam_role.iam_lambda_role.arn
+  filename         = "../build/stepfunction_trigger.zip"                  
+  source_code_hash = filebase64sha256("../build/stepfunction_trigger.zip")
+  runtime          = "python3.9"
+  memory_size      = 512
+  publish          = true
+  handler          = "stepfunction_trigger.handler"
+  timeout          = 5
 
-# resource "aws_lambda_function" "file_upload" {
-#   function_name    = "test-file-upload"
-#   role             = aws_iam_role.iam_lambda_role.arn
-#   filename         = "build/handler.zip"                   #data.archive_file.python_lambda_package.output_path
-#   source_code_hash = filebase64sha256("build/handler.zip") #data.archive_file.python_lambda_package.output_base64sha256
-#   runtime          = "python3.9"
-#   memory_size      = 128
-#   publish          = true
-#   handler          = "handler.handler"
-#   timeout          = 100
+  environment {
+    variables = {
+      STATE_MACHINE_ARN = aws_sfn_state_machine.stepfunction_file_processor.arn
+    }
+  }
 
-#   lifecycle {
-#     ignore_changes = [
-#       source_code_hash,
-#       environment
-#     ]
-#   }
-# }
 
-# resource "aws_lambda_alias" "file_upload_alias" {
-#   name             = "production"
-#   function_name    = aws_lambda_function.file_upload.arn
-#   function_version = "$LATEST"
+  lifecycle {
+    ignore_changes = [
+      source_code_hash,
+      environment
+    ]
+  }
+}
 
-#   lifecycle {
-#     ignore_changes = [
-#       function_version
-#     ]
-#   }
-# }
+resource "aws_lambda_alias" "stepfunction_trigger_alias" {
+  name             = "production"
+  function_name    = aws_lambda_function.stepfunction_trigger.arn
+  function_version = "$LATEST"
 
-# # Create S3 bucket upload trigger for lambda function
+  lifecycle {
+    ignore_changes = [
+      function_version
+    ]
+  }
+}
 
-# resource "aws_s3_bucket_notification" "file_upload_trigger" {
-#   bucket = aws_s3_bucket.file_upload_bucket.id
+# Lambda function to process csv
 
-#   lambda_function {
-#     lambda_function_arn = aws_lambda_function.file_upload.arn
-#     events              = ["s3:ObjectCreated:*"]
-#     #filter_prefix       = "foldername"
-#     #filter_suffix       = ".csv"
-#   }
+resource "aws_lambda_function" "file_upload" {
+  function_name    = "csv-processor"
+  role             = aws_iam_role.iam_lambda_role.arn
+  filename         = "../build/csv_processor.zip"                   #data.archive_file.python_lambda_package.output_path
+  source_code_hash = filebase64sha256("../build/csv_processor.zip") #data.archive_file.python_lambda_package.output_base64sha256
+  runtime          = "python3.9"
+  memory_size      = 128
+  publish          = true
+  handler          = "csv_processor.handler"
+  timeout          = 100
 
-#   depends_on = [aws_lambda_permission.s3_permission_to_trigger_lambda]
-# }
+  environment {
+    variables = {
+      DB_TABLE_NAME = aws_dynamodb_table.transactions_records_table.name
+      CHUNK_SIZE    = 100000
+    }
+  }
 
-# resource "aws_lambda_permission" "s3_permission_to_trigger_lambda" {
-#   statement_id  = "AllowExecutionFromS3Bucket"
-#   action        = "lambda:InvokeFunction"
-#   function_name = aws_lambda_function.file_upload.arn
-#   principal     = "s3.amazonaws.com"
-#   source_arn    = aws_s3_bucket.file_upload_bucket.arn
-# }
+  lifecycle {
+    ignore_changes = [
+      source_code_hash
+    ]
+  }
+}
 
+resource "aws_lambda_alias" "file_upload_alias" {
+  name             = "production"
+  function_name    = aws_lambda_function.file_upload.arn
+  function_version = "$LATEST"
+
+  lifecycle {
+    ignore_changes = [
+      function_version
+    ]
+  }
+}
+
+# Create S3 bucket upload trigger for stepfunction_trigger lambda function
+
+resource "aws_s3_bucket_notification" "file_upload_trigger" {
+  bucket = aws_s3_bucket.file_upload_bucket.id
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.stepfunction_trigger.arn
+    events              = ["s3:ObjectCreated:*"]
+    #filter_prefix       = "foldername"
+    filter_suffix = ".csv"
+  }
+
+  depends_on = [aws_lambda_permission.s3_permission_to_trigger_lambda]
+}
+
+resource "aws_lambda_permission" "s3_permission_to_trigger_lambda" {
+  statement_id  = "AllowExecutionFromS3Bucket"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.stepfunction_trigger.arn
+  principal     = "s3.amazonaws.com"
+  source_arn    = aws_s3_bucket.file_upload_bucket.arn
+}
+
+# Create AWS Step Function
+resource "aws_sfn_state_machine" "stepfunction_file_processor" {
+  name     = "stepfunction_file_processor"
+  role_arn = aws_iam_role.iam_stepfunction_role.arn
+
+  definition = jsonencode({
+    "Comment" : "Orchestrates processing of CSV file.",
+    "StartAt" : "Import",
+    "States" : {
+      "Import" : {
+        "Type" : "Task",
+        "Resource" : "${aws_lambda_function.file_upload.arn}",
+        "Next" : "CheckResults"
+      },
+      "CheckResults" : {
+        "Type" : "Choice",
+        "Choices" : [{
+          "Variable" : "$.handler.results.finished",
+          "BooleanEquals" : false,
+          "Next" : "Import"
+          },
+          {
+            "Variable" : "$.handler.results.finished",
+            "BooleanEquals" : true,
+            "Next" : "SuccessState"
+        }],
+        "Default" : "FailState"
+      },
+      "SuccessState" : {
+        "Type" : "Succeed"
+      },
+      "FailState" : {
+        "Type" : "Fail",
+        "Cause" : "$.handler.results.errors"
+      }
+    }
+  })
+
+  depends_on = [
+    aws_lambda_function.file_upload
+  ]
+
+}
+
+# Create AWS IAM Role for AWS Step Function
+
+resource "aws_iam_role" "iam_stepfunction_role" {
+  name = "iam-stepfunction-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Sid    = ""
+      Principal = {
+        Service = "states.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "stepfunction_policy" {
+  name = "stepfunction-role-policy"
+  role = aws_iam_role.iam_stepfunction_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "lambda:InvokeFunction",
+          "lambda:InvokeAsync"
+        ],
+        Resource = "${aws_lambda_function.file_upload.arn}"
+      }
+    ]
+  })
+}

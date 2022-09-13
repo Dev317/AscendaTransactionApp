@@ -4,6 +4,7 @@
 **/terraform.tfstate
 **/terraform.tfstate.backup
 **/.terraform.lock.hcl
+**/testfile.csv
 *.tfvars
 .trunk
 .env
