@@ -17,13 +17,11 @@ def handler(event, context):
 
     input = {"s3_bucket": s3_bucket, "s3_file": s3_file}
 
-
     try:
         stepFunction = boto3.client("stepfunctions")
         response = stepFunction.start_execution(
             stateMachineArn=STATE_MACHINE_ARN, input=json.dumps(input, indent=4)
         )
-        return response['executionArn']
+        return response["executionArn"]
     except Exception as exc:
         raise exc
-    

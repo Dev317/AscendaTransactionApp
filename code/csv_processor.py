@@ -104,7 +104,6 @@ def handler(event, context):
 
     file_size = get_filesize(s3_bucket, s3_file)
 
-    
     if "handler" not in event:
         # First invocation
         start_byte = 0
