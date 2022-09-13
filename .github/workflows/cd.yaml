@@ -47,9 +47,9 @@ jobs:
           zip -r ../../build/stepfunction_trigger-${{ github.run_id }}.zip .
           echo "Add csv_processor.py into zip package..."
           cd ..
-          zip -g ../build/csv_processor-${{ github.run_id }}.zip handler.py
+          zip -g ../build/csv_processor-${{ github.run_id }}.zip csv_processor.py
           echo "Add stepfunction_trigger.py into zip package..."
-          zip -r ../../build/stepfunction_trigger-${{ github.run_id }}.zip .
+          zip -g ../../build/stepfunction_trigger-${{ github.run_id }}.zip stepfunction_trigger.py
           echo "Return to root folder..."
           cd ..
 
