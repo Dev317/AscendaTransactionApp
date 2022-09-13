@@ -35,7 +35,7 @@ jobs:
         run: |
           pwd
           echo "Go into code and create package..."
-          cd terraform/code
+          cd code
           mkdir package
           pip install --target ./package -r requirements_dev.txt
           echo "Create build folder..."
