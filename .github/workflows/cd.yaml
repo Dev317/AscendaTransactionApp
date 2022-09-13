@@ -7,6 +7,11 @@ on:
     types:
       - completed
 
+env:
+  S3_BUCKET_NAME: lambda-archive-g1t1
+  CSV_PROCESSOR_LAMBDA_NAME: file-upload
+  STEPFUNCTION_TRIGGER_LAMBDA_NAME: stepfunction-trigger
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -38,22 +43,31 @@ jobs:
           mkdir ../build
           echo "Zip package directory..."
           cd package
-          zip -r ../../build/${{ github.run_id }}.zip .
-          echo "Add handler.py into zip package..."
+          zip -r ../../build/csv_processor-${{ github.run_id }}.zip .
+          zip -r ../../build/stepfunction_trigger-${{ github.run_id }}.zip .
+          echo "Add csv_processor.py into zip package..."
           cd ..
-          zip -g ../build/${{ github.run_id }}.zip handler.py
+          zip -g ../build/csv_processor-${{ github.run_id }}.zip handler.py
+          echo "Add stepfunction_trigger.py into zip package..."
+          zip -r ../../build/stepfunction_trigger-${{ github.run_id }}.zip .
           echo "Return to root folder..."
           cd ..
 
       - name: Upload to S3
-        run: aws s3 cp terraform/build/${{ github.run_id }}.zip s3://${{ secrets.S3_BUCKET_NAME }}/${{ github.run_id }}.zip
+        run: |
+          aws s3 cp build/csv_processor-${{ github.run_id }}.zip s3://${{ env.S3_BUCKET_NAME }}/csv_processor/${{ github.run_id }}.zip
+          aws s3 cp build/stepfunction_trigger-${{ github.run_id }}.zip s3://${{ env.S3_BUCKET_NAME }}/stepfunction_trigger/${{ github.run_id }}.zip
 
       - name: Update lambda function code
-        run: aws lambda update-function-code --function-name test-file-upload --s3-bucket ${{ secrets.S3_BUCKET_NAME }} --s3-key ${{ github.run_id }}.zip
+        run: |
+          aws lambda update-function-code --function-name ${{ env.CSV_PROCESSOR_LAMBDA_NAME }} --s3-bucket ${{ env.S3_BUCKET_NAME }} --s3-key csv_processor/${{ github.run_id }}.zip
+          aws lambda update-function-code --function-name ${{ env.STEPFUNCTION_TRIGGER_LAMBDA_NAME }} --s3-bucket ${{ env.S3_BUCKET_NAME }} --s3-key stepfunction_trigger/${{ github.run_id }}.zip
 
       - name: Sleep for 5 seconds
         run: sleep 5s
         shell: bash
 
       - name: Release lambda function version
-        run: aws lambda publish-version --function-name test-file-upload --description ${{ github.run_id }}
+        run: |
+          aws lambda publish-version --function-name ${{ env.CSV_PROCESSOR_LAMBDA_NAME }} --description ${{ github.run_id }}
+          aws lambda publish-version --function-name ${{ env.STEPFUNCTION_TRIGGER_LAMBDA_NAME }} --description ${{ github.run_id }}
