@@ -3,6 +3,22 @@ provider "aws" {
   region = var.aws_region
 }
 
+resource "aws_cognito_user_pool" "fe_userpool" {
+  name = "fe_userpool"
+
+  account_recovery_setting {
+    recovery_mechanism {
+      name     = "verified_email"
+      priority = 1
+    }
+
+    recovery_mechanism {
+      name     = "verified_phone_number"
+      priority = 2
+    }
+  }
+}
+
 data "aws_iam_policy_document" "assume_role" {
   statement {
     effect  = "Allow"
@@ -67,12 +83,12 @@ resource "aws_amplify_app" "Waftech" {
 #   time_unit    = "MONTHLY"
 # }
 
-# Create an archive file for the Python lambda package
-# data "archive_file" "python_lambda_package" {
-#   type        = "zip"
-#   source_file = "/code/handler.py"
-#   output_path = "/build/handler.zip"
-# }
+# # Create an archive file for the Python lambda package
+# # data "archive_file" "python_lambda_package" {
+# #   type        = "zip"
+# #   source_file = "/code/handler.py"
+# #   output_path = "/build/handler.zip"
+# # }
 
 # resource "aws_iam_group" "developers" {
 #   name = "developers"
