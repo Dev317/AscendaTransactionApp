@@ -2,6 +2,16 @@
 provider "aws" {
   region = var.aws_region
 }
+resource "aws_cognito_user_pool_domain" "itsag1t1" {
+  domain       = "g1t1userdomain"
+  user_pool_id = aws_cognito_user_pool.fe_userpool.id
+}
+
+resource "aws_cognito_user_pool_client" "client" {
+  name = "client"
+
+  user_pool_id = aws_cognito_user_pool.fe_userpool.id
+}
 
 resource "aws_cognito_user_pool" "fe_userpool" {
   name = "fe_userpool"
@@ -30,26 +40,26 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
-resource "aws_amplify_branch" "master" {
-  app_id      = aws_amplify_app.Waftech.id
-  branch_name = "fe"
-}
+# resource "aws_amplify_branch" "fe" {
+#   app_id      = aws_amplify_app.Waftech.id
+#   branch_name = "fe"
+# }
 
-resource "aws_amplify_domain_association" "g1t1" {
-  app_id      = aws_amplify_app.Waftech.id
-  domain_name = "itsag1t1.com"
+# resource "aws_amplify_domain_association" "g1t1" {
+#   app_id      = aws_amplify_app.Waftech.id
+#   domain_name = "itsag1t1.com"
 
-  sub_domain {
-    branch_name = aws_amplify_branch.master.branch_name
-    prefix      = ""
-  }
+#   sub_domain {
+#     branch_name = aws_amplify_branch.fe.branch_name
+#     prefix      = ""
+#   }
 
-  # https://www.example.com
-  sub_domain {
-    branch_name = aws_amplify_branch.master.branch_name
-    prefix      = "www"
-  }
-}
+#   # https://www.example.com
+#   sub_domain {
+#     branch_name = aws_amplify_branch.fe.branch_name
+#     prefix      = "www"
+#   }
+# }
 
 resource "aws_iam_role" "amplify-github" {
   name                = "AmplifyGithub"
