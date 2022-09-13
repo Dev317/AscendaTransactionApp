@@ -35,7 +35,7 @@ resource "aws_amplify_branch" "master" {
   branch_name = "fe"
 }
 
-resource "aws_amplify_domain_association" "Waftech" {
+resource "aws_amplify_domain_association" "g1t1" {
   app_id      = aws_amplify_app.Waftech.id
   domain_name = "itsag1t1.com"
 
