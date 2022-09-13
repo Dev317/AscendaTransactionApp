@@ -42,9 +42,11 @@ data "aws_iam_policy_document" "lambda_policy" {
       "dynamodb:Scan",
       "dynamodb:BatchWriteItem",
       "dynamodb:PutItem",
-      "dynamodb:UpdateItem"
+      "dynamodb:UpdateItem",
+      # AWS Step Function policy
+      "states:StartExecution"
     ]
-    resources = ["arn:aws:s3:::*", "arn:aws:dynamodb:::*", "arn:aws:logs:::*"]
+    resources = ["arn:aws:s3:::*", "arn:aws:dynamodb:::*", "arn:aws:logs:::*", "arn:aws:states:::*"]
     effect    = "Allow"
   }
 }
