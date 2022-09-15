@@ -24,7 +24,7 @@ jobs:
           working-dir: ../terraform
           output-file: README.md
           output-method: inject
-          git-push: "true
+          git-push: "true"
 
       - name: Set up Python
         uses: actions/setup-python@v4
