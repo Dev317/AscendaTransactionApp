@@ -15,13 +15,13 @@ resource "aws_route53_zone" "primary" {
 }
 
 resource "aws_amplify_branch" "master" {
-  app_id      = aws_amplify_app.example.id
+  app_id      = aws_amplify_app.master.id
   branch_name = "master"
   # Enable SNS notifications.
   enable_notification = true
 }
 
-resource "aws_amplify_domain_association" "example" {
+resource "aws_amplify_domain_association" "g1t1" {
   app_id      = aws_amplify_app.Waftech.id
   domain_name = "example.com"
 
