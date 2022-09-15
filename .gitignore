@@ -9,3 +9,6 @@
 .trunk
 .env
 node_modules
+.vscode
+amplify
+src
