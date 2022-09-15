@@ -2,6 +2,42 @@
 provider "aws" {
   region = var.aws_region
 }
+# Route 53
+resource "aws_route53_record" "waffle" {
+  zone_id = aws_route53_zone.primary.zone_id
+  name    = "www.itsag1t1.com"
+  type    = "CNAME"
+  ttl     = 5
+}
+
+resource "aws_route53_zone" "primary" {
+  name = "www.itsag1t1.com"
+}
+
+resource "aws_amplify_branch" "master" {
+  app_id      = aws_amplify_app.example.id
+  branch_name = "master"
+  # Enable SNS notifications.
+  enable_notification = true
+}
+
+resource "aws_amplify_domain_association" "example" {
+  app_id      = aws_amplify_app.Waftech.id
+  domain_name = "example.com"
+
+  # https://example.com
+  sub_domain {
+    branch_name = aws_amplify_branch.master.branch_name
+    prefix      = ""
+  }
+
+  # https://www.example.com
+  sub_domain {
+    branch_name = aws_amplify_branch.master.branch_name
+    prefix      = "www"
+  }
+}
+
 resource "aws_cognito_user_pool_domain" "itsag1t1" {
   domain       = "g1t1userdomain"
   user_pool_id = aws_cognito_user_pool.fe_userpool.id
@@ -317,7 +353,7 @@ resource "aws_s3_bucket_notification" "file_upload_trigger" {
     lambda_function_arn = aws_lambda_function.stepfunction_trigger.arn
     events              = ["s3:ObjectCreated:*"]
     #filter_prefix       = "foldername"
-    filter_suffix       = ".csv"
+    filter_suffix = ".csv"
   }
 
   depends_on = [aws_lambda_permission.s3_permission_to_trigger_lambda]
