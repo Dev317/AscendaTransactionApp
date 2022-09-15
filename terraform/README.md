@@ -79,17 +79,18 @@ terraform apply
 Please make sure to update all the resources appropriately.
 
 <!-- BEGIN_TF_DOCS -->
+
 ## Requirements
 
-| Name | Version |
-|------|---------|
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.0 |
+| Name                                                   | Version |
+| ------------------------------------------------------ | ------- |
+| <a name="requirement_aws"></a> [aws](#requirement_aws) | ~> 4.0  |
 
 ## Providers
 
-| Name | Version |
-|------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.30.0 |
+| Name                                             | Version |
+| ------------------------------------------------ | ------- |
+| <a name="provider_aws"></a> [aws](#provider_aws) | 4.30.0  |
 
 ## Modules
 
@@ -97,31 +98,32 @@ No modules.
 
 ## Resources
 
-| Name | Type |
-|------|------|
-| [aws_amplify_app.Waftech](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/amplify_app) | resource |
-| [aws_amplify_branch.master](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/amplify_branch) | resource |
-| [aws_amplify_domain_association.g1t1](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/amplify_domain_association) | resource |
-| [aws_cognito_user_pool.fe_userpool](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cognito_user_pool) | resource |
-| [aws_cognito_user_pool_client.client](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cognito_user_pool_client) | resource |
-| [aws_cognito_user_pool_domain.itsag1t1](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cognito_user_pool_domain) | resource |
-| [aws_iam_role.amplify-github](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_route53_record.waffle](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
-| [aws_route53_zone.primary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_zone) | resource |
-| [aws_iam_policy_document.assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| Name                                                                                                                                           | Type        |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| [aws_amplify_app.Waftech](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/amplify_app)                             | resource    |
+| [aws_amplify_branch.master](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/amplify_branch)                        | resource    |
+| [aws_amplify_domain_association.g1t1](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/amplify_domain_association)  | resource    |
+| [aws_cognito_user_pool.fe_userpool](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cognito_user_pool)             | resource    |
+| [aws_cognito_user_pool_client.client](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cognito_user_pool_client)    | resource    |
+| [aws_cognito_user_pool_domain.itsag1t1](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cognito_user_pool_domain)  | resource    |
+| [aws_iam_role.amplify-github](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role)                            | resource    |
+| [aws_route53_record.waffle](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record)                        | resource    |
+| [aws_route53_zone.primary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_zone)                           | resource    |
+| [aws_iam_policy_document.assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document)      | data source |
 | [aws_iam_policy_document.developer_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.lambda_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
+| [aws_iam_policy_document.lambda_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document)    | data source |
 
 ## Inputs
 
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region | `string` | `"ap-southeast-1"` | no |
-| <a name="input_force_destroy"></a> [force\_destroy](#input\_force\_destroy) | Force deleting a resource | `bool` | `true` | no |
-| <a name="input_github_token"></a> [github\_token](#input\_github\_token) | Github access token | `string` | n/a | yes |
-| <a name="input_lambda_role"></a> [lambda\_role](#input\_lambda\_role) | Name of IAM lambda role | `string` | `"iam-lambda-role"` | no |
+| Name                                                                     | Description               | Type     | Default             | Required |
+| ------------------------------------------------------------------------ | ------------------------- | -------- | ------------------- | :------: |
+| <a name="input_aws_region"></a> [aws_region](#input_aws_region)          | AWS region                | `string` | `"ap-southeast-1"`  |    no    |
+| <a name="input_force_destroy"></a> [force_destroy](#input_force_destroy) | Force deleting a resource | `bool`   | `true`              |    no    |
+| <a name="input_github_token"></a> [github_token](#input_github_token)    | Github access token       | `string` | n/a                 |   yes    |
+| <a name="input_lambda_role"></a> [lambda_role](#input_lambda_role)       | Name of IAM lambda role   | `string` | `"iam-lambda-role"` |    no    |
 
 ## Outputs
 
 No outputs.
+
 <!-- END_TF_DOCS -->
