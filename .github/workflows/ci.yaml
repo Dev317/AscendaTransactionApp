@@ -17,6 +17,14 @@ jobs:
         uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
         with:
           github_token: ${{ github.token }}
+      
+      - name: Render terraform docs inside the README.md and push changes back to PR branch
+        uses: terraform-docs/gh-actions@v1.0.0
+        with:
+          working-dir: ../terraform
+          output-file: README.md
+          output-method: inject
+          git-push: "true"
 
       - name: Set up Python
         uses: actions/setup-python@v4
