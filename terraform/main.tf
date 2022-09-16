@@ -5,13 +5,17 @@ provider "aws" {
 # Route 53
 resource "aws_route53_record" "waffle" {
   zone_id = aws_route53_zone.primary.zone_id
-  name    = "www.itsag1t1.com"
+  name    = "itsag1t1.com"
   type    = "CNAME"
-  ttl     = 5
+  alias {
+    name                   = "itsag1t1.com"
+    zone_id                = "Z3AQBSTGFYJSTF"
+    evaluate_target_health = false
+  }
 }
 
 resource "aws_route53_zone" "primary" {
-  name = "www.itsag1t1.com"
+  name = "itsag1t1.com"
 }
 
 resource "aws_amplify_branch" "master" {
@@ -23,7 +27,7 @@ resource "aws_amplify_branch" "master" {
 
 resource "aws_amplify_domain_association" "g1t1" {
   app_id      = aws_amplify_app.Waftech.id
-  domain_name = "example.com"
+  domain_name = "itsag1t1.com"
 
   # https://example.com
   sub_domain {
