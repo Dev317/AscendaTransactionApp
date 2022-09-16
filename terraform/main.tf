@@ -2,83 +2,83 @@
 provider "aws" {
   region = var.aws_region
 }
-# Route 53
-resource "aws_route53_record" "waffle" {
-  zone_id = aws_route53_zone.primary.zone_id
-  name    = "itsag1t1.com"
-  type    = "CNAME"
-  alias {
-    name                   = "itsag1t1.com"
-    zone_id                = "Z3AQBSTGFYJSTF"
-    evaluate_target_health = false
-  }
-}
+# # Route 53
+# resource "aws_route53_record" "waffle" {
+#   zone_id = aws_route53_zone.primary.zone_id
+#   name    = "itsag1t1.com"
+#   type    = "CNAME"
+#   alias {
+#     name                   = "itsag1t1.com"
+#     zone_id                = "Z3AQBSTGFYJSTF"
+#     evaluate_target_health = false
+#   }
+# }
 
 resource "aws_route53_zone" "primary" {
   name = "itsag1t1.com"
 }
 
-resource "aws_amplify_branch" "master" {
-  app_id      = aws_amplify_app.Waftech.id
-  branch_name = "master"
-  # Enable SNS notifications.
-  enable_notification = true
-}
+# resource "aws_amplify_branch" "master" {
+#   app_id      = aws_amplify_app.Waftech.id
+#   branch_name = "master"
+#   # Enable SNS notifications.
+#   enable_notification = true
+# }
 
-resource "aws_amplify_domain_association" "g1t1" {
-  app_id      = aws_amplify_app.Waftech.id
-  domain_name = "itsag1t1.com"
+# resource "aws_amplify_domain_association" "g1t1" {
+#   app_id      = aws_amplify_app.Waftech.id
+#   domain_name = "itsag1t1.com"
 
-  # https://example.com
-  sub_domain {
-    branch_name = aws_amplify_branch.master.branch_name
-    prefix      = ""
-  }
+#   # https://example.com
+#   sub_domain {
+#     branch_name = aws_amplify_branch.master.branch_name
+#     prefix      = ""
+#   }
 
-  # https://www.example.com
-  sub_domain {
-    branch_name = aws_amplify_branch.master.branch_name
-    prefix      = "www"
-  }
-}
+#   # https://www.example.com
+#   sub_domain {
+#     branch_name = aws_amplify_branch.master.branch_name
+#     prefix      = "www"
+#   }
+# }
 
-resource "aws_cognito_user_pool_domain" "itsag1t1" {
-  domain       = "g1t1userdomain"
-  user_pool_id = aws_cognito_user_pool.fe_userpool.id
-}
+# resource "aws_cognito_user_pool_domain" "itsag1t1" {
+#   domain       = "g1t1userdomain"
+#   user_pool_id = aws_cognito_user_pool.fe_userpool.id
+# }
 
-resource "aws_cognito_user_pool_client" "client" {
-  name = "client"
+# resource "aws_cognito_user_pool_client" "client" {
+#   name = "client"
 
-  user_pool_id = aws_cognito_user_pool.fe_userpool.id
-}
+#   user_pool_id = aws_cognito_user_pool.fe_userpool.id
+# }
 
-resource "aws_cognito_user_pool" "fe_userpool" {
-  name = "fe_userpool"
+# resource "aws_cognito_user_pool" "fe_userpool" {
+#   name = "fe_userpool"
 
-  account_recovery_setting {
-    recovery_mechanism {
-      name     = "verified_email"
-      priority = 1
-    }
+#   account_recovery_setting {
+#     recovery_mechanism {
+#       name     = "verified_email"
+#       priority = 1
+#     }
 
-    recovery_mechanism {
-      name     = "verified_phone_number"
-      priority = 2
-    }
-  }
-}
+#     recovery_mechanism {
+#       name     = "verified_phone_number"
+#       priority = 2
+#     }
+#   }
+# }
 
-data "aws_iam_policy_document" "assume_role" {
-  statement {
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-    principals {
-      type        = "Service"
-      identifiers = ["amplify.amazonaws.com"]
-    }
-  }
-}
+# data "aws_iam_policy_document" "assume_role" {
+#   statement {
+#     effect  = "Allow"
+#     actions = ["sts:AssumeRole"]
+#     principals {
+#       type        = "Service"
+#       identifiers = ["amplify.amazonaws.com"]
+#     }
+#   }
+# }
 
 # resource "aws_amplify_branch" "fe" {
 #   app_id      = aws_amplify_app.Waftech.id
@@ -101,50 +101,50 @@ data "aws_iam_policy_document" "assume_role" {
 #   }
 # }
 
-resource "aws_iam_role" "amplify-github" {
-  name                = "AmplifyGithub"
-  assume_role_policy  = join("", data.aws_iam_policy_document.assume_role.*.json)
-  managed_policy_arns = ["arn:aws:iam::aws:policy/AWSCodeCommitReadOnly"]
-}
+# resource "aws_iam_role" "amplify-github" {
+#   name                = "AmplifyGithub"
+#   assume_role_policy  = join("", data.aws_iam_policy_document.assume_role.*.json)
+#   managed_policy_arns = ["arn:aws:iam::aws:policy/AWSCodeCommitReadOnly"]
+# }
 
-resource "aws_amplify_app" "Waftech" {
-  name                        = "Waftech"
-  description                 = "frontend for Waftech"
-  repository                  = "https://github.com/cs301-itsa/project-2022-23t1-g1-t1-waffles"
-  access_token                = var.github_token
-  iam_service_role_arn        = aws_iam_role.amplify-github.arn
-  enable_auto_branch_creation = true
-  enable_branch_auto_build    = true
+# resource "aws_amplify_app" "Waftech" {
+#   name                        = "Waftech"
+#   description                 = "frontend for Waftech"
+#   repository                  = "https://github.com/cs301-itsa/project-2022-23t1-g1-t1-waffles"
+#   access_token                = var.github_token
+#   iam_service_role_arn        = aws_iam_role.amplify-github.arn
+#   enable_auto_branch_creation = true
+#   enable_branch_auto_build    = true
 
-  build_spec = <<-EOT
-    version: 0.1
-    frontend:
-      phases:
-        preBuild:
-          commands:
-            - npm install
-        build:
-          commands:
-            - npm run build
-      artifacts:
-        baseDirectory: build
-        files:
-          - '**/*'
-      cache:
-        paths:
-          - node_modules/**/*
-  EOT
+#   build_spec = <<-EOT
+#     version: 0.1
+#     frontend:
+#       phases:
+#         preBuild:
+#           commands:
+#             - npm install
+#         build:
+#           commands:
+#             - npm run build
+#       artifacts:
+#         baseDirectory: build
+#         files:
+#           - '**/*'
+#       cache:
+#         paths:
+#           - node_modules/**/*
+#   EOT
 
-  custom_rule {
-    source = "/<*>"
-    status = "404"
-    target = "/index.html"
-  }
+#   custom_rule {
+#     source = "/<*>"
+#     status = "404"
+#     target = "/index.html"
+#   }
 
-  environment_variables = {
-    ENV = "test"
-  }
-}
+#   environment_variables = {
+#     ENV = "test"
+#   }
+# }
 
 # resource "aws_budgets_budget" "under_10_USD" {
 #   name         = "Under 10 USD"
