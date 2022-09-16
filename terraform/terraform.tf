@@ -1,9 +1,18 @@
 terraform {
-  # Declares providers, so that Terraform can install and use them
+  required_version = ">= 1.0.0, < 2.0.0"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 4.0"
     }
+  }
+
+  backend "s3" {
+    bucket         = "waftech-terraform-state"
+    key            = "terraform.tfstate"
+    region         = "ap-southeast-1"
+    dynamodb_table = "Waftech-terraform-locks"
+    encrypt        = true
   }
 }
