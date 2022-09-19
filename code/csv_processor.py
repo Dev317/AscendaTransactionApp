@@ -120,6 +120,9 @@ def handler(event, context):
 
         for item in data:
             save_data_to_db(item)
+            # put calculatiton code here
+            # put save_reward_to_db here
+            # todo: error handling to catch failed calculations and flag it
 
         final_iteration = is_final_iteration(start_byte, file_size, CHUNK_SIZE)
         event["handler"] = {
