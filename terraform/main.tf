@@ -3,19 +3,10 @@ provider "aws" {
   region = var.aws_region
 }
 # # Route 53 
-# resource "aws_route53_record" "waffle" {
-#   zone_id = aws_route53_zone.primary.zone_id
-#   name    = "itsag1t1.com"
-#   type    = "CNAME"
-#   alias {
-#     name                   = "itsag1t1.com"
-#     zone_id                = "Z3AQBSTGFYJSTF"
-#     evaluate_target_health = false
-#   }
-# }
 
 resource "aws_route53_zone" "primary" {
-  name = "itsag1t1.com"
+  name    = "itsag1t1.com"
+  comment = "Bradley"
 }
 
 # resource "aws_cognito_user_pool_domain" "itsag1t1" {
