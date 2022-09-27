@@ -14,3 +14,8 @@ terraform {
     encrypt        = true
   }
 }
+
+provider "aws" {
+    alias = "jakarta"
+  region = "ap-southeast-3"
+}
