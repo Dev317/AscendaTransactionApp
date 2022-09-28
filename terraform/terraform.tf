@@ -16,6 +16,6 @@ terraform {
 }
 
 provider "aws" {
-    alias = "jakarta"
-  region = "ap-southeast-3"
+  alias = "north_virginia"
+  region = "us-east-1"
 }
