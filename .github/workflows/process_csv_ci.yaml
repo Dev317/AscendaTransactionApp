@@ -17,8 +17,6 @@ jobs:
 
       - name: Trunk Check
         uses: trunk-io/trunk-action@v1
-        with:
-          check-mode: all
 
       - name: Run tfsec PR commenter
         uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
@@ -47,5 +45,5 @@ jobs:
         run: |
           pwd
           ls
-          cd code
+          cd code/process_csv
           coverage run -m pytest
