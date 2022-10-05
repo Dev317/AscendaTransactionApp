@@ -1,4 +1,5 @@
 /terraform/.terraform
+/terraform/README.md
 ../.DS_Store
 .DS_Store
 **/terraform.tfstate
