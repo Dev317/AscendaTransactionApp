@@ -6,6 +6,7 @@ on:
       source-path:
         required: true
         type: string
+        description: "Source code folder"
 
 jobs:
   all:
