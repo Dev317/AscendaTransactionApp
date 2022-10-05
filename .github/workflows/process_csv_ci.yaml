@@ -2,12 +2,12 @@ name: Process CSV CI
 
 on:
   push:
-    branches: 
-      - 'feature/process-csv'
+    branches:
+      - "feature/process-csv"
   pull_request:
     branches:
       - master
-      - 'feature/process-csv'
+      - "feature/process-csv"
 
 jobs:
   all:

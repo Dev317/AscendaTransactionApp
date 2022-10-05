@@ -3,7 +3,7 @@ name: Process CSV CD
 on:
   workflow_run:
     workflows: ["Process CSV CI"]
-    branches: ['feature/process-csv']
+    branches: ["feature/process-csv"]
     types:
       - completed
 
