@@ -30,28 +30,27 @@ jobs:
         with:
           python-version: "3.9"
 
-      - name: Build
+      - name: Create Build folder
         run: |
-          echo "Go into code and create package..."
+          rm -rf build
+          mkdir build
+
+      - name: Zip Code Files
+        run: |
+          cd code/process_csv
+          zip ../../build/csv_processor-${{ github.run_id }}.zip csv_processor.py
+          zip ../../build/stepfunction_trigger-${{ github.run_id }}.zip stepfunction_trigger.py
+
+      - name: Add Required Packages
+        run: |
           cd code/process_csv
           mkdir package
           pip install --target ./package -r requirements_dev.txt
-          echo "Create build folder..."
-          rm -rf ../../build
-          mkdir ../../build
-          echo "Zip package directory..."
           cd package
           if [ "$(ls)" ]; then
-            zip -r ../../../build/csv_processor-${{ github.run_id }}.zip .
-            zip -r ../../../build/stepfunction_trigger-${{ github.run_id }}.zip .
+            zip -g -r ../../../build/csv_processor-${{ github.run_id }}.zip .
+            zip -g -r ../../../build/stepfunction_trigger-${{ github.run_id }}.zip .
           fi
-          echo "Add csv_processor.py into zip package..."
-          cd ../..
-          zip -g ../build/csv_processor-${{ github.run_id }}.zip csv_processor.py
-          echo "Add stepfunction_trigger.py into zip package..."
-          zip -g ../build/stepfunction_trigger-${{ github.run_id }}.zip stepfunction_trigger.py
-          echo "Return to root folder..."
-          cd ..
 
   deploy-sg:
     runs-on: ubuntu-latest
