@@ -26,7 +26,8 @@ module "iam" {
 }
 
 module "frontend" {
-  source = "./modules/frontend"
+  source       = "./modules/frontend"
+  github_token = var.github_token
 }
 
 # -----------------------------------
