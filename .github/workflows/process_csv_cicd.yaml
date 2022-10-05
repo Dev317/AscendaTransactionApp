@@ -81,8 +81,8 @@ jobs:
       - name: Upload to S3
         run: |
           echo "Update Singapore S3"
-          aws s3 cp ${{steps.download.outputs.download-path}}/csv_processor-${{ github.run_id }}.zip s3://${{ env.SG_S3_BUCKET_NAME }}/csv_processor/${{ github.run_id }}.zip
-          aws s3 cp ${{steps.download.outputs.download-path}}/stepfunction_trigger-${{ github.run_id }}.zip s3://${{ env.SG_S3_BUCKET_NAME }}/stepfunction_trigger/${{ github.run_id }}.zip
+          aws s3 cp build-files/csv_processor-${{ github.run_id }}.zip s3://${{ env.SG_S3_BUCKET_NAME }}/csv_processor/${{ github.run_id }}.zip
+          aws s3 cp build-files/stepfunction_trigger-${{ github.run_id }}.zip s3://${{ env.SG_S3_BUCKET_NAME }}/stepfunction_trigger/${{ github.run_id }}.zip
 
       - name: Update lambda function code
         run: |
@@ -121,8 +121,8 @@ jobs:
       - name: Upload to S3
         run: |
           echo "Update North Virginia S3"
-          aws s3 cp ${{steps.download.outputs.download-path}}/csv_processor-${{ github.run_id }}.zip s3://${{ env.NV_S3_BUCKET_NAME }}/csv_processor/${{ github.run_id }}.zip
-          aws s3 cp ${{steps.download.outputs.download-path}}/stepfunction_trigger-${{ github.run_id }}.zip s3://${{ env.NV_S3_BUCKET_NAME }}/stepfunction_trigger/${{ github.run_id }}.zip
+          aws s3 cp build-files/csv_processor-${{ github.run_id }}.zip s3://${{ env.NV_S3_BUCKET_NAME }}/csv_processor/${{ github.run_id }}.zip
+          aws s3 cp build-files/stepfunction_trigger-${{ github.run_id }}.zip s3://${{ env.NV_S3_BUCKET_NAME }}/stepfunction_trigger/${{ github.run_id }}.zip
 
       - name: Update lambda function code
         run: |
