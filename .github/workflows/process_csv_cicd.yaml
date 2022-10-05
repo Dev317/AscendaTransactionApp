@@ -19,6 +19,7 @@ jobs:
     uses: ./.github/workflows/process_csv_ci.yaml
     with:
       source-path: code/process_csv
+
   build:
     runs-on: ubuntu-latest
     needs: [ci]
@@ -52,11 +53,23 @@ jobs:
             zip -g -r ../../../build/stepfunction_trigger-${{ github.run_id }}.zip .
           fi
 
+      - name: Create Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-files
+          path: build/
+
   deploy-sg:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
       - uses: actions/checkout@v3
+
+      - name: Download Artifact
+        id: download
+        uses: actions/download-artifact@v3
+        with:
+          name: build-files
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -68,8 +81,8 @@ jobs:
       - name: Upload to S3
         run: |
           echo "Update Singapore S3"
-          aws s3 cp build/csv_processor-${{ github.run_id }}.zip s3://${{ env.SG_S3_BUCKET_NAME }}/csv_processor/${{ github.run_id }}.zip
-          aws s3 cp build/stepfunction_trigger-${{ github.run_id }}.zip s3://${{ env.SG_S3_BUCKET_NAME }}/stepfunction_trigger/${{ github.run_id }}.zip
+          aws s3 cp ${{steps.download.outputs.download-path}}/csv_processor-${{ github.run_id }}.zip s3://${{ env.SG_S3_BUCKET_NAME }}/csv_processor/${{ github.run_id }}.zip
+          aws s3 cp ${{steps.download.outputs.download-path}}/stepfunction_trigger-${{ github.run_id }}.zip s3://${{ env.SG_S3_BUCKET_NAME }}/stepfunction_trigger/${{ github.run_id }}.zip
 
       - name: Update lambda function code
         run: |
@@ -92,6 +105,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Download Artifact
+        id: download
+        uses: actions/download-artifact@v3
+        with:
+          name: build-files
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -102,8 +121,8 @@ jobs:
       - name: Upload to S3
         run: |
           echo "Update North Virginia S3"
-          aws s3 cp build/csv_processor-${{ github.run_id }}.zip s3://${{ env.NV_S3_BUCKET_NAME }}/csv_processor/${{ github.run_id }}.zip
-          aws s3 cp build/stepfunction_trigger-${{ github.run_id }}.zip s3://${{ env.NV_S3_BUCKET_NAME }}/stepfunction_trigger/${{ github.run_id }}.zip
+          aws s3 cp ${{steps.download.outputs.download-path}}/csv_processor-${{ github.run_id }}.zip s3://${{ env.NV_S3_BUCKET_NAME }}/csv_processor/${{ github.run_id }}.zip
+          aws s3 cp ${{steps.download.outputs.download-path}}/stepfunction_trigger-${{ github.run_id }}.zip s3://${{ env.NV_S3_BUCKET_NAME }}/stepfunction_trigger/${{ github.run_id }}.zip
 
       - name: Update lambda function code
         run: |
