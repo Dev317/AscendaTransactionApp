@@ -36,9 +36,10 @@ DB_TABLE_NAME = os.environ.get("DB_TABLE_NAME", "campaign_service_table")
 DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 DYNAMODB_TABLE = DYNAMODB_CLIENT.Table(DB_TABLE_NAME)
 
+
 def create_campaign(data):
     response = DYNAMODB_TABLE.put_item(
-       Item={
+        Item={
             "campaign_id": data["campaign_start_date"] + "_" + data["campaign_name"],
             "campaign_name": data["campaign_name"],
             "campaign_description": data["campaign_description"],
@@ -46,10 +47,11 @@ def create_campaign(data):
             "campaign_end_date": data["campaign_end_date"],
             "card_type": data["card_type"],
             "campaign_conditions": data["campaign_conditions"],
-            "campaign_priority": data["campaign_priority"]
+            "campaign_priority": data["campaign_priority"],
         }
     )
     return response
+
 
 def lambda_handler(event, context):
     """main handler"""
@@ -63,11 +65,8 @@ def lambda_handler(event, context):
     except Exception as exception:
         return {
             "statusCode": 500,
-                "message": "An error occurred creating the campaign.",
-                "error": str(exception)
+            "message": "An error occurred creating the campaign.",
+            "error": str(exception),
         }
 
-    return {
-        "statusCode": 200,
-        "body": json.dumps(dynamo_resp)
-    }
+    return {"statusCode": 200, "body": json.dumps(dynamo_resp)}
