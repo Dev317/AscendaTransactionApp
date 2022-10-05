@@ -1,11 +1,12 @@
 name: Process CSV CD
 
 on:
-  workflow_run:
-    workflows: [Process CSV CI]
-    branches: [feature/process-csv]
-    types:
-      - completed
+  push:
+    branches:
+      - "feature/process-csv"
+  pull_request:
+    branches:
+      - "feature/process-csv"
 
 env:
   SG_S3_BUCKET_NAME: lambda-archive-g1t1-singapore
@@ -14,8 +15,13 @@ env:
   STEPFUNCTION_TRIGGER_LAMBDA_NAME: stepfunction-trigger
 
 jobs:
+  ci:
+    uses: ./.github/workflows/process_csv_ci.yaml
+    with:
+      source-path: code/process_csv
   build:
     runs-on: ubuntu-latest
+    needs: [ci]
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v3
