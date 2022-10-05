@@ -41,8 +41,9 @@ jobs:
           mkdir ../../build
           echo "Zip package directory..."
           cd package
-          zip -r ../../../build/csv_processor-${{ github.run_id }}.zip .
-          zip -r ../../../build/stepfunction_trigger-${{ github.run_id }}.zip .
+          if["$(ls -a)"]; then
+            zip -r ../../../build/csv_processor-${{ github.run_id }}.zip .
+            zip -r ../../../build/stepfunction_trigger-${{ github.run_id }}.zip .
           echo "Add csv_processor.py into zip package..."
           cd ../..
           zip -g ../build/csv_processor-${{ github.run_id }}.zip csv_processor.py
