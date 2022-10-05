@@ -58,7 +58,12 @@ data "aws_iam_policy_document" "lambda_policy" {
       # AWS Step Function policy
       "states:StartExecution"
     ]
-    resources = ["arn:aws:s3:::*", "arn:aws:dynamodb:::*", "arn:aws:logs:::*", "arn:aws:states:::*"]
+
+    // arn:aws:dynamodb:ap-southeast-1:717942231127:table/campaign_service_table
+    resources = ["arn:aws:states:*:*:*",
+                "arn:aws:s3:::*",
+                "arn:aws:logs:*:*:*",
+                "arn:aws:dynamodb:*:*:*"]
     effect    = "Allow"
   }
 }

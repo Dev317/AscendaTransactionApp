@@ -9,3 +9,15 @@ variable "force_destroy" {
   type        = bool
   default     = true
 }
+
+variable "lambda_role" {
+  description = "ARN of IAM lambda role"
+  type        = string
+  default     = "iam-lambda-role"
+}
+
+variable "campaign_service_zip" {
+  description = "Location of Campaign Service Code"
+  type        = string
+  default     = "../build/campaign_service.zip"
+}
