@@ -16,7 +16,7 @@ env:
 
 jobs:
   ci:
-    uses: ./.github/workflows/process_csv_ci.yaml
+    uses: ./.github/workflows/ci.yaml
     with:
       source-path: code/process_csv
 
