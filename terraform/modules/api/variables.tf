@@ -21,3 +21,16 @@ variable "campaign_service_zip" {
   type        = string
   default     = "../build/campaign_service.zip"
 }
+
+variable "read_capactiy" {
+  description = "Read Capacity for DynamoDB"
+  type        = number
+  default     = 30
+}
+
+
+variable "write_capactiy" {
+  description = "Write Capacity for DynamoDB"
+  type        = number
+  default     = 30
+}
