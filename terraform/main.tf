@@ -39,7 +39,7 @@ module "api_sg" {
     aws = aws.singapore
   }
   lambda_archive_s3_bucket = "lambda-archive-g1t1-singapore"
-  lambda_role               = module.iam.iam_lambda_role_arn
+  lambda_role              = module.iam.iam_lambda_role_arn
 }
 
 module "file_processor_sg" {
@@ -61,7 +61,7 @@ module "api_north_virginia" {
     aws = aws.northvirginia
   }
   lambda_archive_s3_bucket = "lambda-archive-g1t1-north-virginia"
-  lambda_role               = module.iam.iam_lambda_role_arn
+  lambda_role              = module.iam.iam_lambda_role_arn
 
 }
 

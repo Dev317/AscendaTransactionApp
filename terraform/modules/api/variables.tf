@@ -1,3 +1,9 @@
+variable "us_region" {
+  description = "The region to deploy the DynamoDB tables to"
+  type = string
+  default     = "us-east-1"
+}
+  
 variable "lambda_archive_s3_bucket" {
   description = "S3 Bucket Name for Lambda ZIP Files"
   type        = string
