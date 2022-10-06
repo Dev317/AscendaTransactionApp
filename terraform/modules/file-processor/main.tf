@@ -23,7 +23,7 @@ resource "aws_s3_bucket" "file_upload_bucket" {
   force_destroy = var.force_destroy
 }
 
-# Create DynamoDB to store records
+# Create DynamoDB to store records -- TO DELETE
 resource "aws_dynamodb_table" "transactions_records_table" {
   name           = "transaction-records-table"
   billing_mode   = "PROVISIONED"
