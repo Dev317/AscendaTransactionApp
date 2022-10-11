@@ -70,6 +70,9 @@ resource "aws_lambda_function" "file_upload" {
       source_code_hash
     ]
   }
+  tracing_config {
+    mode = "Active"
+  }
 }
 
 resource "aws_lambda_alias" "file_upload_alias" {
@@ -109,6 +112,10 @@ resource "aws_lambda_function" "stepfunction_trigger" {
       source_code_hash,
       environment
     ]
+  }
+
+  tracing_config {
+    mode = "Active"
   }
 }
 
