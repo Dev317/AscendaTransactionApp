@@ -70,6 +70,7 @@ resource "aws_lambda_function" "file_upload" {
       source_code_hash
     ]
   }
+
   tracing_config {
     mode = "Active"
   }
