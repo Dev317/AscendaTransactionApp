@@ -1,8 +1,8 @@
 resource "aws_dynamodb_table" "campaign_service_table" {
   name     = "campaign_service_table"
   hash_key = "campaign_id"
-  #   point_in_time_recovery = true
-  #   restore_to_latest_time = true
+  point_in_time_recovery = true
+  restore_to_latest_time = true
   billing_mode = "PAY_PER_REQUEST"
   count        = data.aws_region.current.name == var.default_region ? 1 : 0
   stream_enabled = true
