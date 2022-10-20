@@ -25,6 +25,7 @@ Lambda function that reads dynamodb, generates calculation policies
 import json
 import logging
 import os
+import requests
 
 import boto3
 
@@ -39,20 +40,22 @@ DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 CAMPAIGN_TABLE = DYNAMODB_CLIENT.Table(CAMPAIGN_TABLE_NAME)
 CAMPAIGN_INDEX_TABLE = DYNAMODB_CLIENT.Table(CAMPAIGN_INDEX_TABLE_NAME)
 
+APIG_URL = " https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/"
+
+def invoke_lambda(post_request: dict, end_point: str):
+    """Packages a JSON message into a http request and invokes another service
+    Returns a jsonified response object"""
+    return requests.post(APIG_URL + end_point, json = post_request).json()
+
+
 def create_campaign(data):
-    campaign_id = data["campaign_start_date"] + "_" + data["campaign_name"]
+    campaign_item = data
+    #set the campaign id
+    campaign_id =  data["campaign_start_date"] + "_" + data["campaign_name"]
+    campaign_item["campaign_id"] = campaign_id
     try:
         response = CAMPAIGN_TABLE.put_item(
-            Item={
-                "campaign_id": campaign_id,
-                "campaign_name": data["campaign_name"],
-                "campaign_description": data["campaign_description"],
-                "campaign_start_date": data["campaign_start_date"],
-                "campaign_end_date": data["campaign_end_date"],
-                "card_type": data["card_type"],
-                "campaign_conditions": data["campaign_conditions"],
-                "campaign_priority": data["campaign_priority"]
-            }
+            Item = campaign_item
         )
         LOGGER.info("campaign created")
         add_to_index(campaign_id)
@@ -62,6 +65,22 @@ def create_campaign(data):
                 "message": "An error occurred creating the campaign.",
                 "error": str(exception)
         }
+    
+    try:
+        post_request = {
+            "action": "add_new_campaign",
+            "data": campaign_item
+        }
+        invoke_lambda(post_request, "calculation")
+        LOGGER.info("campaign created")
+    except Exception as exception:
+        return {
+            "statusCode": 500,
+                "message": "An error occurred invoking the calculation service.",
+                "error": str(exception)
+        }
+
+                
     return response
 
 def get_index():
@@ -128,9 +147,13 @@ def get_all():
         }
     return response
 
-def get_by_id(data):
+def get_by_id(campaign_id):
+    """CRUD: get by campaign_id"""
+    LOGGER.info("Attempting to get %s", campaign_id)
     try:
-        response = CAMPAIGN_TABLE.get_item(Key={"campaign_id": data["campaign_id"]})
+        response = CAMPAIGN_TABLE.get_item(Key={"campaign_id": campaign_id})
+        LOGGER.info(json.dumps(response))
+        # note: if the item is not found, response will not have key "item"
     except Exception as exception:
         return {
             "statusCode": 500,
@@ -139,19 +162,41 @@ def get_by_id(data):
         }
     return response
 
-def lambda_handler(event, context):
-    """main handler"""
 
-    if event["action"] == "create":
-        dynamo_resp = create_campaign(event["data"])
-    elif event["action"] == "get_all":
-        dynamo_resp = get_all()
-    elif event["action"] == "get_by_id":
-        dynamo_resp = get_by_id(event["data"])
-    elif event["action"] == "get_index":
-        dynamo_resp = get_index()
+def lambda_handler(event, context):
+    """Main function that lambda passes trigger input into"""
+
+    try:
+        if "body" in event: #if the event comes from APIG
+            body = json.loads(event["body"])
+            action = body["action"]
+        else: #if the event comes from lambda test
+            body = event
+            action = event["action"]
+    except Exception as exception:
+        return {
+            "statusCode": 500,
+            "message": "Incorrect input",
+            "error": repr(exception),
+        }
+
+    try:
+        if action == "create":
+            dynamo_resp = create_campaign(body["data"])
+        elif action == "get_all":
+            dynamo_resp = get_all()
+        elif action == "get_by_id":
+            dynamo_resp = get_by_id(body["data"]["campaign_id"])
+        elif action == "get_index":
+            dynamo_resp = get_index()
+    except Exception as exception:
+        return {
+            "statusCode": 500,
+            "message": "An error occurred processing the action.",
+            "error": str(exception),
+        }
 
     return {
         "statusCode": 200,
-        "body": dynamo_resp
+        "body": json.dumps(dynamo_resp)
     }

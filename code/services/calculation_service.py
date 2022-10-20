@@ -28,9 +28,49 @@ import logging
 import datetime
 from datetime import date, timedelta
 import time
-from database import CAMPAIGN_SERVICE_TABLE, POLICY_DATABASE, EXCLUSION_SERVICE_TABLE
+import os
+import requests
+import boto3
+
+
+EXCLUSION_SERVICE_TABLE = [
+    {
+    "exclusion_id": "09-06-2022_Standard Exclusions",
+    "exclusion_name": "Standard Exclusions",
+    "exclusion_start_date": "09-06-2022",
+    "exclusion_end_date": "11-06-2022",
+    "card_type": ["scis_shopping", "scis_freedom"],
+    "exclusion_conditions": {
+        "mcc":
+            {
+                "6051": "Quasi Cash Merchants - Prepaid top-ups",
+                "9399": "Government Services-Not Elsewhere Classified | Excluded",
+                "6540": "POI (Point of Interaction) Funding Transactions (Excluding MoneySend) | Taxis & public transport"
+            },
+        "merchant":
+            {
+                "Blacklisted Merchant": "Merchant has been blacklisted"
+            }
+        }
+    }
+]
+
+# from database import CAMPAIGN_SERVICE_TABLE, POLICY_DATABASE, EXCLUSION_SERVICE_TABLE
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
+
+AWS_REGION = os.environ.get("AWS_REGION", "ap-southeast-1")
+POLICY_TABLE_NAME = os.environ.get("POLICY_TABLE_NAME", "calculation_policy_table")
+
+DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
+POLICY_TABLE = DYNAMODB_CLIENT.Table(POLICY_TABLE_NAME)
+
+APIG_URL = " https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/"
+
+def invoke_lambda(post_request: dict, end_point: str):
+    """Packages a JSON message into a http request and invokes another service
+    Returns a jsonified response object"""
+    return requests.post(APIG_URL + end_point, json = post_request).json()
 
 
 #   ______ .______       __    __   _______  
@@ -47,9 +87,20 @@ def get_all_card_types() -> list:  # TODO also create crud for card_service, and
 
 
 def get_all_campaigns() -> list:  # TODO make a get_all call to campaign_service
-    """Helper function to call on campaign service to retrieve ALL campaigns"""
-    campaign_service_table = CAMPAIGN_SERVICE_TABLE
-    return campaign_service_table
+    """Helper function to call on campaign service to retrieve ALL campaigns
+    Returns a list of all campaign objects"""
+    post_request = {
+        "action": "get_all"
+    }
+    try:
+        campaign_response = invoke_lambda(post_request, "campaign")
+        return campaign_response["Responses"]["campaign_service_table"]
+    except Exception as exception:
+        return {
+            "statusCode": 500,
+                "message": "An error occurred invoking the campaign service.",
+                "error": str(exception)
+        }
 
 
 def get_all_exclusions() -> list: #TODO make get_all call to exclusion_service
@@ -58,20 +109,45 @@ def get_all_exclusions() -> list: #TODO make get_all call to exclusion_service
     return exclusion_service_table
 
 
-def get_policy(policy_id: str) -> list:
-    policy_database = POLICY_DATABASE
-    if policy_id in policy_database:
-        return policy_database[policy_id]
+def get_policy(policy_id: str) -> dict:
+    try:
+        response = POLICY_TABLE.get_item(Key={"policy_id": policy_id})
+        LOGGER.info("Attempting get policy from dynamodb, policy_id: %s", policy_id)
+        LOGGER.info(json.dumps(response))
+    except Exception as exception:
+        return {
+            "statusCode": 500,
+                "message": "An error occurred getting policy by id.",
+                "error": str(exception)
+        }
+    if "Item" in response:
+        return response["Item"]
     else:
         return {}
 
 
-def put_policy(policy, policy_id): #TODO crud with db
-    """Saves a given policy to the database by way of PUT aka overwrite"""
+
+def put_policy(policy, policy_id):
+    """Saves a given policy dict to the database by way of PUT aka overwrite"""
+    # try:
+    #     POLICY_DATABASE[policy_id] = policy
+    # except Exception as exception:
+    #     print("save failed, error: " + str(exception))
+    policy["policy_id"] = policy_id
     try:
-        POLICY_DATABASE[policy_id] = policy
+        LOGGER.info("Attempting to save %s to db", policy_id)
+        response = POLICY_TABLE.put_item(
+            Item = policy
+        )
+        LOGGER.info("Policy %s saved to db", policy_id)
     except Exception as exception:
-        print("save failed, error: " + str(exception))
+        LOGGER.error(str(exception))
+        return {
+            "statusCode": 500,
+                "message": "An error occurred creating the campaign.",
+                "error": str(exception)
+        }
+    return response
 
 
 #  __    __   _______  __      .______    _______ .______          _______.
@@ -160,39 +236,39 @@ def add_campaign_to_policy(new_campaign: dict, campaign_date: str):
         policy = get_policy(policy_id)
         campaign_test_logger("=========before=========")
         campaign_test_logger(json.dumps(policy, indent=4))
-        if policy:  # check if policy exists
-            if "campaign_conditions" in policy:  # check if there are any campaigns
-                # iterate through campaign conditions from the back, until a priority higher than new is found
-                # insert at that index
-                # move on to next campaign condition
-                # add conditions into the policy
-                campaign_test_logger("stacking existing campaign")
-                cur_index = len(policy["campaign_conditions"]) - 1
-                campaign_test_logger(cur_index)
-                # note: the following for loop is designed to run once first before beginning the loop, hence the while True
-                while True:
-                    if cur_index == -1: #fencepost for when it reaches the topmost policy
-                        campaign_test_logger(f"Found index to insert, inserting behind {cur_index}")
-                        for condition in new_campaign["campaign_conditions"]:
-                            condition["campaign_id"] = new_campaign["campaign_id"]
-                            condition["campaign_priority"] = new_campaign["campaign_priority"]
-                            policy["campaign_conditions"].insert(cur_index + 1, condition)
-                            cur_index = cur_index + 1
-                        break
-                    prior_existing = int(policy["campaign_conditions"][cur_index]["campaign_priority"])
-                    prior_new = int(new_campaign["campaign_priority"])
-                    campaign_test_logger(f"Comparing {prior_existing} to {prior_new}")
-                    if prior_existing > prior_new:
-                        campaign_test_logger(f"Found index to insert, inserting behind {cur_index}")
-                        for condition in new_campaign["campaign_conditions"]:
-                            condition["campaign_id"] = new_campaign["campaign_id"]
-                            condition["campaign_priority"] = new_campaign["campaign_priority"]
-                            policy["campaign_conditions"].insert(cur_index + 1, condition)
-                            cur_index = cur_index + 1
-                        break
-                    else:
-                        cur_index = cur_index - 1
-                
+        # if policy:  # check if policy exists
+        if "campaign_conditions" in policy:  # check if there are any campaigns
+            # iterate through campaign conditions from the back, until a priority higher than new is found
+            # insert at that index
+            # move on to next campaign condition
+            # add conditions into the policy
+            campaign_test_logger("stacking existing campaign")
+            cur_index = len(policy["campaign_conditions"]) - 1
+            campaign_test_logger(cur_index)
+            # note: the following for loop is designed to run once first before beginning the loop, hence the while True
+            while True:
+                if cur_index == -1: #fencepost for when it reaches the topmost policy
+                    campaign_test_logger(f"Found index to insert, inserting behind {cur_index}")
+                    for condition in new_campaign["campaign_conditions"]:
+                        condition["campaign_id"] = new_campaign["campaign_id"]
+                        condition["campaign_priority"] = new_campaign["campaign_priority"]
+                        policy["campaign_conditions"].insert(cur_index + 1, condition)
+                        cur_index = cur_index + 1
+                    break
+                prior_existing = int(policy["campaign_conditions"][cur_index]["campaign_priority"])
+                prior_new = int(new_campaign["campaign_priority"])
+                campaign_test_logger(f"Comparing {prior_existing} to {prior_new}")
+                if prior_existing > prior_new:
+                    campaign_test_logger(f"Found index to insert, inserting behind {cur_index}")
+                    for condition in new_campaign["campaign_conditions"]:
+                        condition["campaign_id"] = new_campaign["campaign_id"]
+                        condition["campaign_priority"] = new_campaign["campaign_priority"]
+                        policy["campaign_conditions"].insert(cur_index + 1, condition)
+                        cur_index = cur_index + 1
+                    break
+                else:
+                    cur_index = cur_index - 1
+
         else:  # if there is no campaign or exclusion at all for this policy, simply add it
             campaign_test_logger("adding new campaign")
             policy["campaign_conditions"] = []
@@ -213,9 +289,16 @@ def add_new_campaign(new_campaign: dict):
     """Invoked by campaign service whenever a new campaign is created
     Adds a new campaign to current policies, across all the campaign's dates
     Iterates through all the dates of the campaign, and calls add_campaign_to_policy"""
-    date_list = generate_dates(new_campaign["campaign_start_date"], new_campaign["campaign_end_date"])
-    for date_to_add in date_list:
-        add_campaign_to_policy(new_campaign, date_to_add)
+    try:
+        date_list = generate_dates(new_campaign["campaign_start_date"], new_campaign["campaign_end_date"])
+        for date_to_add in date_list:
+            add_campaign_to_policy(new_campaign, date_to_add)
+    except Exception as exception:
+        return {
+            "statusCode": 500,
+            "message": "error adding new campaign",
+            "error": repr(exception),
+        }
 
 
 def add_exclusion_to_policy(new_exclusion: dict, exclusion_date: str):
@@ -260,6 +343,43 @@ def add_new_exclusion(new_exclusion: dict):
         add_exclusion_to_policy(new_exclusion, date_to_add)
 
 
+def lambda_handler(event, context):
+    """Main function that lambda passes trigger input into"""
+
+    try:
+        if "body" in event: #if the event comes from APIG
+            body = json.loads(event["body"])
+            action = body["action"]
+        else: #if the event comes from lambda test
+            body = event
+            action = event["action"]
+    except Exception as exception:
+        return {
+            "statusCode": 500,
+            "message": "Incorrect input",
+            "error": repr(exception),
+        }
+
+    try:
+        if action == "add_new_campaign":
+            resp = add_new_campaign(body["data"])
+        elif action== "test_get_policy":
+            resp = get_policy(body["data"]["policy_id"])
+        elif action == "test_get_campaign":
+            resp = get_all_campaigns()
+        elif action == "test_put_policy":
+            resp = put_policy(body["data"], body["data"]["policy_id"])
+    except Exception as exception:
+        return {
+            "statusCode": 500,
+            "message": "An error occurred processing the action.",
+            "error": str(exception),
+        }
+
+    return {
+        "statusCode": 200,
+        "body": json.dumps(resp)
+    }
 # .___________. _______     _______.___________. __  .__   __.   _______ 
 # |           ||   ____|   /       |           ||  | |  \ |  |  /  _____|
 # `---|  |----`|  |__     |   (----`---|  |----`|  | |   \|  | |  |  __  
@@ -271,36 +391,37 @@ def add_new_exclusion(new_exclusion: dict):
 def campaign_test_logger(log_msg):
     """Function to log all the events during campaign addition"""
     # print(log_msg)
+    LOGGER.info(log_msg)
     pass
 
-def exclusion_test_logger(log_msg):
-    """Function to log all the events during exclusion addition"""
-    print(log_msg)
-    pass
+# def exclusion_test_logger(log_msg):
+#     """Function to log all the events during exclusion addition"""
+#     print(log_msg)
+#     pass
 
-if __name__ == "__main__":
-    generate_policies("01-01-2020", "31-12-2022")
-    print("===========================after generating==========================")
-    print(json.dumps(POLICY_DATABASE, indent=4))
+# if __name__ == "__main__":
+#     generate_policies("01-01-2020", "31-12-2022")
+#     print("===========================after generating==========================")
+#     print(json.dumps(POLICY_DATABASE, indent=4))
 
-    test_new_campaign = {
-        "campaign_name": "Test promo",
-        "campaign_start_date": "08-06-2022",
-        "campaign_description": "Test promo",
-        "card_type": "scis_shopping",
-        "campaign_end_date": "11-06-2022",
-        "campaign_id": "01-06-2021_Test promo",
-        "campaign_priority": "21",
-        "campaign_conditions": [
-            {
-                "campaign": "Test Promo Top"
-            },
+#     test_new_campaign = {
+#         "campaign_name": "Test promo",
+#         "campaign_start_date": "08-06-2022",
+#         "campaign_description": "Test promo",
+#         "card_type": "scis_shopping",
+#         "campaign_end_date": "11-06-2022",
+#         "campaign_id": "01-06-2021_Test promo",
+#         "campaign_priority": "21",
+#         "campaign_conditions": [
+#             {
+#                 "campaign": "Test Promo Top"
+#             },
             
-            {
-                "campaign": "Test Promo Bottom"
-            }
-        ]
-    }
-    add_new_campaign(test_new_campaign)
-    print("===========================after adding new campaign==========================")
-    print(json.dumps(POLICY_DATABASE, indent=4))
+#             {
+#                 "campaign": "Test Promo Bottom"
+#             }
+#         ]
+#     }
+#     add_new_campaign(test_new_campaign)
+#     print("===========================after adding new campaign==========================")
+#     print(json.dumps(POLICY_DATABASE, indent=4))
