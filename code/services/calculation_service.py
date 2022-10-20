@@ -236,7 +236,12 @@ def add_campaign_to_policy(new_campaign: dict, campaign_date: str):
         policy = get_policy(policy_id)
         campaign_test_logger("=========before=========")
         campaign_test_logger(json.dumps(policy, indent=4))
-        # if policy:  # check if policy exists
+
+        # pre-format campaign conditions (insert the campaign id and campaign priority)
+        for condition in new_campaign["campaign_conditions"]:
+            condition["campaign_id"] = new_campaign["campaign_id"]
+            condition["campaign_priority"] = new_campaign["campaign_priority"]
+
         if "campaign_conditions" in policy:  # check if there are any campaigns
             # iterate through campaign conditions from the back, until a priority higher than new is found
             # insert at that index
@@ -247,34 +252,27 @@ def add_campaign_to_policy(new_campaign: dict, campaign_date: str):
             campaign_test_logger(cur_index)
             # note: the following for loop is designed to run once first before beginning the loop, hence the while True
             while True:
-                if cur_index == -1: #fencepost for when it reaches the topmost policy
+                if cur_index == -1: # exit condition for when it reaches the topmost policy
                     campaign_test_logger(f"Found index to insert, inserting behind {cur_index}")
                     for condition in new_campaign["campaign_conditions"]:
-                        condition["campaign_id"] = new_campaign["campaign_id"]
-                        condition["campaign_priority"] = new_campaign["campaign_priority"]
                         policy["campaign_conditions"].insert(cur_index + 1, condition)
                         cur_index = cur_index + 1
                     break
                 prior_existing = int(policy["campaign_conditions"][cur_index]["campaign_priority"])
                 prior_new = int(new_campaign["campaign_priority"])
                 campaign_test_logger(f"Comparing {prior_existing} to {prior_new}")
-                if prior_existing > prior_new:
+                if prior_existing > prior_new: #insert the incoming campaign right behind the next higher priority
                     campaign_test_logger(f"Found index to insert, inserting behind {cur_index}")
                     for condition in new_campaign["campaign_conditions"]:
-                        condition["campaign_id"] = new_campaign["campaign_id"]
-                        condition["campaign_priority"] = new_campaign["campaign_priority"]
                         policy["campaign_conditions"].insert(cur_index + 1, condition)
                         cur_index = cur_index + 1
                     break
-                else:
-                    cur_index = cur_index - 1
+                cur_index = cur_index - 1
 
         else:  # if there is no campaign or exclusion at all for this policy, simply add it
             campaign_test_logger("adding new campaign")
             policy["campaign_conditions"] = []
             for condition in new_campaign["campaign_conditions"]:
-                condition["campaign_id"] = new_campaign["campaign_id"]
-                condition["campaign_priority"] = new_campaign["campaign_priority"]
                 policy["campaign_conditions"].append(condition)
 
         campaign_test_logger("=========after=========")
@@ -394,10 +392,10 @@ def campaign_test_logger(log_msg):
     LOGGER.info(log_msg)
     pass
 
-# def exclusion_test_logger(log_msg):
-#     """Function to log all the events during exclusion addition"""
-#     print(log_msg)
-#     pass
+def exclusion_test_logger(log_msg):
+    """Function to log all the events during exclusion addition"""
+    LOGGER.info(log_msg)
+    pass
 
 # if __name__ == "__main__":
 #     generate_policies("01-01-2020", "31-12-2022")
