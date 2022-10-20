@@ -42,6 +42,12 @@ CAMPAIGN_INDEX_TABLE = DYNAMODB_CLIENT.Table(CAMPAIGN_INDEX_TABLE_NAME)
 
 APIG_URL = " https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/"
 
+
+class DuplicateCampaignIndex(Exception):
+    """Raised when campaign service tries to add a campaign whose index already exists
+    Used to prevent duplicates in the index table from blocking the campaign get_all"""
+
+
 def invoke_lambda(post_request: dict, end_point: str):
     """Packages a JSON message into a http request and invokes another service
     Returns a jsonified response object"""
@@ -53,6 +59,15 @@ def create_campaign(data):
     #set the campaign id
     campaign_id =  data["campaign_start_date"] + "_" + data["campaign_name"]
     campaign_item["campaign_id"] = campaign_id
+
+    # check if campaign id already exists
+    campaign_index_list = get_index()
+    for campaign in campaign_index_list:
+        if campaign_id == campaign:
+            #TODO: integrate with outer campaign creation wrt updating of campaigns
+            raise DuplicateCampaignIndex("Duplicate campaign id detected, aborting campaign creation")
+        LOGGER.info(campaign)
+
     try:
         response = CAMPAIGN_TABLE.put_item(
             Item = campaign_item
@@ -103,8 +118,6 @@ def add_to_index(campaign_id):
     LOGGER.info("adding %s to index", campaign_id)
     try:
         campaign_index_list = get_index()
-        for campaign in campaign_index_list:
-            LOGGER.info(campaign)
         campaign_index_list.append(campaign_id)
         response = CAMPAIGN_INDEX_TABLE.put_item(
             Item={
@@ -189,6 +202,14 @@ def lambda_handler(event, context):
             dynamo_resp = get_by_id(body["data"]["campaign_id"])
         elif action == "get_index":
             dynamo_resp = get_index()
+    #TODO: format error returns properly so apig can give proper error response reporting (rather than having to check cloud watch)
+    except DuplicateCampaignIndex as exception:
+        LOGGER.error(exception)
+        return {
+            "statusCode": 500,
+                "message": "Duplicate campaign ID detected. Please change the name of your added campaign.",
+                "error": str(exception)
+        }
     except Exception as exception:
         return {
             "statusCode": 500,
