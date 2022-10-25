@@ -5,6 +5,30 @@ resource "aws_api_gateway_resource" "campaign" {
   path_part   = "campaign"
 }
 
+# Create S3 object that is zip file of Lambda code
+resource "aws_s3_object" "campaign_code" {
+  bucket = aws_s3_bucket.lambda_function_bucket.id
+  key    = "campaign_service.zip"
+  source = var.campaign_service_zip
+}
+
+# Create campaign Lambda function
+resource "aws_lambda_function" "campaign_lambda" {
+  function_name    = "campaign_service_posting"
+  role             = var.lambda_role
+  handler          = "campaign_service.lambda_handler"
+  s3_bucket        = aws_s3_bucket.lambda_function_bucket.id
+  s3_key           = aws_s3_object.campaign_code.key
+  source_code_hash = filebase64sha256(var.campaign_service_zip)
+  runtime          = "python3.7"
+
+  environment {
+    variables = {
+      APIG_URL = "https://${aws_api_gateway_rest_api.orchestrator_apigw.id}.execute-api.ap-southeast-1.amazonaws.com/prod"
+    }
+  }
+}
+
 # /POST for /campaign
 resource "aws_api_gateway_method" "create_campaign" {
   rest_api_id   = aws_api_gateway_rest_api.orchestrator_apigw.id
