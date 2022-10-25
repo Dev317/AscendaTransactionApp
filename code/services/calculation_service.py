@@ -33,28 +33,6 @@ import requests
 import boto3
 
 
-EXCLUSION_SERVICE_TABLE = [
-    {
-    "exclusion_id": "09-06-2022_Standard Exclusions",
-    "exclusion_name": "Standard Exclusions",
-    "exclusion_start_date": "09-06-2022",
-    "exclusion_end_date": "11-06-2022",
-    "card_type": ["scis_shopping", "scis_freedom"],
-    "exclusion_conditions": {
-        "mcc":
-            {
-                "6051": "Quasi Cash Merchants - Prepaid top-ups",
-                "9399": "Government Services-Not Elsewhere Classified | Excluded",
-                "6540": "POI (Point of Interaction) Funding Transactions (Excluding MoneySend) | Taxis & public transport"
-            },
-        "merchant":
-            {
-                "Blacklisted Merchant": "Merchant has been blacklisted"
-            }
-        }
-    }
-]
-
 # from database import CAMPAIGN_SERVICE_TABLE, POLICY_DATABASE, EXCLUSION_SERVICE_TABLE
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
@@ -65,7 +43,7 @@ POLICY_TABLE_NAME = os.environ.get("POLICY_TABLE_NAME", "calculation_policy_tabl
 DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 POLICY_TABLE = DYNAMODB_CLIENT.Table(POLICY_TABLE_NAME)
 
-APIG_URL = " https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/"
+APIG_URL = os.environ.get("APIG_URL","https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/")
 
 def invoke_lambda(post_request: dict, end_point: str):
     """Packages a JSON message into a http request and invokes another service
@@ -82,11 +60,8 @@ def invoke_lambda(post_request: dict, end_point: str):
 # Functions for basic Create, Read, Update, Delete that call other services
 
 
-def get_all_card_types() -> list:  # TODO also create crud for card_service, and set up card)service
-    return ["scis_freedom", "scis_premiummiles", "scis_platinummiles", "scis_shopping"]
 
-
-def get_all_campaigns() -> list:  # TODO make a get_all call to campaign_service
+def get_all_campaigns() -> list:
     """Helper function to call on campaign service to retrieve ALL campaigns
     Returns a list of all campaign objects"""
     post_request = {
@@ -103,10 +78,21 @@ def get_all_campaigns() -> list:  # TODO make a get_all call to campaign_service
         }
 
 
-def get_all_exclusions() -> list: #TODO make get_all call to exclusion_service
-    """Helper function to call on exclusion service to retrieve ALL exclusions"""
-    exclusion_service_table = EXCLUSION_SERVICE_TABLE
-    return exclusion_service_table
+def get_all_exclusions() -> list:
+    """Helper function to call on exclusion service to retrieve ALL exclusions
+    Returns a list of all exclusion objects"""
+    post_request = {
+        "action": "get_all"
+    }
+    try:
+        exclusion_response = invoke_lambda(post_request, "exclusion")
+        return exclusion_response["Responses"]["exclusion_service_table"]
+    except Exception as exception:
+        return {
+            "statusCode": 500,
+                "message": "An error occurred invoking the exclusion service.",
+                "error": str(exception)
+        }
 
 
 def get_policy(policy_id: str) -> dict:
@@ -387,8 +373,15 @@ def lambda_handler(event, context):
             resp = get_policy(body["data"]["policy_id"])
         elif action == "test_get_campaign":
             resp = get_all_campaigns()
+        elif action == "test_get_exclusions":
+            resp = get_all_exclusions()
         elif action == "test_put_policy":
             resp = put_policy(body["data"], body["data"]["policy_id"])
+        else:
+            resp = {
+                "statusCode": 500,
+                "body": "no such action"
+            }
     except Exception as exception:
         return {
             "statusCode": 500,
