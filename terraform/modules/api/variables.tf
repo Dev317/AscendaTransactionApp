@@ -28,11 +28,6 @@ variable "lambda_role" {
   default     = "iam-lambda-role"
 }
 
-variable "campaign_service_zip" {
-  description = "Location of Campaign Service Code"
-  type        = string
-  default     = "../build/campaign_service.zip"
-}
 
 variable "read_capactiy" {
   description = "Read Capacity for DynamoDB"
@@ -45,4 +40,17 @@ variable "write_capactiy" {
   description = "Write Capacity for DynamoDB"
   type        = number
   default     = 30
+}
+
+
+variable "campaign_service_zip" {
+  description = "Location of Campaign Service Code"
+  type        = string
+  default     = "../build/campaign_service.zip"
+}
+
+variable "calculation_service_zip" {
+  description = "Location of Calculation Service Code"
+  type        = string
+  default     = "../build/calculation_service.zip"
 }

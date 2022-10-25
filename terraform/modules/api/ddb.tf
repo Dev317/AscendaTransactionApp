@@ -132,3 +132,43 @@ resource "aws_dynamodb_table" "user_card_service_table" {
     region_name = var.us_region
   }
 }
+
+
+
+resource "aws_dynamodb_table" "exclusion_index_table" {
+  name         = "exclusion_index_table"
+  hash_key     = "exclusion_index_id"
+  billing_mode = "PAY_PER_REQUEST"
+  # point_in_time_recovery = true
+  restore_to_latest_time = true
+  stream_view_type = "KEYS_ONLY"
+  count        = data.aws_region.current.name == var.default_region ? 1 : 0
+  stream_enabled = true
+
+  attribute {
+    name = "exclusion_index_id"
+    type = "S"
+  }
+  replica {
+    region_name = var.us_region
+  }
+}
+
+resource "aws_dynamodb_table" "campaign_index_table" {
+  name         = "campaign_index_table"
+  hash_key     = "campaign_index_id"
+  billing_mode = "PAY_PER_REQUEST"
+  # point_in_time_recovery = true
+  restore_to_latest_time = true
+  stream_view_type = "KEYS_ONLY"
+  count        = data.aws_region.current.name == var.default_region ? 1 : 0
+  stream_enabled = true
+
+  attribute {
+    name = "campaign_index_id"
+    type = "S"
+  }
+  replica {
+    region_name = var.us_region
+  }
+}
