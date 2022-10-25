@@ -215,7 +215,7 @@ def generate_policies(left_bound_date, right_bound_date):
         for day in date_list:
             add_campaign_to_policy(campaign, day)
 
-    print("generate_policies: done adding campaigns")
+    LOGGER.info("generate_policies: done adding campaigns")
     exclusion_list = get_all_exclusions()
     for exclusion in exclusion_list:
         # set the dates to generate to the tighter range of the inputted date and the exclusion's date
@@ -224,7 +224,12 @@ def generate_policies(left_bound_date, right_bound_date):
         date_list = generate_dates(start_date, end_date)
         for day in date_list:
             add_exclusion_to_policy(exclusion, day)
-    print("generate_policies: done adding exclusions")
+    LOGGER.info("generate_policies: done adding exclusions")
+
+    return {
+        "statusCode": 200,
+        "body": "Sucessfully regenerated"
+    }
 
 
 def add_campaign_to_policy(new_campaign: dict, campaign_date: str):
@@ -280,7 +285,7 @@ def add_campaign_to_policy(new_campaign: dict, campaign_date: str):
         # save policy to db
         put_policy(policy, policy_id)
     except Exception as exception:
-        print("exception encountered while adding campaign to policy:" + str(exception))
+        LOGGER.error("exception encountered while adding campaign to policy: %s", str(exception))
 
 
 def add_new_campaign(new_campaign: dict):
@@ -333,7 +338,7 @@ def add_exclusion_to_policy(new_exclusion: dict, exclusion_date: str):
             # save policy to db
             put_policy(policy, policy_id)
         except Exception as exception:
-            print("exception encountered while adding exclusion to policy:" + str(exception))
+            LOGGER.error("exception encountered while adding exclusion to policy: %s", str(exception))
 
 
 def add_new_exclusion(new_exclusion: dict):
@@ -369,11 +374,15 @@ def lambda_handler(event, context):
         }
 
     try:
+        # PRODUCTION ENDPOINTS
         if action == "add_new_campaign":
             resp = add_new_campaign(body["data"])
         elif action == "add_new_exclusion":
             resp = add_new_exclusion(body["data"])
+        elif action == "refresh_policies":
+            resp = generate_policies(body["data"]["start_date"], body["data"]["end_date"])
 
+        #TESTING ENDPOINTS
         elif action== "test_get_policy":
             resp = get_policy(body["data"]["policy_id"])
         elif action == "test_get_campaign":
