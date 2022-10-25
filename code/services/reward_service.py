@@ -19,18 +19,22 @@ import datetime
 from datetime import date, timedelta
 import time
 from database import CAMPAIGN_SERVICE_TABLE, POLICY_DATABASE, EXCLUSION_SERVICE_TABLE
+
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
 
-#   ______ .______       __    __   _______  
-#  /      ||   _  \     |  |  |  | |       \ 
+#   ______ .______       __    __   _______
+#  /      ||   _  \     |  |  |  | |       \
 # |  ,----'|  |_)  |    |  |  |  | |  .--.  |
 # |  |     |      /     |  |  |  | |  |  |  |
 # |  `----.|  |\  \----.|  `--'  | |  '--'  |
-#  \______|| _| `._____| \______/  |_______/ 
+#  \______|| _| `._____| \______/  |_______/
 # Functions for basic Create, Read, Update, Delete that call other services
 
-def get_policy(card_type:str, policy_date: str) -> dict: #TODO read from calculation_service
+
+def get_policy(
+    card_type: str, policy_date: str
+) -> dict:  # TODO read from calculation_service
     policy_id = str(card_type) + "/" + str(policy_date)
     try:
         policy = POLICY_DATABASE[policy_id]
@@ -39,68 +43,77 @@ def get_policy(card_type:str, policy_date: str) -> dict: #TODO read from calcula
     return policy
 
 
-def calculate_reward(policy:dict, transaction:dict) -> dict:
+def calculate_reward(policy: dict, transaction: dict) -> dict:
     """Takes a given policy and applies it to a given transaction to return a reward record"""
     reward = {
-        'reward_id': transaction["transaction_id"][0:16] + policy["policy_id"], #TODO add policy id to the policy itself?
-        'card_id': transaction['cardId'],
-        'card_type': transaction['cardType'],
-        'date': transaction['date'],
-        'merchant_name': transaction['merchant'],
-        'is_exclusion': False,
-        'currency': transaction['currency'],
-        'original_amount': transaction['sgdAmount']
+        "reward_id": transaction["transaction_id"][0:16]
+        + policy["policy_id"],  # TODO add policy id to the policy itself?
+        "card_id": transaction["cardId"],
+        "card_type": transaction["cardType"],
+        "date": transaction["date"],
+        "merchant_name": transaction["merchant"],
+        "is_exclusion": False,
+        "currency": transaction["currency"],
+        "original_amount": transaction["sgdAmount"],
     }
 
-    #check exclusions
+    # check exclusions
     exclusion_mcc = policy["exclusion_conditions"]["mcc"]
     exclusion_merchant = policy["exclusion_conditions"]["merchant"]
 
-    if transaction['mcc'] in exclusion_mcc:
-        reward['is_exclusion'] = True
-        reward['calculation_reason'] = exclusion_mcc[transaction['mcc']]
-        reward['reward_value'] = 0
+    if transaction["mcc"] in exclusion_mcc:
+        reward["is_exclusion"] = True
+        reward["calculation_reason"] = exclusion_mcc[transaction["mcc"]]
+        reward["reward_value"] = 0
 
-    if transaction['merchant'] in exclusion_merchant:
-        reward['is_exclusion'] = True
-        reward['calculation_reason'] = exclusion_merchant[transaction['merchant']]
-        reward['reward_value'] = 0
+    if transaction["merchant"] in exclusion_merchant:
+        reward["is_exclusion"] = True
+        reward["calculation_reason"] = exclusion_merchant[transaction["merchant"]]
+        reward["reward_value"] = 0
 
-    if not reward['is_exclusion']:
-        #apply policy
+    if not reward["is_exclusion"]:
+        # apply policy
         try:
 
-            if 'amount_greater_than' in policy:
-                if float(transaction['sgdAmount']) <= float(policy['amount_greater_than']):
+            if "amount_greater_than" in policy:
+                if float(transaction["sgdAmount"]) <= float(
+                    policy["amount_greater_than"]
+                ):
                     return -1
-            if 'mcc_include' in policy:
-                if transaction['mcc'] not in policy['mcc_include']:
+            if "mcc_include" in policy:
+                if transaction["mcc"] not in policy["mcc_include"]:
                     return -1
-            if 'mcc_exclude' in policy:
-                if transaction['mcc'] in policy['mcc_exclude']:
+            if "mcc_exclude" in policy:
+                if transaction["mcc"] in policy["mcc_exclude"]:
                     return -1
-            if 'merchant_name_include' in policy:
-                if transaction['merchant'] not in policy['merchant_name_include']:
+            if "merchant_name_include" in policy:
+                if transaction["merchant"] not in policy["merchant_name_include"]:
                     return -1
-            if 'merchant_name_exclude' in policy:
-                if transaction['merchant'] in policy['merchant_name_exclude']:
+            if "merchant_name_exclude" in policy:
+                if transaction["merchant"] in policy["merchant_name_exclude"]:
                     return -1
-            if 'currency_include' in policy:
-                if transaction['currency'] not in policy['currency_include']:
+            if "currency_include" in policy:
+                if transaction["currency"] not in policy["currency_include"]:
                     return -1
-            if 'currency_exclude' in policy:
-                if transaction['currency'] in policy['currency_exclude']:
+            if "currency_exclude" in policy:
+                if transaction["currency"] in policy["currency_exclude"]:
                     return -1
-            if 'mcc_type_include' in policy: #checks if the mcc is in a certain range#TODO handle multiple tpyes e.g. hotels, petrol and games
-                if transaction['mcc'] not in MCC_TYPES[policy['mcc_type_include']]:
+            if (
+                "mcc_type_include" in policy
+            ):  # checks if the mcc is in a certain range#TODO handle multiple tpyes e.g. hotels, petrol and games
+                if transaction["mcc"] not in MCC_TYPES[policy["mcc_type_include"]]:
                     return -1
-            if 'mcc_type_exclude' in policy: #checks if the mcc is not in a certain range
-                if transaction['mcc'] in MCC_TYPES[policy['mcc_type_exclude']]:
+            if (
+                "mcc_type_exclude" in policy
+            ):  # checks if the mcc is not in a certain range
+                if transaction["mcc"] in MCC_TYPES[policy["mcc_type_exclude"]]:
                     return -1
 
-            if 'percentage_of_amount' in policy:
-                return float(policy['percentage_of_amount']) * float(transaction['sgdAmount'])
-            #else other calculation types to be implemented
+            if "percentage_of_amount" in policy:
+                return float(policy["percentage_of_amount"]) * float(
+                    transaction["sgdAmount"]
+                )
+            # else other calculation types to be implemented
 
         except Exception as exception:
             raise exception

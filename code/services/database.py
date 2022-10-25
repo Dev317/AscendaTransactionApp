@@ -6,34 +6,30 @@ POLICY_DATABASE = {
                 "percentage_of_amount": "10",
                 "calculation_reason": "10 points/SGD on all online spend",
                 "campaign_id": "01-01-2020_SCIS Shopping",
-                "campaign_priority": "0"
+                "campaign_priority": "0",
             },
             {
                 "merchant_category_include": "Shopping",
                 "percentage_of_amount": "4",
                 "calculation_reason": "4 points/SGD on all shopping spend",
                 "campaign_id": "01-01-2020_SCIS Shopping",
-                "campaign_priority": "0"
+                "campaign_priority": "0",
             },
             {
                 "percentage_of_amount": "1",
                 "calculation_reason": "1 point/SGD on spend",
                 "campaign_id": "01-01-2020_SCIS Shopping",
-                "campaign_priority": "0"
-            }
+                "campaign_priority": "0",
+            },
         ],
         "exclusion_conditions": {
-            "mcc":
-            {
+            "mcc": {
                 "6051": "Quasi Cash Merchants - Prepaid top-ups",
                 "9399": "Government Services-Not Elsewhere Classified | Excluded",
-                "6540": "POI (Point of Interaction) Funding Transactions (Excluding MoneySend) | Taxis & public transport"
+                "6540": "POI (Point of Interaction) Funding Transactions (Excluding MoneySend) | Taxis & public transport",
             },
-            "merchant":
-            {
-                "Blacklisted Merchant": "Merchant has been blacklisted"
-            }
-        }
+            "merchant": {"Blacklisted Merchant": "Merchant has been blacklisted"},
+        },
     }
 }
 
@@ -47,16 +43,14 @@ CAMPAIGN_SERVICE_TABLE = [
         "campaign_id": "01-06-2021_Grab promo",
         "campaign_priority": "50",
         "campaign_conditions": [
-            {
-                "campaign": "Grab"
-            }
+            {"campaign": "Grab"}
             # {
             #     "amount_greater_than": "100",
             #     "merchant_name_include": ["Grab"],
             #     "percentage_of_amount": "4",
             #     "calculation_reason": "Grab Promo - 4 miles per dollar with Grab, min spend 100 SGD"
             # }
-        ]
+        ],
     },
     {
         "campaign_name": "SCIS Shopping Card Base",
@@ -67,15 +61,9 @@ CAMPAIGN_SERVICE_TABLE = [
         "campaign_id": "01-01-2020_SCIS Shopping Card Base",
         "campaign_priority": "0",
         "campaign_conditions": [
-            {
-                "campaign": "Base top"
-            },
-            {
-                "campaign": "Base mid"
-            },
-            {
-                "campaign": "Base low"
-            }
+            {"campaign": "Base top"},
+            {"campaign": "Base mid"},
+            {"campaign": "Base low"}
             # {
             #     "merchant_category_include": "Online",
             #     "percentage_of_amount": "10",
@@ -90,7 +78,7 @@ CAMPAIGN_SERVICE_TABLE = [
             #     "percentage_of_amount": "1",
             #     "calculation_reason": "1 point/SGD on spend",
             # }
-        ]
+        ],
     },
     {
         "campaign_name": "Shopee promo",
@@ -106,10 +94,8 @@ CAMPAIGN_SERVICE_TABLE = [
             #     "percentage_of_amount": "5",
             #     "calculation_reason": "Shopee Promo - 5 points per dollar with Shopee"
             # }
-            {
-                "campaign": "Shopee"
-            }
-        ]
+            {"campaign": "Shopee"}
+        ],
     },
     # {
     #     "campaign_name": "Freedom Card Base",
@@ -196,22 +182,18 @@ CAMPAIGN_SERVICE_TABLE = [
 
 EXCLUSION_SERVICE_TABLE = [
     {
-    "exclusion_id": "09-06-2022_Standard Exclusions",
-    "exclusion_name": "Standard Exclusions",
-    "exclusion_start_date": "09-06-2022",
-    "exclusion_end_date": "11-06-2022",
-    "card_type": ["scis_shopping", "scis_freedom"],
-    "exclusion_conditions": {
-        "mcc":
-            {
+        "exclusion_id": "09-06-2022_Standard Exclusions",
+        "exclusion_name": "Standard Exclusions",
+        "exclusion_start_date": "09-06-2022",
+        "exclusion_end_date": "11-06-2022",
+        "card_type": ["scis_shopping", "scis_freedom"],
+        "exclusion_conditions": {
+            "mcc": {
                 "6051": "Quasi Cash Merchants - Prepaid top-ups",
                 "9399": "Government Services-Not Elsewhere Classified | Excluded",
-                "6540": "POI (Point of Interaction) Funding Transactions (Excluding MoneySend) | Taxis & public transport"
+                "6540": "POI (Point of Interaction) Funding Transactions (Excluding MoneySend) | Taxis & public transport",
             },
-        "merchant":
-            {
-                "Blacklisted Merchant": "Merchant has been blacklisted"
-            }
-        }
+            "merchant": {"Blacklisted Merchant": "Merchant has been blacklisted"},
+        },
     }
 ]
