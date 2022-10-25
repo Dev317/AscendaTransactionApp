@@ -105,8 +105,18 @@ def create_campaign(data):
 def get_index():
     """helper function to get the list of campaigns, returns a list of strings"""
     try:
-        index_response = CAMPAIGN_INDEX_TABLE.get_item(Key={"index_id": "campaign_index"})
-        campaign_index_list = index_response["Item"]["campaign_index_list"]
+        index_response = CAMPAIGN_INDEX_TABLE.get_item(Key={"campaign_index_id": "campaign_index"})
+                # rare edge case for startup: if item doesn't exist, create it
+        if "Item" not in index_response:
+            CAMPAIGN_INDEX_TABLE.put_item(
+                Item={
+                    "campaign_index_id": "campaign_index",
+                    "campaign_index_list": []
+                }
+            )
+            campaign_index_list = []
+        else:
+            campaign_index_list = index_response["Item"]["exclusion_index_list"]
     except Exception as exception:
         LOGGER.error(exception)
         return {
@@ -126,7 +136,7 @@ def add_to_index(campaign_id):
         campaign_index_list.append(campaign_id)
         response = CAMPAIGN_INDEX_TABLE.put_item(
             Item={
-                "index_id": "campaign_index",
+                "campaign_index_id": "campaign_index",
                 "campaign_index_list": campaign_index_list
             }
         )

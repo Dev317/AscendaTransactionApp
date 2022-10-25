@@ -80,7 +80,17 @@ def get_index():
     """helper function to get the list of exclusions, returns a list of strings"""
     try:
         index_response = EXCLUSION_INDEX_TABLE.get_item(Key={"exclusion_index_id": "exclusion_index"})
-        exclusion_index_list = index_response["Item"]["exclusion_index_list"]
+        # rare edge case for startup: if item doesn't exist, create it
+        if "Item" not in index_response:
+            EXCLUSION_INDEX_TABLE.put_item(
+                Item={
+                    "exclusion_index_id": "exclusion_index",
+                    "exclusion_index_list": []
+                }
+            )
+            exclusion_index_list = []
+        else:
+            exclusion_index_list = index_response["Item"]["exclusion_index_list"]
     except Exception as exception:
         LOGGER.error(exception)
         return {
