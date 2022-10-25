@@ -56,6 +56,7 @@ def invoke_lambda(post_request: dict, end_point: str):
 
 def create_campaign(data):
     campaign_item = data
+    #TODO input verification to check that the fields are correctly set? or relegate to frontend?
     #set the campaign id
     campaign_id =  data["campaign_start_date"] + "_" + data["campaign_name"]
     campaign_item["campaign_id"] = campaign_id
@@ -87,7 +88,7 @@ def create_campaign(data):
             "data": campaign_item
         }
         invoke_lambda(post_request, "calculation")
-        LOGGER.info("campaign created")
+        LOGGER.info("calculation successfully invoked")
     except Exception as exception:
         return {
             "statusCode": 500,

@@ -297,6 +297,11 @@ def add_new_campaign(new_campaign: dict):
             "message": "error adding new campaign",
             "error": repr(exception),
         }
+    
+    return {
+        "statusCode": 200,
+        "body": "successfully appplied new campaign to existing policies"
+    }
 
 
 def add_exclusion_to_policy(new_exclusion: dict, exclusion_date: str):
@@ -339,6 +344,11 @@ def add_new_exclusion(new_exclusion: dict):
         new_exclusion["exclusion_start_date"], new_exclusion["exclusion_end_date"])
     for date_to_add in date_list:
         add_exclusion_to_policy(new_exclusion, date_to_add)
+    
+    return {
+        "statusCode": 200,
+        "body": "successfully applied new exclusion to existing policies"
+    }
 
 
 def lambda_handler(event, context):
@@ -361,6 +371,9 @@ def lambda_handler(event, context):
     try:
         if action == "add_new_campaign":
             resp = add_new_campaign(body["data"])
+        elif action == "add_new_exclusion":
+            resp = add_new_exclusion(body["data"])
+
         elif action== "test_get_policy":
             resp = get_policy(body["data"]["policy_id"])
         elif action == "test_get_campaign":

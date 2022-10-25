@@ -20,6 +20,7 @@
 import json
 import logging
 import os
+import requests
 
 import boto3
 
@@ -34,9 +35,18 @@ DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 EXCLUSION_TABLE = DYNAMODB_CLIENT.Table(EXCLUSION_TABLE_NAME)
 EXCLUSION_INDEX_TABLE = DYNAMODB_CLIENT.Table(EXCLUSION_INDEX_TABLE_NAME)
 
+APIG_URL = " https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/"
+
 class DuplicateExclusionIndex(Exception):
     """Raised when exclusion service tries to add a exclusion whose index already exists
     Used to prevent duplicates in the index table from blocking the exclusion get_all"""
+
+
+def invoke_lambda(post_request: dict, end_point: str):
+    """Packages a JSON message into a http request and invokes another service
+    Returns a jsonified response object"""
+    return requests.post(APIG_URL + end_point, json = post_request).json()
+
 
 def create_exclusion(data):
     #TODO input verification to check that the fields are correctly set? or relegate to frontend?
@@ -65,6 +75,21 @@ def create_exclusion(data):
                 "message": "An error occurred creating the exclusion.",
                 "error": str(exception)
         }
+
+    try:
+        post_request = {
+            "action": "add_new_exclusion",
+            "data": exclusion_item
+        }
+        invoke_lambda(post_request, "calculation")
+        LOGGER.info("calculation successfully invoked")
+    except Exception as exception:
+        return {
+            "statusCode": 500,
+                "message": "An error occurred invoking the calculation service.",
+                "error": str(exception)
+        }
+
     return response
 
 def get_index():
