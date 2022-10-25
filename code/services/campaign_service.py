@@ -40,7 +40,7 @@ DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 CAMPAIGN_TABLE = DYNAMODB_CLIENT.Table(CAMPAIGN_TABLE_NAME)
 CAMPAIGN_INDEX_TABLE = DYNAMODB_CLIENT.Table(CAMPAIGN_INDEX_TABLE_NAME)
 
-APIG_URL = " https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/"
+APIG_URL = os.environ.get("APIG_URL","https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/")
 
 
 class DuplicateCampaignIndex(Exception):
@@ -55,6 +55,8 @@ def invoke_lambda(post_request: dict, end_point: str):
 
 
 def create_campaign(data):
+    """Takes in a json of campaign data (from APIG) and creates DB object
+    Then, invokes the calculation service to apply the campaign"""
     campaign_item = data
     #TODO input verification to check that the fields are correctly set? or relegate to frontend?
     #set the campaign id
@@ -99,6 +101,7 @@ def create_campaign(data):
                 
     return response
 
+
 def get_index():
     """helper function to get the list of campaigns, returns a list of strings"""
     try:
@@ -113,6 +116,7 @@ def get_index():
         }
     LOGGER.info("index retrieved")
     return campaign_index_list
+
 
 def add_to_index(campaign_id):
     """function that adds a campaign name to the index object table, returns the add response"""
@@ -135,6 +139,7 @@ def add_to_index(campaign_id):
         }
     LOGGER.info("succcessfully added %s to index", campaign_id)
     return response
+
 
 def get_all():
     """get all campaigns from the campaigns table"""
@@ -160,6 +165,7 @@ def get_all():
                 "error": str(exception)
         }
     return response
+
 
 def get_by_id(campaign_id):
     """CRUD: get by campaign_id"""
@@ -203,6 +209,11 @@ def lambda_handler(event, context):
             dynamo_resp = get_by_id(body["data"]["campaign_id"])
         elif action == "get_index":
             dynamo_resp = get_index()
+        else:
+            dynamo_resp = {
+                "statusCode": 500,
+                "body": "no such action"
+            }
     #TODO: format error returns properly so apig can give proper error response reporting (rather than having to check cloud watch)
     except DuplicateCampaignIndex as exception:
         LOGGER.error(exception)

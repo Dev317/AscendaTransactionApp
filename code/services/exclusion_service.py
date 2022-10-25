@@ -1,22 +1,3 @@
-# CREATING A NEW EXCLUSION
-# 1) Admin creates a new exclusion on frontend
-# 2) Create request comes through API gateway
-# 3) API gateway hits this service
-# 4) This service runs CRUD operations to update the exclusions database
-# 5) On success, there is a need to re-create the calculation policies
-# 6) This service sends the dates and specific card-exclusion to calculation_service through API gateway
-# to do identify point of failure for the above, and where the error reporting and handling should fall, and whether there should be saga rollback
-
-# READ
-# invoked by UI (admin), calculation
-
-# UPDATE
-# ? luxury
-
-# DELETE
-# ? luxury
-
-
 import json
 import logging
 import os
@@ -35,7 +16,7 @@ DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 EXCLUSION_TABLE = DYNAMODB_CLIENT.Table(EXCLUSION_TABLE_NAME)
 EXCLUSION_INDEX_TABLE = DYNAMODB_CLIENT.Table(EXCLUSION_INDEX_TABLE_NAME)
 
-APIG_URL = " https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/"
+APIG_URL = os.environ.get("APIG_URL","https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/")
 
 class DuplicateExclusionIndex(Exception):
     """Raised when exclusion service tries to add a exclusion whose index already exists
@@ -49,6 +30,8 @@ def invoke_lambda(post_request: dict, end_point: str):
 
 
 def create_exclusion(data):
+    """Takes in a json of exclusion data (from APIG) and creates DB object
+    Then, invokes the calculation service to apply the exclusion"""
     #TODO input verification to check that the fields are correctly set? or relegate to frontend?
     exclusion_id = data["exclusion_start_date"] + "_" + data["exclusion_name"]
     exclusion_item = data
@@ -92,6 +75,7 @@ def create_exclusion(data):
 
     return response
 
+
 def get_index():
     """helper function to get the list of exclusions, returns a list of strings"""
     try:
@@ -106,6 +90,7 @@ def get_index():
         }
     LOGGER.info("index retrieved")
     return exclusion_index_list
+
 
 def add_to_index(exclusion_id):
     """function that adds a exclusion name to the index object table, returns the add response"""
@@ -130,6 +115,7 @@ def add_to_index(exclusion_id):
         }
     LOGGER.info("succcessfully added %s to index", exclusion_id)
     return response
+
 
 def get_all():
     """get all exclusions from the exclusions table"""
@@ -156,6 +142,7 @@ def get_all():
         }
     return response
 
+
 def get_by_id(data):
     """CRUD: get by exclusion_id"""
     try:
@@ -168,9 +155,9 @@ def get_by_id(data):
         }
     return response
 
+
 def lambda_handler(event, context):
     """main handler"""
-
     try:
         if "body" in event: #if the event comes from APIG
             body = json.loads(event["body"])
@@ -195,6 +182,11 @@ def lambda_handler(event, context):
             dynamo_resp = get_by_id(body["data"])
         elif action == "get_index":
             dynamo_resp = get_index()
+        else:
+            dynamo_resp = {
+                "statusCode": 500,
+                "body": "no such action"
+            }
     #TODO: format error returns properly so apig can give proper error response reporting (rather than having to check cloud watch)
     except DuplicateExclusionIndex as exception:
         LOGGER.error(exception)
