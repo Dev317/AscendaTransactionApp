@@ -79,51 +79,49 @@ terraform apply
 Please make sure to update all the resources appropriately.
 
 <!-- BEGIN_TF_DOCS -->
-
 ## Requirements
 
-| Name                                                   | Version |
-| ------------------------------------------------------ | ------- |
-| <a name="requirement_aws"></a> [aws](#requirement_aws) | ~> 4.0  |
+| Name | Version |
+|------|---------|
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | ~> 4.0 |
 
 ## Providers
 
-| Name                                             | Version |
-| ------------------------------------------------ | ------- |
-| <a name="provider_aws"></a> [aws](#provider_aws) | ~> 4.0  |
+| Name | Version |
+|------|---------|
+| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 4.0 |
 
 ## Modules
 
-| Name                                                                                                                       | Source                   | Version |
-| -------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------- |
-| <a name="module_api_north_virginia"></a> [api_north_virginia](#module_api_north_virginia)                                  | ./modules/api            | n/a     |
-| <a name="module_api_sg"></a> [api_sg](#module_api_sg)                                                                      | ./modules/api            | n/a     |
-| <a name="module_file_processor_north_virginia"></a> [file_processor_north_virginia](#module_file_processor_north_virginia) | ./modules/file-processor | n/a     |
-| <a name="module_file_processor_sg"></a> [file_processor_sg](#module_file_processor_sg)                                     | ./modules/file-processor | n/a     |
-| <a name="module_frontend"></a> [frontend](#module_frontend)                                                                | ./modules/frontend       | n/a     |
-| <a name="module_iam"></a> [iam](#module_iam)                                                                               | ./modules/iam            | n/a     |
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_api_north_virginia"></a> [api\_north\_virginia](#module\_api\_north\_virginia) | ./modules/api | n/a |
+| <a name="module_api_sg"></a> [api\_sg](#module\_api\_sg) | ./modules/api | n/a |
+| <a name="module_file_processor_north_virginia"></a> [file\_processor\_north\_virginia](#module\_file\_processor\_north\_virginia) | ./modules/file-processor | n/a |
+| <a name="module_file_processor_sg"></a> [file\_processor\_sg](#module\_file\_processor\_sg) | ./modules/file-processor | n/a |
+| <a name="module_frontend"></a> [frontend](#module\_frontend) | ./modules/frontend | n/a |
+| <a name="module_iam"></a> [iam](#module\_iam) | ./modules/iam | n/a |
 
 ## Resources
 
-| Name                                                                                                                                                                                     | Type     |
-| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| [aws_dynamodb_table.terraform_locks](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table)                                                         | resource |
-| [aws_s3_bucket.terraform_state](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket)                                                                   | resource |
-| [aws_s3_bucket_public_access_block.public_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block)                             | resource |
+| Name | Type |
+|------|------|
+| [aws_dynamodb_table.terraform_locks](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table) | resource |
+| [aws_s3_bucket.terraform_state](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
+| [aws_s3_bucket_public_access_block.public_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
 | [aws_s3_bucket_server_side_encryption_configuration.default](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
-| [aws_s3_bucket_versioning.enabled](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning)                                                     | resource |
+| [aws_s3_bucket_versioning.enabled](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning) | resource |
 
 ## Inputs
 
-| Name                                                                  | Description         | Type     | Default | Required |
-| --------------------------------------------------------------------- | ------------------- | -------- | ------- | :------: |
-| <a name="input_github_token"></a> [github_token](#input_github_token) | Github access token | `string` | n/a     |   yes    |
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_github_token"></a> [github\_token](#input\_github\_token) | Github access token | `string` | n/a | yes |
 
 ## Outputs
 
-| Name                                                                                         | Description                    |
-| -------------------------------------------------------------------------------------------- | ------------------------------ |
-| <a name="output_dynamodb_table_name"></a> [dynamodb_table_name](#output_dynamodb_table_name) | The name of the DynamoDB table |
-| <a name="output_s3_bucket_arn"></a> [s3_bucket_arn](#output_s3_bucket_arn)                   | The ARN of the S3 bucket       |
-
+| Name | Description |
+|------|-------------|
+| <a name="output_dynamodb_table_name"></a> [dynamodb\_table\_name](#output\_dynamodb\_table\_name) | The name of the DynamoDB table |
+| <a name="output_s3_bucket_arn"></a> [s3\_bucket\_arn](#output\_s3\_bucket\_arn) | The ARN of the S3 bucket |
 <!-- END_TF_DOCS -->
