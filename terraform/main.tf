@@ -40,6 +40,7 @@ module "api_sg" {
   }
   lambda_archive_s3_bucket = "lambda-archive-g1t1-singapore"
   lambda_role              = module.iam.iam_lambda_role_arn
+  apigw_region             = "ap-southeast-1"
 }
 
 module "file_processor_sg" {
@@ -62,7 +63,7 @@ module "api_north_virginia" {
   }
   lambda_archive_s3_bucket = "lambda-archive-g1t1-north-virginia"
   lambda_role              = module.iam.iam_lambda_role_arn
-
+  apigw_region             = "us-east-1"
 }
 
 module "file_processor_north_virginia" {

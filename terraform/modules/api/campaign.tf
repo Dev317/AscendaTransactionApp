@@ -24,7 +24,7 @@ resource "aws_lambda_function" "campaign_lambda" {
 
   environment {
     variables = {
-      APIG_URL = "https://${aws_api_gateway_rest_api.orchestrator_apigw.id}.execute-api.ap-southeast-1.amazonaws.com/prod"
+      APIG_URL = "https://${aws_api_gateway_rest_api.orchestrator_apigw.id}.execute-api.${var.apigw_region}.amazonaws.com/prod"
     }
   }
 }

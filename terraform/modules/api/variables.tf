@@ -10,6 +10,12 @@ variable "us_region" {
   default     = "us-east-1"
 }
 
+variable "apigw_region" {
+  description = "The name of region that the api gateway is hosted"
+  type        = string
+  default     = ""
+}
+
 variable "lambda_archive_s3_bucket" {
   description = "S3 Bucket Name for Lambda ZIP Files"
   type        = string
@@ -49,8 +55,8 @@ variable "campaign_service_zip" {
   default     = "../build/campaign_service.zip"
 }
 
-variable "calculation_service_zip" {
-  description = "Location of Calculation Service Code"
-  type        = string
-  default     = "../build/calculation_service.zip"
-}
+# variable "calculation_service_zip" {
+#   description = "Location of Calculation Service Code"
+#   type        = string
+#   default     = "../build/calculation_service.zip"
+# }

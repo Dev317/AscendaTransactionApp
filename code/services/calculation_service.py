@@ -1,8 +1,7 @@
 import json
 import logging
 import datetime
-from datetime import date, timedelta
-import time
+from datetime import timedelta
 import os
 import requests
 import boto3

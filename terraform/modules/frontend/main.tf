@@ -45,10 +45,10 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
-# resource "aws_amplify_branch" "fe" {
-#   app_id      = aws_amplify_app.Waftech.id
-#   branch_name = "fe"
-# }
+resource "aws_amplify_branch" "fe" {
+  app_id      = aws_amplify_app.Waftech.id
+  branch_name = "fe33"
+}
 
 # resource "aws_amplify_domain_association" "g1t1" {
 #   app_id      = aws_amplify_app.Waftech.id
@@ -69,12 +69,11 @@ data "aws_iam_policy_document" "assume_role" {
 resource "aws_iam_role" "amplify-github" {
   name                = "AmplifyGithub"
   assume_role_policy  = join("", data.aws_iam_policy_document.assume_role.*.json)
-  managed_policy_arns = ["arn:aws:iam::aws:policy/AWSCodeCommitReadOnly"]
 }
 
 resource "aws_amplify_app" "Waftech" {
   name                        = "Waftech"
-  description                 = "frontend for Waftech"
+  description                 = "Frontend for Waftech"
   repository                  = "https://github.com/cs301-itsa/project-2022-23t1-g1-t1-waffles"
   access_token                = var.github_token
   iam_service_role_arn        = aws_iam_role.amplify-github.arn
@@ -104,9 +103,5 @@ resource "aws_amplify_app" "Waftech" {
     source = "/<*>"
     status = "404"
     target = "/index.html"
-  }
-
-  environment_variables = {
-    ENV = "test"
   }
 }

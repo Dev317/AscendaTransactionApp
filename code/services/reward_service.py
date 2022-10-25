@@ -13,12 +13,8 @@
 # DELETE
 # ? luxury
 
-import json
 import logging
-import datetime
-from datetime import date, timedelta
-import time
-from database import CAMPAIGN_SERVICE_TABLE, POLICY_DATABASE, EXCLUSION_SERVICE_TABLE
+from database import POLICY_DATABASE
 
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
