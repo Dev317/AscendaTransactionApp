@@ -66,3 +66,9 @@ variable "exclusion_service_zip" {
   type        = string
   default     = "../build/exclusion_service.zip"
 }
+
+variable "health_check_zip" {
+  description = "Location of Health Check Code"
+  type        = string
+  default     = "../build/health_check.zip"
+}
