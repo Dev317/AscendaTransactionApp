@@ -20,10 +20,20 @@ output "base_url_campaign_us" {
 
 output "base_url_calculation_sg" {
   description = "Base URL for API Gateway for Calculation in SG."
-  value = module.api_sg.calculation_api_deployment
+  value = module.api_sg.base_url_calculation
 }
 
 output "base_url_calculation_us" {
   description = "Base URL for API Gateway for Calculation in US."
-  value = module.api_north_virginia.calculation_api_deployment
+  value = module.api_north_virginia.base_url_calculation
+}
+
+output "base_url_exclusion_sg" {
+  description = "Base URL for API Gateway for Exclusion in SG."
+  value = module.api_sg.base_url_exclusion
+}
+
+output "base_url_exclusion_us" {
+  description = "Base URL for API Gateway for Exclusion in US."
+  value = module.api_north_virginia.base_url_exclusion
 }

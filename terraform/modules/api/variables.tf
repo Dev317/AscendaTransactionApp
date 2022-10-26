@@ -60,3 +60,9 @@ variable "calculation_service_zip" {
   type        = string
   default     = "../build/calculation_service.zip"
 }
+
+variable "exclusion_service_zip" {
+  description = "Location of Exclusion Service Code"
+  type        = string
+  default     = "../build/exclusion_service.zip"
+}
