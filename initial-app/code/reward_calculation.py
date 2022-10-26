@@ -6,124 +6,129 @@ import json
 
 def get_policy_list_by_date_and_card_type(transaction_date: str, cardType: str):
     """function to fetch the policies for that current date"""
-    #db logic to be implemented
+    # db logic to be implemented
 
     policy_list = [
         {
-            'amount_greater_than': '100',
-            'merchant_name_include': ['Grab'],
-            'percentage_of_amount': '4',
-            'calculation_reason': 'Grab Promo - 4 miles per dollar with Grab, min spend 100 SGD'
+            "amount_greater_than": "100",
+            "merchant_name_include": ["Grab"],
+            "percentage_of_amount": "4",
+            "calculation_reason": "Grab Promo - 4 miles per dollar with Grab, min spend 100 SGD",
         },
         {
-            'amount_greater_than': '2000',
-            'percentage_of_amount': '0.03',
-            'calculation_reason': '3 percent cashback for all expenditure above 2000 SGD'
+            "amount_greater_than": "2000",
+            "percentage_of_amount": "0.03",
+            "calculation_reason": "3 percent cashback for all expenditure above 2000 SGD",
         },
         {
-            'amount_greater_than': '500',
-            'percentage_of_amount': '0.01',
-            'calculation_reason': '1 percent cashback for all expenditure above 500 SGD'
+            "amount_greater_than": "500",
+            "percentage_of_amount": "0.01",
+            "calculation_reason": "1 percent cashback for all expenditure above 500 SGD",
         },
         {
-            'percentage_of_amount': '0.005',
-            'calculation_reason': '0.5 percent cashback for all expenditure'
+            "percentage_of_amount": "0.005",
+            "calculation_reason": "0.5 percent cashback for all expenditure",
         },
     ]
     return policy_list
 
 
 def get_exclusions_by_date_and_card_type(transaction_date: str, cardType: str):
-    '''function to get all exclusions by date'''
+    """function to get all exclusions by date"""
     exclusions_dict = {
-        'exclusions_dict_mcc':
-            {
-                '6051': 'Quasi Cash Merchants - Prepaid top-ups',
-                '9399': 'Government Services-Not Elsewhere Classified | Excluded',
-                '6540': 'POI (Point of Interaction) Funding Transactions (Excluding MoneySend) | Taxis & public transport'
-            },
-        'exclusions_dict_merchant':
-            {
-                'Blacklisted Merchant': 'Merchant has been blacklisted'
-            }
+        "exclusions_dict_mcc": {
+            "6051": "Quasi Cash Merchants - Prepaid top-ups",
+            "9399": "Government Services-Not Elsewhere Classified | Excluded",
+            "6540": "POI (Point of Interaction) Funding Transactions (Excluding MoneySend) | Taxis & public transport",
+        },
+        "exclusions_dict_merchant": {
+            "Blacklisted Merchant": "Merchant has been blacklisted"
+        },
     }
 
     return exclusions_dict
 
 
 def get_reward(transaction: dict):
-    '''main function to govern the calculation of an individual transaction, generating a record'''
+    """main function to govern the calculation of an individual transaction, generating a record"""
 
     reward = {
-        'reward_id': 'id',
-        'card_id': transaction['cardId'],
-        'card_type': transaction['cardType'],
-        'date': transaction['date'],
-        'merchant_name': transaction['merchant'],
-        'is_exclusion': False,
-        'currency': transaction['currency'],
-        'original_amount': transaction['sgdAmount']
+        "reward_id": "id",
+        "card_id": transaction["cardId"],
+        "card_type": transaction["cardType"],
+        "date": transaction["date"],
+        "merchant_name": transaction["merchant"],
+        "is_exclusion": False,
+        "currency": transaction["currency"],
+        "original_amount": transaction["sgdAmount"],
     }
 
-    #check exclusions
-    exclusions_dict = get_exclusions_by_date_and_card_type(transaction['date'], transaction['cardType'])
+    # check exclusions
+    exclusions_dict = get_exclusions_by_date_and_card_type(
+        transaction["date"], transaction["cardType"]
+    )
 
-    if transaction['mcc'] in exclusions_dict['exclusions_dict_mcc']:
-        reward['is_exclusion'] = True
-        reward['calculation_reason'] = exclusions_dict['exclusions_dict_mcc'][transaction['mcc']]
-        reward['reward_value'] = 0
+    if transaction["mcc"] in exclusions_dict["exclusions_dict_mcc"]:
+        reward["is_exclusion"] = True
+        reward["calculation_reason"] = exclusions_dict["exclusions_dict_mcc"][
+            transaction["mcc"]
+        ]
+        reward["reward_value"] = 0
 
-    if transaction['merchant'] in exclusions_dict['exclusions_dict_merchant']:
-        reward['is_exclusion'] = True
-        reward['calculation_reason'] = exclusions_dict['exclusions_dict_merchant'][transaction['merchant']]
-        reward['reward_value'] = 0
+    if transaction["merchant"] in exclusions_dict["exclusions_dict_merchant"]:
+        reward["is_exclusion"] = True
+        reward["calculation_reason"] = exclusions_dict["exclusions_dict_merchant"][
+            transaction["merchant"]
+        ]
+        reward["reward_value"] = 0
 
-    if not reward['is_exclusion']:
-        #get policy and calculate
-        policy_list = get_policy_list_by_date_and_card_type(transaction['date'], transaction['cardType'])
+    if not reward["is_exclusion"]:
+        # get policy and calculate
+        policy_list = get_policy_list_by_date_and_card_type(
+            transaction["date"], transaction["cardType"]
+        )
 
         for policy in policy_list:
             reward_float = apply_policy(transaction, policy)
             if reward_float > 0:
-                reward['reward_value'] = reward_float
-                reward['calculation_reason'] = policy['calculation_reason']
+                reward["reward_value"] = reward_float
+                reward["calculation_reason"] = policy["calculation_reason"]
                 break
 
-    print(json.dumps(reward, indent = 4))
-
+    print(json.dumps(reward, indent=4))
 
 
 def apply_policy(transaction: dict, policy: dict):
-    '''Function to run the logic.
+    """Function to run the logic.
     Must give a transaction dict and a policy dict,
-    returns a reward amount in float'''
+    returns a reward amount in float"""
 
     try:
 
-        if 'amount_greater_than' in policy:
-            if float(transaction['sgdAmount']) <= float(policy['amount_greater_than']):
+        if "amount_greater_than" in policy:
+            if float(transaction["sgdAmount"]) <= float(policy["amount_greater_than"]):
                 return -1
-        if 'mcc_include' in policy:
-            if transaction['mcc'] not in policy['mcc_include']:
+        if "mcc_include" in policy:
+            if transaction["mcc"] not in policy["mcc_include"]:
                 return -1
-        if 'mcc_exclude' in policy:
-            if transaction['mcc'] in policy['mcc_exclude']:
+        if "mcc_exclude" in policy:
+            if transaction["mcc"] in policy["mcc_exclude"]:
                 return -1
-        if 'merchant_name_include' in policy:
-            if transaction['merchant'] not in policy['merchant_name_include']:
+        if "merchant_name_include" in policy:
+            if transaction["merchant"] not in policy["merchant_name_include"]:
                 return -1
-        if 'merchant_name_exclude' in policy:
-            if transaction['merchant'] in policy['merchant_name_exclude']:
+        if "merchant_name_exclude" in policy:
+            if transaction["merchant"] in policy["merchant_name_exclude"]:
                 return -1
 
-        if 'percentage_of_amount' in policy:
-            return float(policy['percentage_of_amount']) * float(transaction['sgdAmount'])
-        #else other calculation types to be implemented
+        if "percentage_of_amount" in policy:
+            return float(policy["percentage_of_amount"]) * float(
+                transaction["sgdAmount"]
+            )
+        # else other calculation types to be implemented
 
     except Exception as exception:
         raise exception
-
-
 
 
 # def process_policy(amount, mcc, transaction_date, card_type, card_id, merchant_name):
@@ -203,69 +208,68 @@ def apply_policy(transaction: dict, policy: dict):
 #     return reward
 
 
-#mockup transaction
+# mockup transaction
 transaction1 = {
-        "id": '7ce56f44-659a-453f-8bc4-5a102faada42',
-        "cardId": "0fd148a9-a350-4567-9e6d-d768ab9c1932",
-        "merchant": "Collier",
-        "mcc": "4642",
-        "currency": "SGD",
-        "amount": "285.96",
-        "sgdAmount": "2001",
-        "transactionId": "07110e8bf85f1a1229eaa5dcbdea68c51d537218143d0021945cfae8861e3efc",
-        "date": "27/8/2021",
-        "cardPan": "6771-8964-5359-9669",
-        "cardType": "scis_freedom",
-    }
+    "id": "7ce56f44-659a-453f-8bc4-5a102faada42",
+    "cardId": "0fd148a9-a350-4567-9e6d-d768ab9c1932",
+    "merchant": "Collier",
+    "mcc": "4642",
+    "currency": "SGD",
+    "amount": "285.96",
+    "sgdAmount": "2001",
+    "transactionId": "07110e8bf85f1a1229eaa5dcbdea68c51d537218143d0021945cfae8861e3efc",
+    "date": "27/8/2021",
+    "cardPan": "6771-8964-5359-9669",
+    "cardType": "scis_freedom",
+}
 
 get_reward(transaction1)
 
 
 transaction2 = {
-        "id": '7ce56f44-659a-453f-8bc4-5a102faada42',
-        "cardId": "0fd148a9-a350-4567-9e6d-d768ab9c1932",
-        "merchant": "Grab",
-        "mcc": "4642",
-        "currency": "SGD",
-        "amount": "285.96",
-        "sgdAmount": "132.81",
-        "transactionId": "07110e8bf85f1a1229eaa5dcbdea68c51d537218143d0021945cfae8861e3efc",
-        "date": "27/8/2021",
-        "cardPan": "6771-8964-5359-9669",
-        "cardType": "scis_freedom",
-    }
+    "id": "7ce56f44-659a-453f-8bc4-5a102faada42",
+    "cardId": "0fd148a9-a350-4567-9e6d-d768ab9c1932",
+    "merchant": "Grab",
+    "mcc": "4642",
+    "currency": "SGD",
+    "amount": "285.96",
+    "sgdAmount": "132.81",
+    "transactionId": "07110e8bf85f1a1229eaa5dcbdea68c51d537218143d0021945cfae8861e3efc",
+    "date": "27/8/2021",
+    "cardPan": "6771-8964-5359-9669",
+    "cardType": "scis_freedom",
+}
 
 get_reward(transaction2)
 
 transaction3 = {
-        "id": '7ce56f44-659a-453f-8bc4-5a102faada42',
-        "cardId": "0fd148a9-a350-4567-9e6d-d768ab9c1932",
-        "merchant": "AXS",
-        "mcc": "9399",
-        "currency": "SGD",
-        "amount": "285.96",
-        "sgdAmount": "100.53",
-        "transactionId": "07110e8bf85f1a1229eaa5dcbdea68c51d537218143d0021945cfae8861e3efc",
-        "date": "27/8/2021",
-        "cardPan": "6771-8964-5359-9669",
-        "cardType": "scis_freedom",
-    }
+    "id": "7ce56f44-659a-453f-8bc4-5a102faada42",
+    "cardId": "0fd148a9-a350-4567-9e6d-d768ab9c1932",
+    "merchant": "AXS",
+    "mcc": "9399",
+    "currency": "SGD",
+    "amount": "285.96",
+    "sgdAmount": "100.53",
+    "transactionId": "07110e8bf85f1a1229eaa5dcbdea68c51d537218143d0021945cfae8861e3efc",
+    "date": "27/8/2021",
+    "cardPan": "6771-8964-5359-9669",
+    "cardType": "scis_freedom",
+}
 
 get_reward(transaction3)
 
 transaction4 = {
-        "id": '7ce56f44-659a-453f-8bc4-5a102faada42',
-        "cardId": "0fd148a9-a350-4567-9e6d-d768ab9c1932",
-        "merchant": "Blacklisted Merchant",
-        "mcc": "9399",
-        "currency": "SGD",
-        "amount": "285.96",
-        "sgdAmount": "50.67",
-        "transactionId": "07110e8bf85f1a1229eaa5dcbdea68c51d537218143d0021945cfae8861e3efc",
-        "date": "27/8/2021",
-        "cardPan": "6771-8964-5359-9669",
-        "cardType": "scis_freedom",
-    }
+    "id": "7ce56f44-659a-453f-8bc4-5a102faada42",
+    "cardId": "0fd148a9-a350-4567-9e6d-d768ab9c1932",
+    "merchant": "Blacklisted Merchant",
+    "mcc": "9399",
+    "currency": "SGD",
+    "amount": "285.96",
+    "sgdAmount": "50.67",
+    "transactionId": "07110e8bf85f1a1229eaa5dcbdea68c51d537218143d0021945cfae8861e3efc",
+    "date": "27/8/2021",
+    "cardPan": "6771-8964-5359-9669",
+    "cardType": "scis_freedom",
+}
 
 get_reward(transaction4)
-
