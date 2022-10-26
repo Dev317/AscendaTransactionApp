@@ -55,8 +55,8 @@ variable "campaign_service_zip" {
   default     = "../build/campaign_service.zip"
 }
 
-# variable "calculation_service_zip" {
-#   description = "Location of Calculation Service Code"
-#   type        = string
-#   default     = "../build/calculation_service.zip"
-# }
+variable "calculation_service_zip" {
+  description = "Location of Calculation Service Code"
+  type        = string
+  default     = "../build/calculation_service.zip"
+}
