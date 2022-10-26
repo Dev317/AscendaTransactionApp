@@ -25,10 +25,6 @@ module "iam" {
   source = "./modules/iam"
 }
 
-module "frontend" {
-  source       = "./modules/frontend"
-  github_token = var.github_token
-}
 
 # -----------------------------------
 # Singapore Configuration
@@ -53,6 +49,16 @@ module "file_processor_sg" {
   stepfunction_trigger_role = module.iam.iam_stepfunction_role_arn
 }
 
+module "frontend_sg" {
+  source = "./modules/frontend"
+  providers = {
+    aws = aws.singapore
+  }
+  github_token = var.github_token
+  waftech_region = "ap-southeast-1"
+  waftech_branch = "fe-ap-se-1"
+}
+
 # -----------------------------------
 # North Virginia Configuration
 # -----------------------------------
@@ -75,6 +81,17 @@ module "file_processor_north_virginia" {
   lambda_role               = module.iam.iam_lambda_role_arn
   stepfunction_trigger_role = module.iam.iam_stepfunction_role_arn
 }
+
+module "frontend_north_virginia" {
+  source = "./modules/frontend"
+  providers = {
+    aws = aws.northvirginia
+  }
+  github_token = var.github_token
+  waftech_region = "us-east-1"
+  waftech_branch = "fe-us-east-1"
+}
+
 
 # -----------------------------------
 # Refactoring Blocks
