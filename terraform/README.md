@@ -126,6 +126,8 @@ Please make sure to update all the resources appropriately.
 | <a name="output_base_url_calculation_us"></a> [base\_url\_calculation\_us](#output\_base\_url\_calculation\_us) | Base URL for API Gateway for Calculation in US. |
 | <a name="output_base_url_campaign_sg"></a> [base\_url\_campaign\_sg](#output\_base\_url\_campaign\_sg) | Base URL for API Gateway for Campaign in SG. |
 | <a name="output_base_url_campaign_us"></a> [base\_url\_campaign\_us](#output\_base\_url\_campaign\_us) | Base URL for API Gateway for Campaign in US. |
+| <a name="output_base_url_exclusion_sg"></a> [base\_url\_exclusion\_sg](#output\_base\_url\_exclusion\_sg) | Base URL for API Gateway for Exclusion in SG. |
+| <a name="output_base_url_exclusion_us"></a> [base\_url\_exclusion\_us](#output\_base\_url\_exclusion\_us) | Base URL for API Gateway for Exclusion in US. |
 | <a name="output_dynamodb_table_name"></a> [dynamodb\_table\_name](#output\_dynamodb\_table\_name) | The name of the DynamoDB table |
 | <a name="output_s3_bucket_arn"></a> [s3\_bucket\_arn](#output\_s3\_bucket\_arn) | The ARN of the S3 bucket |
 <!-- END_TF_DOCS -->
