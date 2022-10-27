@@ -84,12 +84,18 @@ resource "aws_amplify_app" "Waftech" {
   enable_branch_auto_build    = true
 
   build_spec = <<-EOT
-    version: 0.1
+    version: 1
+    backend:
+      phases:
+        build:
+          commands:
+            - '# Execute Amplify CLI with the helper script'
+            - amplifyPush --simple
     frontend:
       phases:
         preBuild:
           commands:
-            - npm install
+            - npm ci
         build:
           commands:
             - npm run build
@@ -98,8 +104,6 @@ resource "aws_amplify_app" "Waftech" {
         files:
           - '**/*'
       cache:
-        paths:
-          - node_modules/**/*
   EOT
 
   custom_rule {
