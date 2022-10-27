@@ -47,7 +47,7 @@ data "aws_iam_policy_document" "assume_role" {
 resource "aws_amplify_backend_environment" "dev" {
   app_id               = aws_amplify_app.Waftech.id
   environment_name     = "dev"
-  deployment_artifacts = "Waftech-deployment-${var.waftech_region}"
+  deployment_artifacts = "waftech-deployment-${var.waftech_region}"
   stack_name           = "amplify-Waftech-${var.waftech_region}"
 }
 
@@ -78,7 +78,7 @@ resource "aws_iam_role" "amplify-github" {
 }
 
 resource "aws_amplify_app" "Waftech" {
-  name                        = "Waftech ${var.waftech_region}"
+  name                        = "waftech-${var.waftech_region}"
   description                 = "Frontend for Waftech"
   repository                  = "https://github.com/cs301-itsa/project-2022-23t1-g1-t1-waffles"
   access_token                = var.github_token
