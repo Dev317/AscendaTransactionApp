@@ -8,17 +8,17 @@ terraform {
 }
 
 resource "aws_cognito_user_pool_domain" "itsag1t1" {
-  domain       = "g1t1userdomain${var.waftech_region}"
+  domain       = "g1t1userdomain-${var.waftech_region}"
   user_pool_id = aws_cognito_user_pool.userpool.id
 }
 
 resource "aws_cognito_user_pool_client" "client" {
-  name = "client${var.waftech_region}"
+  name = "client-${var.waftech_region}"
   user_pool_id = aws_cognito_user_pool.userpool.id
 }
 
 resource "aws_cognito_user_pool" "userpool" {
-  name = "userpool${var.waftech_region}"
+  name = "userpool-${var.waftech_region}"
 
   account_recovery_setting {
     recovery_mechanism {
@@ -47,6 +47,8 @@ data "aws_iam_policy_document" "assume_role" {
 resource "aws_amplify_backend_environment" "dev" {
   app_id               = aws_amplify_app.Waftech.id
   environment_name     = "dev"
+  deployment_artifacts = "Waftech-deployment-${var.waftech_region}"
+  stack_name           = "amplify-Waftech-${var.waftech_region}"
 }
 
 resource "aws_amplify_branch" "fe" {

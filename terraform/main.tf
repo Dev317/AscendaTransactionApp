@@ -56,7 +56,7 @@ module "frontend_sg" {
   }
   github_token = var.github_token
   waftech_region = "ap-southeast-1"
-  waftech_branch = "fe-ap-se-1"
+  waftech_branch = "fe-ap-southeast-1-test"
 }
 
 # -----------------------------------
@@ -89,7 +89,7 @@ module "frontend_north_virginia" {
   }
   github_token = var.github_token
   waftech_region = "us-east-1"
-  waftech_branch = "fe-us-east-1"
+  waftech_branch = "fe-us-east-1-test"
 }
 
 
