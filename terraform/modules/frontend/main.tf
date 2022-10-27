@@ -205,9 +205,11 @@ resource "aws_amplify_app" "Waftech" {
     status = "404"
     target = "/index.html"
   }
+
   environment_variables = {
     AMPLIFY_USERPOOL_ID = aws_cognito_user_pool.userpool.id
     AMPLIFY_WEBCLIENT_ID = aws_cognito_user_pool_client.client.id
     AMPLIFY_NATIVECLIENT_ID = aws_cognito_user_pool_client.clientWeb.id
+    AMPLIFY_IDENTITYPOOL_ID = aws_cognito_identity_pool.identity_pool.id
   }
 }
