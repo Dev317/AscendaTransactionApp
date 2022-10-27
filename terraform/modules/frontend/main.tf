@@ -17,6 +17,11 @@ resource "aws_cognito_user_pool_client" "client" {
   user_pool_id = aws_cognito_user_pool.userpool.id
 }
 
+resource "aws_cognito_user_pool_client" "clientWeb" {
+  name = "clientWeb-${var.waftech_region}"
+  user_pool_id = aws_cognito_user_pool.userpool.id
+}
+
 resource "aws_cognito_user_pool" "userpool" {
   name = "userpool-${var.waftech_region}"
 
@@ -33,19 +38,19 @@ resource "aws_cognito_user_pool" "userpool" {
   }
 }
 
-resource "aws_cognito_identity_pool" "indentitypool" {
-  identity_pool_name               = "indentitypool-${var.waftech_region}"
+resource "aws_cognito_identity_pool" "identity_pool" {
+  identity_pool_name               = "identity_pool-${var.waftech_region}"
   allow_unauthenticated_identities = false
 
   cognito_identity_providers {
     client_id               = aws_cognito_user_pool_client.client.id
-    provider_name = aws_cognito_user_pool.userpool.endpoint
+    provider_name           = aws_cognito_user_pool.userpool.endpoint
     server_side_token_check = true
   }
 }
 
 resource "aws_cognito_identity_pool_roles_attachment" "main" {
-  identity_pool_id = aws_cognito_identity_pool.indentitypool.id
+  identity_pool_id = aws_cognito_identity_pool.identity_pool.id
 
   roles = {
     authenticated   = aws_iam_role.auth_iam_role.arn
@@ -120,6 +125,15 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
+data "aws_iam_policy" "amplify-access-policy" {
+  name = "AdministratorAccess-Amplify"
+}
+
+resource "aws_iam_role_policy_attachment" "attach-amplify-access-policy" {
+  role       = aws_iam_role.amplify-github.name
+  policy_arn = data.aws_iam_policy.amplify-access-policy.arn
+}
+
 resource "aws_amplify_backend_environment" "dev" {
   app_id               = aws_amplify_app.Waftech.id
   environment_name     = "dev"
@@ -149,7 +163,7 @@ resource "aws_amplify_branch" "fe" {
 # }
 
 resource "aws_iam_role" "amplify-github" {
-  name                = "AmplifyGithub${var.waftech_region}"
+  name                = "AmplifyGithub-${var.waftech_region}"
   assume_role_policy  = join("", data.aws_iam_policy_document.assume_role.*.json)
 }
 
@@ -190,5 +204,10 @@ resource "aws_amplify_app" "Waftech" {
     source = "/<*>"
     status = "404"
     target = "/index.html"
+  }
+  environment_variables = {
+    AMPLIFY_USERPOOL_ID = aws_cognito_user_pool.userpool.id
+    AMPLIFY_WEBCLIENT_ID = aws_cognito_user_pool_client.client.id
+    AMPLIFY_NATIVECLIENT_ID = aws_cognito_user_pool_client.clientWeb.id
   }
 }
