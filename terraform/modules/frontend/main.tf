@@ -173,9 +173,11 @@ resource "aws_amplify_app" "Waftech" {
       phases:
         preBuild:
           commands:
+            - nvm use $VERSION_NODE_14
             - npm ci
         build:
           commands:
+            - nvm use $VERSION_NODE_14
             - npm run build
       artifacts:
         baseDirectory: build
