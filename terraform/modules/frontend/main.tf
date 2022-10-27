@@ -54,39 +54,39 @@ resource "aws_cognito_identity_pool_roles_attachment" "main" {
 }
 
 resource "aws_iam_role" "auth_iam_role" {
-      name = "auth_iam_role"
-      assume_role_policy = <<EOF
- {
-      "Version": "2012-10-17",
-      "Statement": [
-           {
-                "Action": "sts:AssumeRole",
-                "Principal": {
-                     "Federated": "cognito-identity.amazonaws.com"
-                },
-                "Effect": "Allow",
-                "Sid": ""
-           }
-      ]
- }
- EOF
- }
+  name = "auth_iam_role"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Federated": "cognito-identity.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
 
 resource "aws_iam_role" "unauth_iam_role" {
   name = "unauth_iam_role"
   assume_role_policy = <<EOF
 {
-    "Version": "2012-10-17",
-    "Statement": [
-          {
-              "Action": "sts:AssumeRole",
-              "Principal": {
-                    "Federated": "cognito-identity.amazonaws.com"
-              },
-              "Effect": "Allow",
-              "Sid": ""
-          }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Federated": "cognito-identity.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
 }
 EOF
 }
@@ -96,15 +96,15 @@ resource "aws_iam_role_policy" "web_iam_unauth_role_policy" {
   role = aws_iam_role.unauth_iam_role.id
   policy = <<EOF
 {
-    "Version": "2012-10-17",
-    "Statement": [
-          {
-              "Sid": "",
-              "Action": "*",
-              "Effect": "Deny",
-              "Resource": "*"
-          }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Action": "*",
+      "Effect": "Deny",
+      "Resource": "*"
+    }
+  ]
 }
 EOF
 }
