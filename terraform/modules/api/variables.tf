@@ -72,3 +72,18 @@ variable "health_check_zip" {
   type        = string
   default     = "../build/health_check.zip"
 }
+
+variable "certificate_arn" {
+  description = "ACM Certificate ARN"
+  type        = string
+}
+
+variable "route53_hosted_zone_id" {
+  description = "Route 53 Hosted Zone ID"
+  type        = string
+}
+
+variable "route53_health_check" {
+  description = "Route 53 API Gateway Health Check"
+  type        = string
+}
