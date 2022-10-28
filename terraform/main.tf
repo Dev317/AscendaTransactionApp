@@ -56,7 +56,7 @@ module "frontend_sg" {
   }
   github_token = var.github_token
   waftech_region = "ap-southeast-1"
-  waftech_branch = "fe-ap-southeast-1"
+  waftech_branch = "fe-ap-se-1"
 }
 
 # -----------------------------------

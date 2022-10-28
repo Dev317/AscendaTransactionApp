@@ -59,7 +59,7 @@ resource "aws_cognito_identity_pool_roles_attachment" "main" {
 }
 
 resource "aws_iam_role" "auth_iam_role" {
-  name = "auth_iam_role"
+  name = "auth_iam_role-${var.waftech_region}"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -78,7 +78,7 @@ EOF
 }
 
 resource "aws_iam_role" "unauth_iam_role" {
-  name = "unauth_iam_role"
+  name = "unauth_iam_role-${var.waftech_region}"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
