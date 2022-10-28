@@ -18,6 +18,11 @@ variable "apigw_zone_id_primary" {
   type        = string
 }
 
+variable "apigw_endpoint_primary" {
+  description = "Primary APIGW Invoke URL"
+  type        = string
+}
+
 variable "apigw_domain_name_secondary" {
   description = "Secondary APIGW Domain Cloudfront Distribution Domain Name"
   type        = string
@@ -25,5 +30,10 @@ variable "apigw_domain_name_secondary" {
 
 variable "apigw_zone_id_secondary" {
   description = "Secondary APIGW Domain Cloudfront Distribution Zone ID"
+  type        = string
+}
+
+variable "apigw_endpoint_secondary" {
+  description = "Secondary APIGW Invoke URL"
   type        = string
 }

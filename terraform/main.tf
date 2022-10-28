@@ -31,8 +31,10 @@ module "route53" {
   route53_hosted_zone_id      = var.route53_hosted_zone_id
   apigw_domain_name_primary   = module.api_sg.apigw_domain_name
   apigw_zone_id_primary       = module.api_sg.apigw_zone_id
+  apigw_endpoint_primary      = module.api_sg.base_url_health_check
   apigw_domain_name_secondary = module.api_north_virginia.apigw_domain_name
   apigw_zone_id_secondary     = module.api_north_virginia.apigw_zone_id
+  apigw_endpoint_secondary    = module.api_north_virginia.base_url_health_check
 }
 
 # -----------------------------------
@@ -58,7 +60,6 @@ module "api_sg" {
   apigw_region             = "ap-southeast-1"
   certificate_arn          = module.acm_sg.certificate_arn
   route53_hosted_zone_id   = var.route53_hosted_zone_id
-  route53_health_check     = module.route53.route53_apigw_health_check
 }
 
 module "file_processor_sg" {
@@ -76,7 +77,7 @@ module "frontend_sg" {
   providers = {
     aws = aws.singapore
   }
-  github_token = var.github_token
+  github_token   = var.github_token
   waftech_region = "ap-southeast-1"
   waftech_branch = "fe-ap-se-1"
 }
@@ -102,7 +103,6 @@ module "api_north_virginia" {
   apigw_region             = "us-east-1"
   certificate_arn          = module.acm_north_virginia.certificate_arn
   route53_hosted_zone_id   = var.route53_hosted_zone_id
-  route53_health_check     = module.route53.route53_apigw_health_check
 }
 
 module "file_processor_north_virginia" {
@@ -120,7 +120,7 @@ module "frontend_north_virginia" {
   providers = {
     aws = aws.northvirginia
   }
-  github_token = var.github_token
+  github_token   = var.github_token
   waftech_region = "us-east-1"
   waftech_branch = "fe-us-east-1"
 }

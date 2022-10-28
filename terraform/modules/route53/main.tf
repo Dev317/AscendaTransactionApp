@@ -13,15 +13,23 @@ terraform {
 #   comment = "Primary hosted zone"
 # }
 
-# Create Route 53 Health Check
-resource "aws_route53_health_check" "apigw_health_check" {
+# ------------------------------------------------------
+# Primary Resources - ap-southeast-1
+# ------------------------------------------------------
+
+# Primary health check
+resource "aws_route53_health_check" "apigw_health_check_primary" {
   failure_threshold = "5"
-  fqdn              = "api.itsag1t1.com"
+  fqdn              = replace(var.apigw_endpoint_primary, "/(https://)|(/prod)/", "")
   port              = 443
   request_interval  = "30"
-  resource_path     = "/health"
+  resource_path     = "/prod/health"
   search_string     = "ok"
   type              = "HTTPS_STR_MATCH"
+
+  tags = {
+    Name = "apigw-primary-health-check"
+  }
 }
 
 # Primary APIGW Domain Record
@@ -41,7 +49,26 @@ resource "aws_route53_record" "api_primary" {
     evaluate_target_health = true
   }
 
-  health_check_id = aws_route53_health_check.apigw_health_check.id
+  health_check_id = aws_route53_health_check.apigw_health_check_primary.id
+}
+
+
+# ------------------------------------------------------
+# Secondary Resources - us-east-1
+# ------------------------------------------------------
+# Secondary health check
+resource "aws_route53_health_check" "apigw_health_check_secondary" {
+  failure_threshold = "5"
+  fqdn              = replace(var.apigw_endpoint_secondary, "/(https://)|(/prod)/", "")
+  port              = 443
+  request_interval  = "30"
+  resource_path     = "/prod/health"
+  search_string     = "ok"
+  type              = "HTTPS_STR_MATCH"
+
+  tags = {
+    Name = "apigw-secondary-health-check"
+  }
 }
 
 # Secondary APIGW Domain Record
@@ -61,5 +88,5 @@ resource "aws_route53_record" "api_secondary" {
     evaluate_target_health = true
   }
 
-  health_check_id = aws_route53_health_check.apigw_health_check.id
+  health_check_id = aws_route53_health_check.apigw_health_check_secondary.id
 }

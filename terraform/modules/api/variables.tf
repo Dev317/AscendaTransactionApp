@@ -83,7 +83,3 @@ variable "route53_hosted_zone_id" {
   type        = string
 }
 
-variable "route53_health_check" {
-  description = "Route 53 API Gateway Health Check"
-  type        = string
-}

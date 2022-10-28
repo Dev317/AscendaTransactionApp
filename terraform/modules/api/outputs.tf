@@ -13,6 +13,11 @@ output "base_url_exclusion" {
   value       = aws_api_gateway_deployment.exclusion_api_deployment.invoke_url
 }
 
+output "base_url_health_check" {
+  description = "Base URL for API Gateway for Health Check"
+  value       = aws_api_gateway_deployment.health_api_deployment.invoke_url
+}
+
 output "apigw_domain_name" {
   description = "APIGW Domain Cloudfront Distribution Domain Name"
   value       = aws_api_gateway_domain_name.apigw_domain.regional_domain_name
