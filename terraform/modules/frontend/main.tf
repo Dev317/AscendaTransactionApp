@@ -25,6 +25,19 @@ resource "aws_cognito_user_pool_client" "clientWeb" {
 resource "aws_cognito_user_pool" "userpool" {
   name = "userpool-${var.waftech_region}"
 
+  username_attributes = ["email"]
+  auto_verified_attributes = ["email"]
+
+  password_policy {
+    minimum_length = 6
+  }
+
+  verification_message_template {
+    default_email_option = "CONFIRM_WITH_CODE"
+    email_subject = "Account Confirmation"
+    email_message = "Your confirmation code is {####}"
+  }
+
   account_recovery_setting {
     recovery_mechanism {
       name     = "verified_email"
@@ -36,6 +49,7 @@ resource "aws_cognito_user_pool" "userpool" {
       priority = 2
     }
   }
+
 }
 
 resource "aws_cognito_identity_pool" "identity_pool" {
