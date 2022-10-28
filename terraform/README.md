@@ -99,7 +99,8 @@ Please make sure to update all the resources appropriately.
 | <a name="module_api_sg"></a> [api\_sg](#module\_api\_sg) | ./modules/api | n/a |
 | <a name="module_file_processor_north_virginia"></a> [file\_processor\_north\_virginia](#module\_file\_processor\_north\_virginia) | ./modules/file-processor | n/a |
 | <a name="module_file_processor_sg"></a> [file\_processor\_sg](#module\_file\_processor\_sg) | ./modules/file-processor | n/a |
-| <a name="module_frontend"></a> [frontend](#module\_frontend) | ./modules/frontend | n/a |
+| <a name="module_frontend_north_virginia"></a> [frontend\_north\_virginia](#module\_frontend\_north\_virginia) | ./modules/frontend | n/a |
+| <a name="module_frontend_sg"></a> [frontend\_sg](#module\_frontend\_sg) | ./modules/frontend | n/a |
 | <a name="module_iam"></a> [iam](#module\_iam) | ./modules/iam | n/a |
 
 ## Resources
@@ -116,7 +117,7 @@ Please make sure to update all the resources appropriately.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_github_token"></a> [github\_token](#input\_github\_token) | Github access token | `string` | n/a | yes |
+| <a name="input_github_token"></a> [github\_token](#input\_github\_token) | Github access token | `string` | `"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"` | no |
 
 ## Outputs
 

@@ -7,19 +7,23 @@ terraform {
   }
 }
 
-# resource "aws_cognito_user_pool_domain" "itsag1t1" {
-#   domain       = "g1t1userdomain"
-#   user_pool_id = aws_cognito_user_pool.fe_userpool.id
-# }
-
-resource "aws_cognito_user_pool_client" "client" {
-  name = "client"
-
-  user_pool_id = aws_cognito_user_pool.fe_userpool.id
+resource "aws_cognito_user_pool_domain" "itsag1t1" {
+  domain       = "g1t1userdomain-${var.waftech_region}"
+  user_pool_id = aws_cognito_user_pool.userpool.id
 }
 
-resource "aws_cognito_user_pool" "fe_userpool" {
-  name = "fe_userpool"
+resource "aws_cognito_user_pool_client" "client" {
+  name = "client-${var.waftech_region}"
+  user_pool_id = aws_cognito_user_pool.userpool.id
+}
+
+resource "aws_cognito_user_pool_client" "clientWeb" {
+  name = "clientWeb-${var.waftech_region}"
+  user_pool_id = aws_cognito_user_pool.userpool.id
+}
+
+resource "aws_cognito_user_pool" "userpool" {
+  name = "userpool-${var.waftech_region}"
 
   account_recovery_setting {
     recovery_mechanism {
@@ -34,6 +38,82 @@ resource "aws_cognito_user_pool" "fe_userpool" {
   }
 }
 
+resource "aws_cognito_identity_pool" "identity_pool" {
+  identity_pool_name               = "identity_pool-${var.waftech_region}"
+  allow_unauthenticated_identities = false
+
+  cognito_identity_providers {
+    client_id               = aws_cognito_user_pool_client.client.id
+    provider_name           = aws_cognito_user_pool.userpool.endpoint
+    server_side_token_check = true
+  }
+}
+
+resource "aws_cognito_identity_pool_roles_attachment" "main" {
+  identity_pool_id = aws_cognito_identity_pool.identity_pool.id
+
+  roles = {
+    authenticated   = aws_iam_role.auth_iam_role.arn
+    unauthenticated = aws_iam_role.unauth_iam_role.arn
+  }
+}
+
+resource "aws_iam_role" "auth_iam_role" {
+  name = "auth_iam_role-${var.waftech_region}"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Federated": "cognito-identity.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role" "unauth_iam_role" {
+  name = "unauth_iam_role-${var.waftech_region}"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Federated": "cognito-identity.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "web_iam_unauth_role_policy" {
+  name = "web_iam_unauth_role_policy"
+  role = aws_iam_role.unauth_iam_role.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Action": "*",
+      "Effect": "Deny",
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+
 data "aws_iam_policy_document" "assume_role" {
   statement {
     effect  = "Allow"
@@ -45,9 +125,25 @@ data "aws_iam_policy_document" "assume_role" {
   }
 }
 
+data "aws_iam_policy" "amplify-access-policy" {
+  name = "AdministratorAccess-Amplify"
+}
+
+resource "aws_iam_role_policy_attachment" "attach-amplify-access-policy" {
+  role       = aws_iam_role.amplify-github.name
+  policy_arn = data.aws_iam_policy.amplify-access-policy.arn
+}
+
+resource "aws_amplify_backend_environment" "dev" {
+  app_id               = aws_amplify_app.Waftech.id
+  environment_name     = "dev"
+  deployment_artifacts = "waftech-deployment-${var.waftech_region}"
+  stack_name           = "amplify-Waftech-${var.waftech_region}"
+}
+
 resource "aws_amplify_branch" "fe" {
   app_id      = aws_amplify_app.Waftech.id
-  branch_name = "fe33"
+  branch_name = var.waftech_branch
 }
 
 # resource "aws_amplify_domain_association" "g1t1" {
@@ -67,41 +163,53 @@ resource "aws_amplify_branch" "fe" {
 # }
 
 resource "aws_iam_role" "amplify-github" {
-  name                = "AmplifyGithub"
+  name                = "AmplifyGithub-${var.waftech_region}"
   assume_role_policy  = join("", data.aws_iam_policy_document.assume_role.*.json)
 }
 
 resource "aws_amplify_app" "Waftech" {
-  name                        = "Waftech"
+  name                        = "waftech-${var.waftech_region}"
   description                 = "Frontend for Waftech"
   repository                  = "https://github.com/cs301-itsa/project-2022-23t1-g1-t1-waffles"
   access_token                = var.github_token
   iam_service_role_arn        = aws_iam_role.amplify-github.arn
-  enable_auto_branch_creation = true
   enable_branch_auto_build    = true
 
   build_spec = <<-EOT
-    version: 0.1
+    version: 1
+    backend:
+      phases:
+        build:
+          commands:
+            - '# Execute Amplify CLI with the helper script'
+            - amplifyPush --simple
     frontend:
       phases:
         preBuild:
           commands:
-            - npm install
+            - nvm use $VERSION_NODE_14
+            - npm ci
         build:
           commands:
+            - nvm use $VERSION_NODE_14
             - npm run build
       artifacts:
         baseDirectory: build
         files:
           - '**/*'
       cache:
-        paths:
-          - node_modules/**/*
   EOT
 
   custom_rule {
     source = "/<*>"
     status = "404"
     target = "/index.html"
+  }
+
+  environment_variables = {
+    AMPLIFY_USERPOOL_ID = aws_cognito_user_pool.userpool.id
+    AMPLIFY_WEBCLIENT_ID = aws_cognito_user_pool_client.client.id
+    AMPLIFY_NATIVECLIENT_ID = aws_cognito_user_pool_client.clientWeb.id
+    AMPLIFY_IDENTITYPOOL_ID = aws_cognito_identity_pool.identity_pool.id
   }
 }
