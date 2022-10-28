@@ -1,5 +1,11 @@
 variable "github_token" {
   description = "Github access token"
   type        = string
-  default     = "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"
+  sensitive   = true
+}
+
+variable "route53_hosted_zone_id" {
+  description = "Route 53 Hosted Zone ID"
+  type        = string
+  default     = "Z089272719LULOG2M18OT"
 }
