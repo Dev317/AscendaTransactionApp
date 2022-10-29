@@ -46,8 +46,7 @@ def get_all_campaigns() -> list:
         "action": "get_all"
     }
     try:
-        campaign_response = invoke_lambda(post_request, "campaign")
-        return campaign_response["Responses"]["campaign_service_table"]
+        return invoke_lambda(post_request, "campaign")
     except Exception as exception:
         return {
             "statusCode": 500,
@@ -63,8 +62,7 @@ def get_all_exclusions() -> list:
         "action": "get_all"
     }
     try:
-        exclusion_response = invoke_lambda(post_request, "exclusion")
-        return exclusion_response["Responses"]["exclusion_service_table"]
+        return invoke_lambda(post_request, "exclusion")
     except Exception as exception:
         return {
             "statusCode": 500,
@@ -73,13 +71,13 @@ def get_all_exclusions() -> list:
         }
 
 
-def get_policy(policy_id: str) -> dict:
-    """CRUD: get a single policy from the polcy table by a given policy_id
+def get_policy(card_type: str, policy_date: dict) -> dict:
+    """CRUD: get a single policy from the polcy table by a given card_type and policy_date
     Returns a policy in dict form"""
     try:
-        response = POLICY_TABLE.get_item(Key={"policy_id": policy_id})
+        response = POLICY_TABLE.get_item(Key={"card_type": card_type, "policy_date": policy_date})
         LOGGER.info(
-            "Attempting get policy from dynamodb, policy_id: %s", policy_id)
+            "Attempting get policy from dynamodb, %s - %s", card_type, policy_date)
         LOGGER.info(json.dumps(response))
     except Exception as exception:
         return {
@@ -93,15 +91,14 @@ def get_policy(policy_id: str) -> dict:
         return {}
 
 
-def put_policy(policy, policy_id):
+def put_policy(policy):
     """Saves a given policy dict to the database by way of PUT aka overwrite"""
-    policy["policy_id"] = policy_id
     try:
-        LOGGER.info("Attempting to save %s to db", policy_id)
+        LOGGER.info("Attempting to save %s - %s to db", policy["card_type"], policy["policy_date"])
         response = POLICY_TABLE.put_item(
             Item=policy
         )
-        LOGGER.info("Policy %s saved to db", policy_id)
+        LOGGER.info("Policy %s - %s saved to db", policy["card_type"], policy["policy_date"])
     except Exception as exception:
         LOGGER.error(str(exception))
         return {
@@ -167,7 +164,7 @@ def get_later_date(first_date: str, second_date: str):
 def generate_policies(left_bound_date, right_bound_date):
     """Initialisation function to populate an empty database with all campaigns and exclusions
     Can also be used to update existing policies for a given date range"""
-
+    LOGGER.info("entered gen policies")
     campaign_list = get_all_campaigns()
     for campaign in campaign_list:
         # set the dates to generate to the tighter range of the inputted date and the campaign's date
@@ -202,17 +199,25 @@ def add_campaign_to_policy(new_campaign: dict, campaign_date: str):
     """Iterates through all the existing campaign conditions of a given date
     then inserts the new campaign's conditions in the right order"""
     campaign_test_logger(
-        f"Adding {new_campaign['campaign_id']} to {campaign_date}")
-    policy_id = str(new_campaign["card_type"]) + "/" + str(campaign_date)
+        f"Adding {new_campaign['campaign_name']} to {campaign_date}")
+    # policy_id = str(new_campaign["card_type"]) + "/" + str(campaign_date)
     try:
-        policy = get_policy(policy_id)
+        policy = get_policy(new_campaign["card_type"], campaign_date)
         campaign_test_logger("=========before=========")
         campaign_test_logger(json.dumps(policy, indent=4))
 
         # pre-format campaign conditions (insert the campaign id and campaign priority)
         for condition in new_campaign["campaign_conditions"]:
-            condition["campaign_id"] = new_campaign["campaign_id"]
+            condition["campaign_name"] = new_campaign["campaign_name"]
             condition["campaign_priority"] = new_campaign["campaign_priority"]
+
+        if not policy:
+            policy = {
+                    "card_type": new_campaign["card_type"],
+                    "policy_date": campaign_date
+                }
+
+        #TODO check if this campaign is already in the policy, if it is, replace it! (UPDATE of CRUD)
 
         if "campaign_conditions" in policy:  # check if there are any campaigns
             # iterate through campaign conditions from the back, until a priority higher than new is found
@@ -256,7 +261,7 @@ def add_campaign_to_policy(new_campaign: dict, campaign_date: str):
         campaign_test_logger("=========after=========")
         campaign_test_logger(json.dumps(policy, indent=4))
         # save policy to db
-        put_policy(policy, policy_id)
+        put_policy(policy)
     except Exception as exception:
         LOGGER.error(
             "exception encountered while adding campaign to policy: %s", str(exception))
@@ -285,37 +290,41 @@ def add_new_campaign(new_campaign: dict):
 
 
 def add_exclusion_to_policy(new_exclusion: dict, exclusion_date: str):
-    """Iterates through all the card_types in a given exlusion, and applies it to a given policy date"""
+    """Applies new exclusion it to a given policy date"""
     exclusion_test_logger(
-        f"Adding {new_exclusion['exclusion_id']} to {exclusion_date}")
-    for card_type in new_exclusion["card_type"]:
-        policy_id = str(card_type) + "/" + str(exclusion_date)
-        try:
-            policy = get_policy(policy_id)
-            exclusion_test_logger("=========before=========")
-            exclusion_test_logger(json.dumps(policy, indent=4))
-            if policy:
-                if "exclusion_conditions" not in policy:  # in case where there is no existing exclusions, create a blank one
-                    policy["exclusion_conditions"] = {
-                        "mcc": {},
-                        "merchant": {}
-                    }
-                for excl in new_exclusion["exclusion_conditions"]["mcc"]:
-                    policy["exclusion_conditions"]["mcc"][excl] = new_exclusion["exclusion_conditions"]["mcc"][excl]
-                for excl in new_exclusion["exclusion_conditions"]["merchant"]:
-                    policy["exclusion_conditions"]["merchant"][excl] = new_exclusion["exclusion_conditions"]["merchant"][excl]
-            else:
-                policy = {
-                    "exclusion_conditions": new_exclusion["exclusion_conditions"]
+        f"Adding {new_exclusion['exclusion_name']} to {exclusion_date}")
+    
+    
+    # for card_type in new_exclusion["card_type"]:
+        # policy_id = str(card_type) + "/" + str(exclusion_date)
+    try:
+        policy = get_policy(new_exclusion["card_type"], exclusion_date)
+        exclusion_test_logger("=========before=========")
+        exclusion_test_logger(json.dumps(policy, indent=4))
+        if policy:
+            if "exclusion_conditions" not in policy:  # in case where there is no existing exclusions, create a blank one
+                policy["exclusion_conditions"] = {
+                    "mcc": {},
+                    "merchant": {}
                 }
+            for excl in new_exclusion["exclusion_conditions"]["mcc"]:
+                policy["exclusion_conditions"]["mcc"][excl] = new_exclusion["exclusion_conditions"]["mcc"][excl]
+            for excl in new_exclusion["exclusion_conditions"]["merchant"]:
+                policy["exclusion_conditions"]["merchant"][excl] = new_exclusion["exclusion_conditions"]["merchant"][excl]
+        else:
+            policy = {
+                "card_type": new_exclusion["card_type"],
+                "policy_date": exclusion_date,
+                "exclusion_conditions": new_exclusion["exclusion_conditions"]
+            }
 
-            exclusion_test_logger("=========after=========")
-            exclusion_test_logger(json.dumps(policy, indent=4))
-            # save policy to db
-            put_policy(policy, policy_id)
-        except Exception as exception:
-            LOGGER.error(
-                "exception encountered while adding exclusion to policy: %s", str(exception))
+        exclusion_test_logger("=========after=========")
+        exclusion_test_logger(json.dumps(policy, indent=4))
+        # save policy to db
+        put_policy(policy)
+    except Exception as exception:
+        LOGGER.error(
+            "exception encountered while adding exclusion to policy: %s", str(exception))
 
 
 def add_new_exclusion(new_exclusion: dict):
@@ -362,13 +371,13 @@ def lambda_handler(event, context):
 
         # TESTING ENDPOINTS
         elif action == "test_get_policy":
-            resp = get_policy(body["data"]["policy_id"])
+            resp = get_policy(body["data"]["card_type"], body["data"]["policy_date"])
         elif action == "test_get_campaign":
             resp = get_all_campaigns()
         elif action == "test_get_exclusions":
             resp = get_all_exclusions()
         elif action == "test_put_policy":
-            resp = put_policy(body["data"], body["data"]["policy_id"])
+            resp = put_policy(body["data"])
         else:
             resp = {
                 "statusCode": 500,

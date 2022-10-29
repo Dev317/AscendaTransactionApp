@@ -34,18 +34,11 @@ LOGGER.setLevel(logging.INFO)
 
 AWS_REGION = os.environ.get("AWS_REGION", "ap-southeast-1")
 CAMPAIGN_TABLE_NAME = os.environ.get("CAMPAIGN_TABLE_NAME", "campaign_service_table")
-CAMPAIGN_INDEX_TABLE_NAME = os.environ.get("CAMPAIGN_INDEX_TABLE_NAME", "campaign_index_table")
 
 DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 CAMPAIGN_TABLE = DYNAMODB_CLIENT.Table(CAMPAIGN_TABLE_NAME)
-CAMPAIGN_INDEX_TABLE = DYNAMODB_CLIENT.Table(CAMPAIGN_INDEX_TABLE_NAME)
 
 APIG_URL = os.environ.get("APIG_URL","https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/")
-
-
-class DuplicateCampaignIndex(Exception):
-    """Raised when campaign service tries to add a campaign whose index already exists
-    Used to prevent duplicates in the index table from blocking the campaign get_all"""
 
 
 def invoke_lambda(post_request: dict, end_point: str):
@@ -118,7 +111,7 @@ def get_all():
 
 
 def get_by_card_type_and_name(card_type: str, campaign_name: str):
-    """CRUD: get by campaign_id"""
+    """CRUD: get by card type and name"""
     LOGGER.info("Attempting to get %s", campaign_name)
     try:
         response = CAMPAIGN_TABLE.get_item(Key={"card_type": card_type,"campaign_name": campaign_name})
@@ -163,13 +156,6 @@ def lambda_handler(event, context):
                 "body": "no such action"
             }
     #TODO: format error returns properly so apig can give proper error response reporting (rather than having to check cloud watch)
-    except DuplicateCampaignIndex as exception:
-        LOGGER.error(exception)
-        return {
-            "statusCode": 500,
-                "message": "Duplicate campaign ID detected. Please change the name of your added campaign.",
-                "error": str(exception)
-        }
     except Exception as exception:
         return {
             "statusCode": 500,
