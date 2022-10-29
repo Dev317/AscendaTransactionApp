@@ -25,6 +25,7 @@ DYNAMODB_TABLE = DYNAMODB_CLIENT.Table(DB_TABLE_NAME)
 SQS_CLIENT = boto3.client("sqs")
 SQS_QUEUE_URL = os.environ.get("SQS_QUEUE_URL")
 
+
 def get_filesize(bucket, key):
     try:
         obj = S3_CLIENT.head_object(Bucket=bucket, Key=key)
@@ -86,6 +87,7 @@ def save_data_to_db(data):
     result = DYNAMODB_TABLE.put_item(Item=item)
     return result
 
+
 def send_message_to_queue(data, message_group):
     """
     Function sends a message to SQS Queue
@@ -93,9 +95,10 @@ def send_message_to_queue(data, message_group):
     result = SQS_CLIENT.send_message(
         QueueUrl=SQS_QUEUE_URL,
         MessageBody=json.dumps(data),
-        MessageGroupId=message_group
+        MessageGroupId=message_group,
     )
     return result
+
 
 def is_final_iteration(next_start_byte, file_size, chunk_size):
     if (next_start_byte + chunk_size) >= file_size:
@@ -156,7 +159,7 @@ def handler(event, context):
 
         for item in data:
             save_data_to_db(item)
-            send_message_to_queue(item, context['aws_request_id'])
+            send_message_to_queue(item, context["aws_request_id"])
 
         event["handler"]["results"] = {
             "startByte": next_start_byte,
