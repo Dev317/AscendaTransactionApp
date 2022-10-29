@@ -104,6 +104,7 @@ resource "aws_lambda_function" "stepfunction_trigger" {
   environment {
     variables = {
       STATE_MACHINE_ARN = aws_sfn_state_machine.stepfunction_file_processor.arn
+      SQS_QUEUE_URL     = aws_sqs_queue.transactions_queue.url
     }
   }
 
@@ -204,4 +205,11 @@ resource "aws_sfn_state_machine" "stepfunction_file_processor" {
     aws_lambda_function.file_upload
   ]
 
+}
+
+# Create SQS Queue
+resource "aws_sqs_queue" "transactions_queue" {
+  name                        = "transactions-queue.fifo"
+  fifo_queue                  = true
+  content_based_deduplication = true
 }
