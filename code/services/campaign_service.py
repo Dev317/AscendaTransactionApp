@@ -57,26 +57,22 @@ def invoke_lambda(post_request: dict, end_point: str):
 def create_campaign(data):
     """Takes in a json of campaign data (from APIG) and creates DB object
     Then, invokes the calculation service to apply the campaign"""
-    campaign_item = data
-    #TODO input verification to check that the fields are correctly set? or relegate to frontend?
-    #set the campaign id
-    campaign_id =  data["campaign_start_date"] + "_" + data["campaign_name"]
-    campaign_item["campaign_id"] = campaign_id
 
-    # check if campaign id already exists
-    campaign_index_list = get_index()
-    for campaign in campaign_index_list:
-        if campaign_id == campaign:
-            #TODO: integrate with outer campaign creation wrt updating of campaigns
-            raise DuplicateCampaignIndex("Duplicate campaign id detected, aborting campaign creation")
-        LOGGER.info(campaign)
+    #TODO input verification to check that the fields are correctly set? or relegate to frontend?
+
+    #check if campaign exists
+    existing_campaign = get_by_card_type_and_name(data["card_type"], data["campaign_name"])
+    if "Item" in existing_campaign:
+        return {
+            "statusCode": 500,
+                "message": "Campaign already exists. Did you mean to update instead?"
+        }
 
     try:
         response = CAMPAIGN_TABLE.put_item(
-            Item = campaign_item
+            Item = data
         )
         LOGGER.info("campaign created")
-        add_to_index(campaign_id)
     except Exception as exception:
         return {
             "statusCode": 500,
@@ -87,7 +83,7 @@ def create_campaign(data):
     try:
         post_request = {
             "action": "add_new_campaign",
-            "data": campaign_item
+            "data": data
         }
         invoke_lambda(post_request, "calculation")
         LOGGER.info("calculation successfully invoked")
@@ -102,86 +98,30 @@ def create_campaign(data):
     return response
 
 
-def get_index():
-    """helper function to get the list of campaigns, returns a list of strings"""
-    try:
-        index_response = CAMPAIGN_INDEX_TABLE.get_item(Key={"campaign_index_id": "campaign_index"})
-                # rare edge case for startup: if item doesn't exist, create it
-        if "Item" not in index_response:
-            CAMPAIGN_INDEX_TABLE.put_item(
-                Item={
-                    "campaign_index_id": "campaign_index",
-                    "campaign_index_list": []
-                }
-            )
-            campaign_index_list = []
-        else:
-            campaign_index_list = index_response["Item"]["exclusion_index_list"]
-    except Exception as exception:
-        LOGGER.error(exception)
-        return {
-            "statusCode": 500,
-                "message": "An error occurred retrieving index.",
-                "error": str(exception)
-        }
-    LOGGER.info("index retrieved")
-    return campaign_index_list
-
-
-def add_to_index(campaign_id):
-    """function that adds a campaign name to the index object table, returns the add response"""
-    LOGGER.info("adding %s to index", campaign_id)
-    try:
-        campaign_index_list = get_index()
-        campaign_index_list.append(campaign_id)
-        response = CAMPAIGN_INDEX_TABLE.put_item(
-            Item={
-                "campaign_index_id": "campaign_index",
-                "campaign_index_list": campaign_index_list
-            }
-        )
-    except Exception as exception:
-        LOGGER.error(exception)
-        return {
-            "statusCode": 500,
-                "message": "An error occurred adding to index.",
-                "error": str(exception)
-        }
-    LOGGER.info("succcessfully added %s to index", campaign_id)
-    return response
 
 
 def get_all():
     """get all campaigns from the campaigns table"""
-    campaign_index_list = get_index()
-    keys_list = []
-    for campaign in campaign_index_list:
-        keys_list.append({"campaign_id": campaign})
     try:
-        response = DYNAMODB_CLIENT.batch_get_item(
-            RequestItems={
-                CAMPAIGN_TABLE_NAME: {
-                    "Keys": keys_list,
-                    "ConsistentRead": True
-                }
-            },
-            ReturnConsumedCapacity="TOTAL"
-        # Todo: consume the unprocessed keys
-    )
+        response = CAMPAIGN_TABLE.scan()
+        data = response['Items']
+        while 'LastEvaluatedKey' in response:
+            response = CAMPAIGN_TABLE.scan(ExclusiveStartKey=response['LastEvaluatedKey'])
+            data.extend(response['Items'])
     except Exception as exception:
         return {
             "statusCode": 500,
                 "message": "An error occurred getting all campaigns.",
                 "error": str(exception)
         }
-    return response
+    return data
 
 
-def get_by_id(campaign_id):
+def get_by_card_type_and_name(card_type: str, campaign_name: str):
     """CRUD: get by campaign_id"""
-    LOGGER.info("Attempting to get %s", campaign_id)
+    LOGGER.info("Attempting to get %s", campaign_name)
     try:
-        response = CAMPAIGN_TABLE.get_item(Key={"campaign_id": campaign_id})
+        response = CAMPAIGN_TABLE.get_item(Key={"card_type": card_type,"campaign_name": campaign_name})
         LOGGER.info(json.dumps(response))
         # note: if the item is not found, response will not have key "item"
     except Exception as exception:
@@ -215,10 +155,8 @@ def lambda_handler(event, context):
             dynamo_resp = create_campaign(body["data"])
         elif action == "get_all":
             dynamo_resp = get_all()
-        elif action == "get_by_id":
-            dynamo_resp = get_by_id(body["data"]["campaign_id"])
-        elif action == "get_index":
-            dynamo_resp = get_index()
+        elif action == "get_by_card_type_and_name":
+            dynamo_resp = get_by_card_type_and_name(body["data"]["card_type"], body["data"]["campaign_name"])
         else:
             dynamo_resp = {
                 "statusCode": 500,
