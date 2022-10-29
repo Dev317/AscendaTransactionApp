@@ -58,8 +58,34 @@ def create_transaction(data: dict):
         }
     return response
 
+
+def batch_create_transactions(transaction_list: list):
+    """Takes a list of transaction dicts and invokes create_transaction multiple times,
+    Then enqueues the batch transactions to generate rewards"""
+    errorred_transactions = []
+    for transaction in transaction_list:
+        try:
+            create_transaction(transaction)
+        except Exception as exception:
+            errorred_transactions.append(transaction)
+            LOGGER.error("Transaction <%s> failed to be saved", transaction["transaction_id"])
+            LOGGER.error(exception)
+    LOGGER.info("Transactions saved. Total errored values: %d", len(errorred_transactions))
+    
+    post_request = {
+        "action": "batch_create_reward",
+        "data": transaction_list
+    }
+    invoke_lambda(post_request, "reward")
+
+    return {
+        "statusCode": 200,
+        "body": "Successfully processed batch of transactions"
+    }
+
+
 def get_by_card_id(card_id: str):
-    """CRUD: get alltransactions by card_id (akak partition key)"""
+    """CRUD: get all transactions by card_id (aka partition key)"""
     LOGGER.info("Attempting to get %s", card_id)
     try:
         # response = TRANSACTION_TABLE.get_item(Key={"card_id": card_id})

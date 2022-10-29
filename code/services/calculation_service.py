@@ -368,10 +368,10 @@ def lambda_handler(event, context):
         elif action == "refresh_policies":
             resp = generate_policies(
                 body["data"]["start_date"], body["data"]["end_date"])
+        elif action == "get_policy":
+            resp = get_policy(body["data"]["card_type"], body["data"]["policy_date"])
 
         # TESTING ENDPOINTS
-        elif action == "test_get_policy":
-            resp = get_policy(body["data"]["card_type"], body["data"]["policy_date"])
         elif action == "test_get_campaign":
             resp = get_all_campaigns()
         elif action == "test_get_exclusions":
