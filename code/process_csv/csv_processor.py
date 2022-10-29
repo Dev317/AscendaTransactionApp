@@ -3,7 +3,6 @@ Simple Lambda function that reads file from S3 bucket and saves
 its content to DynamoDB table
 """
 #!/usr/bin/env python3
-
 import json
 import logging
 import os
@@ -23,6 +22,8 @@ S3_CLIENT = boto3.client("s3")
 DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 DYNAMODB_TABLE = DYNAMODB_CLIENT.Table(DB_TABLE_NAME)
 
+SQS_CLIENT = boto3.client("sqs")
+SQS_QUEUE_URL = os.environ.get("SQS_QUEUE_URL")
 
 def get_filesize(bucket, key):
     try:
@@ -57,16 +58,16 @@ def get_data_from_file(bucket, key, start_byte, end_byte):
         record_data = record.split(",")
         item = {
             "id": str(record_data[0]),
-            "cardId": str(record_data[1]),
+            "card_id": str(record_data[1]),
             "merchant": str(record_data[2]),
             "mcc": int(record_data[3]) if len(record_data[3]) > 0 else 0,
             "currency": str(record_data[4]),
             "amount": float(record_data[5]),
-            "sgdAmount": float(record_data[6]),
-            "transactionId": str(record_data[7]),
+            "sgd_amount": float(record_data[6]),
+            "transaction_id": str(record_data[7]),
             "date": str(record_data[8]),
-            "cardPan": str(record_data[9]),
-            "cardType": str(record_data[10]),
+            "card_pan": str(record_data[9]),
+            "card_type": str(record_data[10]),
         }
         data.append(item)
         LOGGER.info("Processing: %s", item)
@@ -85,6 +86,16 @@ def save_data_to_db(data):
     result = DYNAMODB_TABLE.put_item(Item=item)
     return result
 
+def send_message_to_queue(data, message_group):
+    """
+    Function sends a message to SQS Queue
+    """
+    result = SQS_CLIENT.send_message(
+        QueueUrl=SQS_QUEUE_URL,
+        MessageBody=json.dumps(data),
+        MessageGroupId=message_group
+    )
+    return result
 
 def is_final_iteration(next_start_byte, file_size, chunk_size):
     if (next_start_byte + chunk_size) >= file_size:
@@ -145,6 +156,7 @@ def handler(event, context):
 
         for item in data:
             save_data_to_db(item)
+            send_message_to_queue(item, context['aws_request_id'])
 
         event["handler"]["results"] = {
             "startByte": next_start_byte,

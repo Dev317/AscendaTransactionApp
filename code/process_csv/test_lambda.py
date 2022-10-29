@@ -39,16 +39,16 @@ TEST_CSV_FILE_CONTENT = [
 S3_TEST_FILE_CONTENT = [
     {
         "id": "7ce56f44-659a-453f-8bc4-5a102faada42",
-        "cardId": "0fd148a9-a350-4567-9e6d-d768ab9c1932",
+        "card_id": "0fd148a9-a350-4567-9e6d-d768ab9c1932",
         "merchant": "Collier",
         "mcc": 4642,
         "currency": "SGD",
         "amount": 285.96,
-        "sgdAmount": 0.0,
-        "transactionId": "07110e8bf85f1a1229eaa5dcbdea68c51d537218143d0021945cfae8861e3efc",
+        "sgd_amount": 0.0,
+        "transaction_id": "07110e8bf85f1a1229eaa5dcbdea68c51d537218143d0021945cfae8861e3efc",
         "date": "27/8/2021",
-        "cardPan": "6771-8964-5359-9669",
-        "cardType": "scis_platinummiles",
+        "card_pan": "6771-8964-5359-9669",
+        "card_type": "scis_platinummiles",
     }
 ]
 
