@@ -50,6 +50,10 @@ resource "aws_cognito_user_pool" "userpool" {
     }
   }
 
+  lifecycle {
+    ignore_changes = [password_policy]
+  }
+
 }
 
 resource "aws_cognito_identity_pool" "identity_pool" {
@@ -226,4 +230,20 @@ resource "aws_amplify_app" "Waftech" {
     AMPLIFY_NATIVECLIENT_ID = aws_cognito_user_pool_client.clientWeb.id
     AMPLIFY_IDENTITYPOOL_ID = aws_cognito_identity_pool.identity_pool.id
   }
+
+  lifecycle {
+    ignore_changes = [build_spec, environment_variables]
+  }
+}
+
+resource "aws_cognito_user_group" "admin" {
+  name         = "admin"
+  user_pool_id = aws_cognito_user_pool.userpool.id
+  description  = "admin user group"
+}
+
+resource "aws_cognito_user_group" "banker" {
+  name         = "banker"
+  user_pool_id = aws_cognito_user_pool.userpool.id
+  description  = "banker user group"
 }
