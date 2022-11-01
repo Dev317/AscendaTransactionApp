@@ -1,10 +1,11 @@
 import csv
+import json
 import os
 import unittest
 
 import boto3
 import mock
-from moto import mock_dynamodb, mock_s3
+from moto import mock_dynamodb, mock_s3, mock_sqs
 
 S3_BUCKET_NAME = "file-upload-8de7e6fe-776a-4481-80c4-e4959b3dfc42"
 DEFAULT_REGION = "us-east-1"
@@ -57,6 +58,7 @@ DYNAMODB_TABLE_NAME = "transaction-records-table"
 
 @mock_s3
 @mock_dynamodb
+@mock_sqs
 @mock.patch.dict(os.environ, {"DB_TABLE_NAME": DYNAMODB_TABLE_NAME})
 class TestLambdaFunction(unittest.TestCase):
     def setUp(self):
@@ -81,6 +83,12 @@ class TestLambdaFunction(unittest.TestCase):
 
         self.table = boto3.resource("dynamodb", region_name="ap-southeast-1").Table(
             DYNAMODB_TABLE_NAME
+        )
+
+        # SQS Mock Setup
+        self.sqs = boto3.resource("sqs")
+        self.queue = self.sqs.create_queue(
+            QueueName="test-transactions-queue.fifo", Attributes={"FifoQueue": "true"}
         )
 
     def test_get_data_from_file(self):
@@ -109,6 +117,18 @@ class TestLambdaFunction(unittest.TestCase):
             db_records += db_response["Items"]
 
         self.assertEqual(len(S3_TEST_FILE_CONTENT), len(db_records))
+
+    def test_send_message_to_queue(self):
+        import csv_processor
+        from csv_processor import send_message_to_queue
+
+        csv_processor.SQS_QUEUE_URL = self.queue.url
+
+        send_message_to_queue(S3_TEST_FILE_CONTENT[0], "abcd")
+
+        sqs_messages = self.queue.receive_messages()
+
+        self.assertEqual(json.loads(sqs_messages[0].body), S3_TEST_FILE_CONTENT[0])
 
     """
     def test_handler(self):
