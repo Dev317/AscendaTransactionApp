@@ -62,6 +62,7 @@ resource "aws_lambda_function" "file_upload" {
     variables = {
       DB_TABLE_NAME = aws_dynamodb_table.transactions_records_table.name
       CHUNK_SIZE    = 100000
+      SQS_QUEUE_URL = aws_sqs_queue.transactions_queue.url
     }
   }
 
@@ -104,7 +105,6 @@ resource "aws_lambda_function" "stepfunction_trigger" {
   environment {
     variables = {
       STATE_MACHINE_ARN = aws_sfn_state_machine.stepfunction_file_processor.arn
-      SQS_QUEUE_URL     = aws_sqs_queue.transactions_queue.url
     }
   }
 

@@ -56,14 +56,18 @@ data "aws_iam_policy_document" "lambda_policy" {
       "dynamodb:PutItem",
       "dynamodb:UpdateItem",
       # AWS Step Function policy
-      "states:StartExecution"
+      "states:StartExecution",
+      # AWS SQS policy
+      "sqs:SendMessage",
+      "sqs:ReceiveMessage"
     ]
 
     // arn:aws:dynamodb:ap-southeast-1:717942231127:table/campaign_service_table
     resources = ["arn:aws:states:*:*:*",
-                "arn:aws:s3:::*",
-                "arn:aws:logs:*:*:*",
-                "arn:aws:dynamodb:*:*:*"]
-    effect    = "Allow"
+      "arn:aws:s3:::*",
+      "arn:aws:logs:*:*:*",
+      "arn:aws:dynamodb:*:*:*",
+    "arn:aws:sqs:*:*:*"]
+    effect = "Allow"
   }
 }
