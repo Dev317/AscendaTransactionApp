@@ -6,6 +6,7 @@ its content to DynamoDB table
 import json
 import logging
 import os
+import uuid
 from decimal import Decimal
 
 import boto3
@@ -97,6 +98,7 @@ def send_message_to_queue(data, message_group):
         MessageBody=json.dumps(data),
         MessageGroupId=message_group,
     )
+    LOGGER.info("message sent to queue")
     return result
 
 
@@ -132,8 +134,11 @@ def handler(event, context):
             s3_bucket, s3_file, start_byte, end_byte
         )
 
+        queue_message_group = str(uuid.uuid4())
+
         for item in data:
             save_data_to_db(item)
+            send_message_to_queue(item, queue_message_group)
             # put calculatiton code here
             # put save_reward_to_db here
             # todo: error handling to catch failed calculations and flag it
