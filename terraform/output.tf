@@ -37,3 +37,33 @@ output "base_url_exclusion_us" {
   description = "Base URL for API Gateway for Exclusion in US."
   value = module.api_north_virginia.base_url_exclusion
 }
+
+output "base_url_user_sg" {
+  description = "Base URL for API Gateway for User in SG."
+  value = module.api_sg.base_url_user
+}
+
+output "base_url_reward_sg" {
+  description = "Base URL for API Gateway for Reward in SG."
+  value = module.api_sg.base_url_reward
+}
+
+output "base_url_transaction_sg" {
+  description = "Base URL for API Gateway for Transaction in SG."
+  value = module.api_sg.base_url_transaction
+}
+
+output "base_url_user_us" {
+  description = "Base URL for API Gateway for User in US."
+  value = module.api_north_virginia.base_url_user
+}
+
+output "base_url_reward_us" {
+  description = "Base URL for API Gateway for Reward in US."
+  value = module.api_north_virginia.base_url_reward
+}
+
+output "base_url_transaction_us" {
+  description = "Base URL for API Gateway for Transaction in US."
+  value = module.api_north_virginia.base_url_transaction
+}

@@ -23,6 +23,17 @@ resource "aws_s3_bucket" "file_upload_bucket" {
   force_destroy = var.force_destroy
 }
 
+# CORS config
+resource "aws_s3_bucket_cors_configuration" "cors_config" {
+  bucket = aws_s3_bucket.file_upload_bucket.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["PUT", "POST", "GET", "DELETE"]
+    allowed_origins = ["*"]
+  }
+}
+
 # Create DynamoDB to store records -- TO DELETE
 resource "aws_dynamodb_table" "transactions_records_table" {
   name           = "transaction-records-table"

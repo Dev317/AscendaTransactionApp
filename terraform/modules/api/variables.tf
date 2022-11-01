@@ -73,6 +73,24 @@ variable "health_check_zip" {
   default     = "../build/health_check.zip"
 }
 
+variable "user_service_zip" {
+  description = "Location of User Service Code"
+  type        = string
+  default     = "../build/user_service.zip"
+}
+
+variable "reward_service_zip" {
+  description = "Location of Reward Service Code"
+  type        = string
+  default     = "../build/reward_service.zip"
+}
+
+variable "transaction_service_zip" {
+  description = "Location of Transaction Service Code"
+  type        = string
+  default     = "../build/transaction_service.zip"
+}
+
 variable "certificate_arn" {
   description = "ACM Certificate ARN"
   type        = string

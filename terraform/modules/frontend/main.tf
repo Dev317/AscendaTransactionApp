@@ -162,6 +162,10 @@ resource "aws_amplify_backend_environment" "dev" {
 resource "aws_amplify_branch" "fe" {
   app_id      = aws_amplify_app.Waftech.id
   branch_name = var.waftech_branch
+
+  lifecycle {
+    ignore_changes = [backend_environment_arn]
+  }
 }
 
 # resource "aws_amplify_domain_association" "g1t1" {
@@ -246,4 +250,10 @@ resource "aws_cognito_user_group" "banker" {
   name         = "banker"
   user_pool_id = aws_cognito_user_pool.userpool.id
   description  = "banker user group"
+}
+
+resource "aws_cognito_user_group" "customer" {
+  name         = "customer"
+  user_pool_id = aws_cognito_user_pool.userpool.id
+  description  = "customer user group"
 }

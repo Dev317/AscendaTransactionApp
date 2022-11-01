@@ -14,7 +14,7 @@ resource "aws_s3_object" "campaign_code" {
 
 # Create campaign Lambda function
 resource "aws_lambda_function" "campaign_lambda" {
-  function_name    = "campaign_service_posting"
+  function_name    = "campaign_service"
   role             = var.lambda_role
   handler          = "campaign_service.lambda_handler"
   s3_bucket        = aws_s3_bucket.lambda_function_bucket.id
