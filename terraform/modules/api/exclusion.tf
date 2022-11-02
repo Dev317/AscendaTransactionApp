@@ -40,7 +40,7 @@ resource "aws_api_gateway_method" "create_exclusion" {
 # Integrate with API Gateway with Lambda function
 resource "aws_api_gateway_integration" "create_exclusion_lambda" {
   rest_api_id = aws_api_gateway_rest_api.orchestrator_apigw.id
-  resource_id = aws_api_gateway_method.create_exclusion.resource_id
+  resource_id = aws_api_gateway_resource.exclusion.id
   http_method = aws_api_gateway_method.create_exclusion.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
@@ -65,7 +65,7 @@ resource "aws_api_gateway_deployment" "exclusion_api_deployment" {
 
   triggers = {
     redeployment = sha1(jsonencode([
-      aws_api_gateway_resource.campaign.id,
+      aws_api_gateway_resource.exclusion.id,
       aws_api_gateway_method.create_exclusion.id,
       aws_api_gateway_integration.create_exclusion_lambda.id,
     ]))
