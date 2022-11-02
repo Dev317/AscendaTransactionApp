@@ -13,60 +13,6 @@ jobs:
 
     - name: Checkout Repo
       uses: actions/checkout@v1
-      
-#     - name: Setup Terraform
-#       uses: hashicorp/setup-terraform@v2
-#       with:
-#         terraform_version: 1.1.9
-#         terraform_wrapper: false
-
-#     - name: Terraform Init
-#       id: init
-#       run: terraform init
-#       env:
-#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#         TF_ACTION_WORKING_DIR: 'terraform'
-#         AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
-#         AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#       working-directory: ./terraform
-#       shell: bash
-
-#     - name: Terraform Validate
-#       uses: hashicorp/terraform-github-actions/validate@v0.3.7
-    
-#     - name: Terraform Plan
-#       id: plan
-#       run: |
-#         terraform plan -input=false -no-color -out tf.plan -var="github_token=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"
-#       env:
-#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#         TF_ACTION_WORKING_DIR: 'terraform'
-#         AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
-#         AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#       working-directory: ./terraform # Use your environment folder
-#       shell: bash
-    
-#     - name: Terraform Show
-#       id: show
-#       run: terraform show -no-color -var="github_token=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" tf.plan 2>&1 > /tmp/plan.txt
-#       working-directory: ./terraform
-#       env:
-#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#         TF_ACTION_WORKING_DIR: 'terraform'
-#         AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
-#         AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#       shell: bash
-
-#     - name: Terraform Apply
-#       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-#       run: terraform apply -input=false tf.plan -var="github_token=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"
-#       env:
-#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#         TF_ACTION_WORKING_DIR: 'terraform'
-#         AWS_ACCESS_KEY_ID:  ${{ secrets.AWS_ACCESS_KEY_ID }}
-#         AWS_SECRET_ACCESS_KEY:  ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#       working-directory: ./terraform # Use your environment folder
-#       shell: bash
 
     - name: Verify Terraform version
       run: terraform --version
@@ -82,11 +28,15 @@ jobs:
     - name: Terraform validation
       run: terraform validate
       working-directory: ./terraform
-
-    - name: Terraform apply 
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: ap-southeast-1
+      
+    - name: Terraform show
+      run: terraform show
       working-directory: ./terraform
-      run: terraform apply -auto-approve -input=false -var="github_token=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"
+
+#     - name: Terraform apply 
+#       env:
+#         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#         AWS_DEFAULT_REGION: ap-southeast-1
+#       working-directory: ./terraform
+#       run: terraform apply -auto-approve -input=false -var="github_token=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"
