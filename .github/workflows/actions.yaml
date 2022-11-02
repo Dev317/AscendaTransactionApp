@@ -12,9 +12,9 @@ jobs:
     steps:
 
     - name: Checkout Repo
-      uses: actions/checkout@v1
+      uses: actions/checkout@v3
       with:
-        ref: ${{ github.ref_name }}
+        ref: infrastructure
 
     - name: Verify Terraform version
       run: terraform --version
@@ -52,8 +52,6 @@ jobs:
         output-file: README.md
         output-method: inject
         git-push: "true"
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: ${{ github.ref }}
 
   deploy:
     name: deploy
