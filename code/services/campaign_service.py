@@ -58,7 +58,7 @@ def create_campaign(data):
     if "Item" in existing_campaign:
         return {
             "statusCode": 500,
-                "message": "Campaign already exists. Did you mean to update instead?"
+            "message": "Campaign already exists. Did you mean to update instead?"
         }
 
     try:
