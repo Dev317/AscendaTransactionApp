@@ -48,7 +48,7 @@ jobs:
     
     - name: Terraform Show
       id: show
-      run: terraform show -no-color tf.plan 2>&1 > /tmp/plan.txt
+      run: terraform show -no-color -var="github_token=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" tf.plan 2>&1 > /tmp/plan.txt
       working-directory: ./terraform
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
