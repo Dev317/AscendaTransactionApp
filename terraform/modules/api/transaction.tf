@@ -27,6 +27,10 @@ resource "aws_lambda_function" "transaction_lambda" {
       APIG_URL = "https://${aws_api_gateway_rest_api.orchestrator_apigw.id}.execute-api.${var.apigw_region}.amazonaws.com/prod"
     }
   }
+
+  lifecycle {
+    ignore_changes = [source_code_hash]
+  }
 }
 
 # /POST for /transaction
