@@ -169,6 +169,7 @@ def calculate_reward(transaction: dict) -> dict:
     try:
         policy = get_policy(transaction["card_type"], transaction["transaction_date"])
         reward = apply_policy(policy, transaction)
+        put_reward(reward)
     except Exception as exception:
         return {
             "statusCode": 500,
@@ -176,6 +177,24 @@ def calculate_reward(transaction: dict) -> dict:
             "error": str(exception),
         }
     return reward
+
+
+def put_reward(reward: dict):
+    """Takes a reward dict and stores it into dynamodb table"""
+    try:
+        LOGGER.info("Attempting to save reward %s to db",reward["reward_id"])
+        response = REWARD_TABLE.put_item(
+            Item=reward
+        )
+        LOGGER.info("reward %s - %s saved to db", reward["reward_id"], reward["date"])
+    except Exception as exception:
+        LOGGER.error(str(exception))
+        return {
+            "statusCode": 500,
+            "message": "An error adding the reward to db.",
+            "error": str(exception)
+        }
+    return response
 
 
 def get_all_by_card_id(card_id: str):

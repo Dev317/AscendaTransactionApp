@@ -246,66 +246,147 @@ def create_exclusions(exclusion_list: list):
             print("Failed to add exclusion: ", exclusion["exclusion_name"])
             print(exception)
 
-create_campaigns(BASE_CAMPAIGNS)
-create_exclusions(BASE_EXCLUSIONS)
+def create_users(user_list: list):
+    for user in user_list:
+        try:
+            post_request = {
+                "action": "create",
+                "data": user
+            }
+            invoke_lambda(post_request, "user")
+        except Exception as exception:
+            print("Failed to add user: ", user["first_name"])
+            print(exception)
 
-print("complete")
+def create_rewards(transaction_list: list):
+    #TODO do the transaction step!! especially the SQS part. this is just temp for testing of frontend
+    for transaction in transaction_list:
+        try:
+            post_request = {
+                "action": "calculate_reward",
+                "data": transaction
+            }
+            invoke_lambda(post_request, "reward")
+        except Exception as exception:
+            print("Failed to calculate and add_reward: ", transaction["transaction_id"])
+            print(exception)
 
-#mockup transactions
-transaction1 = {
-        "id": "7ce56f44-659a-453f-8bc4-5a102faada42",
-        "card_id": "0fd148a9-a350-4567-9e6d-d768ab9c1932",
+
+TEST_USERS = [
+    {
+        "user_id": "marcusgohsh",
+        "first_name": "Marcus",
+        "last_name": "Goh",
+        "phone": "94223757",
+        "email": "hi@marcu.sg",
+        "created_at": "02-01-2022",
+        "updated_at": "02-01-2022",
+        "card_id": "marcus_card_id_1",
+        "card_pan": "1234-1234-1234-1111",
+        "card_type": "scis_freedom"
+    },
+    {
+        "user_id": "marcusgohsh",
+        "first_name": "Marcus",
+        "last_name": "Goh",
+        "phone": "94223757",
+        "email": "hi@marcu.sg",
+        "created_at": "02-01-2022",
+        "updated_at": "02-01-2022",
+        "card_id": "marcus_card_id_2",
+        "card_pan": "1234-1234-1234-2222",
+        "card_type": "scis_platinummiles"
+    },
+    {
+        "user_id": "marcusgohsh",
+        "first_name": "Marcus",
+        "last_name": "Goh",
+        "phone": "94223757",
+        "email": "hi@marcu.sg",
+        "created_at": "02-01-2022",
+        "updated_at": "02-01-2022",
+        "card_id": "marcus_card_id_3",
+        "card_pan": "1234-1234-1234-3333",
+        "card_type": "scis_premiummiles"
+    },
+    {
+        "user_id": "marcusgohsh",
+        "first_name": "Marcus",
+        "last_name": "Goh",
+        "phone": "94223757",
+        "email": "hi@marcu.sg",
+        "created_at": "02-01-2022",
+        "updated_at": "02-01-2022",
+        "card_id": "marcus_card_id_4",
+        "card_pan": "1234-1234-1234-4444",
+        "card_type": "scis_shopping"
+    }
+]
+
+
+TEST_TRANSACTIONS = [
+    {
+        "id": "asdf1",
+        "card_id": "marcus_card_id_1",
         "merchant": "Collier",
         "mcc": "4642",
         "currency": "SGD",
-        "amount": "285.96",
+        "amount": "2001",
         "sgd_amount": "2001",
-        "transaction_id": "07110e8bf85f1a1229eaa5dcbdea68c51d537218143d0021945cfae8861e3efc",
+        "transaction_id": "testtx1",
         "transaction_date": "09-06-2022",
-        "card_pan": "6771-8964-5359-9669",
+        "card_pan": "1234-1234-1234-1111",
         "card_type": "scis_freedom"
-    }
-
-
-transaction2 = {
-        "id": "7ce56f44-659a-453f-8bc4-5a102faada42",
-        "card_id": "0fd148a9-a350-4567-9e6d-d768ab9c1932",
+    },
+    {
+        "id": "asdf2",
+        "card_id": "marcus_card_id_1",
         "merchant": "Grab",
         "mcc": "4642",
         "currency": "SGD",
         "amount": "285.96",
         "sgd_amount": "132.81",
-        "transaction_id": "07110e8bf85f1a1229eaa5dcbdea68c51d537218143d0021945cfae8861e3efc",
+        "transaction_id": "testtx2",
         "transaction_date": "09-06-2022",
-        "card_pan": "6771-8964-5359-9669",
+        "card_pan": "1234-1234-1234-1111",
         "card_type": "scis_freedom"
-    }
-
-
-transaction3 = {
-        "id": "7ce56f44-659a-453f-8bc4-5a102faada42",
-        "card_id": "0fd148a9-a350-4567-9e6d-d768ab9c1932",
+    },
+    {
+        "id": "asdf3",
+        "card_id": "marcus_card_id_1",
         "merchant": "AXS",
         "mcc": "9399",
         "currency": "SGD",
         "amount": "285.96",
         "sgd_amount": "100.53",
-        "transaction_id": "07110e8bf85f1a1229eaa5dcbdea68c51d537218143d0021945cfae8861e3efc",
+        "transaction_id": "testtx3",
         "transaction_date": "09-06-2022",
-        "card_pan": "6771-8964-5359-9669",
+        "card_pan": "1234-1234-1234-1111",
         "card_type": "scis_freedom"
-    }
-
-transaction4 = {
-        "id": "7ce56f44-659a-453f-8bc4-5a102faada42",
-        "card_id": "0fd148a9-a350-4567-9e6d-d768ab9c1932",
+    },
+    {
+        "id": "asdf4",
+        "card_id": "marcus_card_id_1",
         "merchant": "Blacklisted Merchant",
         "mcc": "9399",
         "currency": "SGD",
         "amount": "285.96",
         "sgd_amount": "50.67",
-        "transaction_id": "07110e8bf85f1a1229eaa5dcbdea68c51d537218143d0021945cfae8861e3efc",
+        "transaction_id": "testtx4",
         "transaction_date": "09-06-2022",
-        "card_pan": "6771-8964-5359-9669",
+        "card_pan": "1234-1234-1234-1111",
         "card_type": "scis_freedom"
     }
+]
+
+def run():
+    
+    # create_campaigns(BASE_CAMPAIGNS)
+    # create_exclusions(BASE_EXCLUSIONS)
+    create_users(TEST_USERS)
+    create_rewards(TEST_TRANSACTIONS)
+
+    print("complete")
+
+
+run()
