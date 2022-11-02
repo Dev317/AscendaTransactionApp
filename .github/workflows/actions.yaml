@@ -59,7 +59,7 @@ jobs:
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: terraform apply -input=false tf.plan
+      run: terraform apply -input=false tf.plan -var="github_token=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"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TF_ACTION_WORKING_DIR: 'terraform'
