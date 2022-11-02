@@ -14,7 +14,7 @@ resource "aws_s3_object" "calculation_code" {
 
 # Create calculation Lambda function
 resource "aws_lambda_function" "calculation_lambda" {
-  function_name    = "calculation_service_posting"
+  function_name    = "calculation_service"
   role             = var.lambda_role
   handler          = "calculation_service.lambda_handler"
   s3_bucket        = aws_s3_bucket.lambda_function_bucket.id

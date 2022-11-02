@@ -14,7 +14,7 @@ resource "aws_s3_object" "exclusion_code" {
 
 # Create exclusion Lambda function
 resource "aws_lambda_function" "exclusion_lambda" {
-  function_name    = "exclusion_service_posting"
+  function_name    = "exclusion_service"
   role             = var.lambda_role
   handler          = "exclusion_service.lambda_handler"
   s3_bucket        = aws_s3_bucket.lambda_function_bucket.id
