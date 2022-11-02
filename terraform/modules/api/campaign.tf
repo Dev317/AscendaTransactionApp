@@ -40,7 +40,7 @@ resource "aws_api_gateway_method" "create_campaign" {
 # Integrate with API Gateway with Lambda function
 resource "aws_api_gateway_integration" "create_campaign_lambda" {
   rest_api_id = aws_api_gateway_rest_api.orchestrator_apigw.id
-  resource_id = aws_api_gateway_method.create_campaign.resource_id
+  resource_id = aws_api_gateway_resource.campaign.id
   http_method = aws_api_gateway_method.create_campaign.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"

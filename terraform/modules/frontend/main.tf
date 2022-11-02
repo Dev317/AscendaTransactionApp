@@ -236,7 +236,7 @@ resource "aws_amplify_app" "Waftech" {
   }
 
   lifecycle {
-    ignore_changes = [build_spec, environment_variables]
+    ignore_changes = [build_spec, environment_variables, access_token]
   }
 }
 
