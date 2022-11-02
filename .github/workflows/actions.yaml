@@ -31,6 +31,10 @@ jobs:
       run: terraform validate
       working-directory: ./terraform
       
+    - name: Terraform plan
+      run: terraform plan -var="github_token=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"
+      working-directory: ./terraform
+      
     - name: Terraform show
       run: terraform show
       env:
