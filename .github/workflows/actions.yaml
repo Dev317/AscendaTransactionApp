@@ -7,7 +7,7 @@ on:
 
 jobs:
   tf_fmt:
-    name: Terraform Infrastructure Check
+    name: Terraform Check
     runs-on: ubuntu-latest
     steps:
 
@@ -53,14 +53,14 @@ jobs:
         git-push: "true"
 
   deploy:
-    name: Manually apply
+    name: Manual Apply
     runs-on: ubuntu-latest
     needs: tf_fmt
     steps:
       - uses: trstringer/manual-approval@v1
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
-          approvers: Dev317
+          approvers: Dev317, Jenpoer, BradleyYeo, TheCatchyName
 
       - name: Terraform apply 
         env:
