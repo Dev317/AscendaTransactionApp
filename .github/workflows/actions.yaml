@@ -37,7 +37,7 @@ jobs:
     - name: Terraform Show
       id: show
       run: terraform show -no-color tf.plan 2>&1 > /tmp/plan.txt
-      working-directory: ./staging # Use your environment folder
+      working-directory: ./terraform
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TF_ACTION_WORKING_DIR: 'terraform'
