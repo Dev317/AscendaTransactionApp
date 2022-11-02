@@ -13,7 +13,7 @@ LOGGER.setLevel(logging.INFO)
 
 AWS_REGION = os.environ.get("AWS_REGION", "ap-southeast-1")
 POLICY_TABLE_NAME = os.environ.get(
-    "POLICY_TABLE_NAME", "calculation_policy_table")
+    "POLICY_TABLE_NAME", "calculation_service_table")
 
 DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 POLICY_TABLE = DYNAMODB_CLIENT.Table(POLICY_TABLE_NAME)
@@ -272,6 +272,7 @@ def add_new_campaign(new_campaign: dict):
     Adds a new campaign to current policies, across all the campaign's dates
     Iterates through all the dates of the campaign, and calls add_campaign_to_policy"""
     try:
+        LOGGER.info("entering add_new_campaign for loop")
         date_list = generate_dates(
             new_campaign["campaign_start_date"], new_campaign["campaign_end_date"])
         for date_to_add in date_list:
