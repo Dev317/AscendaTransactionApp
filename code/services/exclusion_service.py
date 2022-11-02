@@ -14,7 +14,7 @@ EXCLUSION_TABLE_NAME = os.environ.get("EXCLUSION_TABLE_NAME", "exclusion_service
 DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 EXCLUSION_TABLE = DYNAMODB_CLIENT.Table(EXCLUSION_TABLE_NAME)
 
-APIG_URL = os.environ.get("APIG_URL","https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/")
+APIG_URL = os.environ.get("APIG_URL","https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/")
 
 
 def invoke_lambda(post_request: dict, end_point: str):

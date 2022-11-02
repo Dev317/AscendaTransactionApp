@@ -31,7 +31,7 @@ TRANSACTION_TABLE_NAME = os.environ.get("TRANSACTION_TABLE_NAME", "transaction_s
 DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 TRANSACTION_TABLE = DYNAMODB_CLIENT.Table(TRANSACTION_TABLE_NAME)
 
-APIG_URL = os.environ.get("APIG_URL","https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/")
+APIG_URL = os.environ.get("APIG_URL","https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/")
 
 
 def invoke_lambda(post_request: dict, end_point: str):

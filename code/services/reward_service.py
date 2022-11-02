@@ -29,7 +29,7 @@ REWARD_TABLE_NAME = os.environ.get("REWARD_TABLE_NAME", "reward_service_table")
 DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 REWARD_TABLE = DYNAMODB_CLIENT.Table(REWARD_TABLE_NAME)
 
-APIG_URL = os.environ.get("APIG_URL","https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/")
+APIG_URL = os.environ.get("APIG_URL","https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/")
 
 
 class NoPolicyFound(Exception):

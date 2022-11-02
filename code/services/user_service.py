@@ -15,7 +15,7 @@ USER_TABLE_NAME = os.environ.get("USER_TABLE_NAME", "user_service_table")
 DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 USER_TABLE = DYNAMODB_CLIENT.Table(USER_TABLE_NAME)
 
-APIG_URL = os.environ.get("APIG_URL","https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/")
+APIG_URL = os.environ.get("APIG_URL","https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/")
 
 
 def invoke_lambda(post_request: dict, end_point: str):

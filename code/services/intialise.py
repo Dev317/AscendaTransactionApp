@@ -6,8 +6,8 @@
 import requests
 
 # replace with apig of system as necessary
-# APIG_URL = "https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod"
-APIG_URL = "https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/"
+APIG_URL = "https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/"
+# APIG_URL = "https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/"
 
 
 def invoke_lambda(post_request: dict, end_point: str):
@@ -266,8 +266,6 @@ transaction1 = {
         "card_type": "scis_freedom"
     }
 
-get_reward(transaction1)
-
 
 transaction2 = {
         "id": "7ce56f44-659a-453f-8bc4-5a102faada42",
@@ -283,7 +281,6 @@ transaction2 = {
         "card_type": "scis_freedom"
     }
 
-get_reward(transaction2)
 
 transaction3 = {
         "id": "7ce56f44-659a-453f-8bc4-5a102faada42",
@@ -298,8 +295,6 @@ transaction3 = {
         "card_pan": "6771-8964-5359-9669",
         "card_type": "scis_freedom"
     }
-
-get_reward(transaction3)
 
 transaction4 = {
         "id": "7ce56f44-659a-453f-8bc4-5a102faada42",

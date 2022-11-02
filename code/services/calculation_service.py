@@ -19,7 +19,7 @@ DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 POLICY_TABLE = DYNAMODB_CLIENT.Table(POLICY_TABLE_NAME)
 
 APIG_URL = os.environ.get(
-    "APIG_URL", "https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/")
+    "APIG_URL", "https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/")
 
 TESTING_TOGGLE = os.environ.get("TESTING_TOGGLE", False)
 
