@@ -31,10 +31,10 @@ module "route53" {
   route53_hosted_zone_id      = var.route53_hosted_zone_id
   apigw_domain_name_primary   = module.api_sg.apigw_domain_name
   apigw_zone_id_primary       = module.api_sg.apigw_zone_id
-  apigw_endpoint_primary      = module.api_sg.base_url_health_check
+  apigw_endpoint_primary      = module.api_sg.apigw_base_url
   apigw_domain_name_secondary = module.api_north_virginia.apigw_domain_name
   apigw_zone_id_secondary     = module.api_north_virginia.apigw_zone_id
-  apigw_endpoint_secondary    = module.api_north_virginia.base_url_health_check
+  apigw_endpoint_secondary    = module.api_north_virginia.apigw_base_url
 }
 
 # -----------------------------------

@@ -42,3 +42,8 @@ output "apigw_zone_id" {
   description = "APIGW Domain Cloudfront Distribution Zone ID"
   value       = aws_api_gateway_domain_name.apigw_domain.regional_zone_id
 }
+
+output "apigw_base_url" {
+  description = "APIGW Base URL"
+  value       = aws_api_gateway_deployment.health_api_deployment.invoke_url
+}
