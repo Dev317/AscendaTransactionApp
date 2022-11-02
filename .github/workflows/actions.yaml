@@ -68,7 +68,7 @@ jobs:
       - uses: trstringer/manual-approval@v1
         with:
           secret: ${{ secrets.GITHUB_TOKEN }}
-          approvers: Dev317, Jenpoer, BradleyYeo, TheCatchyName
+          approvers: Dev317,Jenpoer,BradleyYeo,TheCatchyName
 
       - name: Terraform apply 
         env:
