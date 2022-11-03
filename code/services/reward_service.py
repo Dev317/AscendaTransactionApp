@@ -259,13 +259,18 @@ def lambda_handler(event, context):
             resp = calculate_reward(body["data"])
         elif action == "get_all_by_card_id":
             resp = get_all_by_card_id(body["data"]["card_id"])
+        elif action == "health":
+            resp = "Service is healthy"
 
         # TESTING ENDPOINTS
         elif action == "test_get_policy":
             resp = get_policy(body["data"]["card_type"], body["data"]["policy_date"])
         else:
-            LOGGER.info("received unrecognised action")
-            resp = {"statusCode": 500, "body": "no such action"}
+            return {
+                "statusCode": 500,
+                "headers": {"Access-Control-Allow-Origin": "*"},
+                "body": "no such action",
+            }
     except Exception as exception:
         return {
             "statusCode": 500,

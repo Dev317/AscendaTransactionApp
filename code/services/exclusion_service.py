@@ -145,15 +145,21 @@ def lambda_handler(event, context):
 
     try:
         if action == "create":
-            dynamo_resp = create_exclusion(body["data"])
+            resp = create_exclusion(body["data"])
         elif action == "get_all":
-            dynamo_resp = get_all()
+            resp = get_all()
         elif action == "get_by_card_type_and_name":
-            dynamo_resp = get_by_card_type_and_name(
+            resp = get_by_card_type_and_name(
                 body["data"]["card_type"], body["data"]["exclusion_name"]
             )
+        elif action == "health":
+            resp = "Service is healthy"
         else:
-            dynamo_resp = {"statusCode": 500, "body": "no such action"}
+            return {
+                "statusCode": 500,
+                "headers": {"Access-Control-Allow-Origin": "*"},
+                "body": "no such action",
+            }
     # TODO: format error returns properly so apig can give proper error response reporting (rather than having to check cloud watch)
     except Exception as exception:
         LOGGER.error(exception)
@@ -167,5 +173,5 @@ def lambda_handler(event, context):
     return {
         "statusCode": 200,
         "headers": {"Access-Control-Allow-Origin": "*"},
-        "body": json.dumps(dynamo_resp, cls=JSONEncoder),
+        "body": json.dumps(resp, cls=JSONEncoder),
     }

@@ -398,6 +398,8 @@ def lambda_handler(event, context):
             )
         elif action == "get_policy":
             resp = get_policy(body["data"]["card_type"], body["data"]["policy_date"])
+        elif action == "health":
+            resp = "Service is healthy"
 
         # TESTING ENDPOINTS
         elif action == "test_get_campaign":
@@ -407,7 +409,7 @@ def lambda_handler(event, context):
         elif action == "test_put_policy":
             resp = put_policy(body["data"])
         else:
-            resp = {
+            return {
                 "statusCode": 500,
                 "headers": {"Access-Control-Allow-Origin": "*"},
                 "body": "no such action",

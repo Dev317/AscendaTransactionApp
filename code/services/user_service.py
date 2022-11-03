@@ -97,10 +97,12 @@ def lambda_handler(event, context):
             resp = batch_create_user(body["data"])
         elif action == "get_cards_by_user_id":
             resp = get_cards_by_user_id(body["data"]["user_id"])
+        elif action == "health":
+            resp = "Service is healthy"
 
         # TESTING ENDPOINTS
         else:
-            resp = {
+            return {
                 "statusCode": 500,
                 "headers": {"Access-Control-Allow-Origin": "*"},
                 "body": "no such action",
