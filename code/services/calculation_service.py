@@ -4,6 +4,7 @@ import datetime
 from datetime import date, timedelta
 import time
 import os
+from decimal import Decimal
 import requests
 import boto3
 
@@ -22,6 +23,13 @@ APIG_URL = os.environ.get(
     "APIG_URL", "https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/")
 
 TESTING_TOGGLE = os.environ.get("TESTING_TOGGLE", False)
+
+
+class JSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return json.JSONEncoder.default(self, obj)
 
 
 def invoke_lambda(post_request: dict, end_point: str):
@@ -393,7 +401,7 @@ def lambda_handler(event, context):
 
     return {
         "statusCode": 200,
-        "body": json.dumps(resp)
+        "body": json.dumps(resp, cls=JSONEncoder)
     }
 
 

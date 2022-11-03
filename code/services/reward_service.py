@@ -14,6 +14,7 @@
 # ? luxury
 import logging
 import os
+from decimal import Decimal
 import requests
 import json
 
@@ -49,6 +50,13 @@ MCC_TYPES = { # (incl, excl)
     "professional": range(8000,9000),
     "government": range(9000,10000),
     }
+
+class JSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return json.JSONEncoder.default(self, obj)
+
 
 def invoke_lambda(post_request: dict, end_point: str):
     """Packages a JSON message into a http request and invokes another service
@@ -199,12 +207,18 @@ def put_reward(reward: dict):
 
 def get_all_by_card_id(card_id: str):
     response = REWARD_TABLE.scan(FilterExpression=Attr("card_id").eq(card_id))
+    if "Items" not in response:
+        return {"No results found"}
+    LOGGER.info(str(response))
     data = response["Items"]
 
     while "LastEvaluatedKey" in response:
+        LOGGER.info("Still has lastev key")
         response = REWARD_TABLE.scan(ExclusiveStartKey=response["LastEvaluatedKey"])
         data.extend(response["Items"])
-    
+
+    LOGGER.info("Fetched all, final: ")
+    LOGGER.info(data)
     return data
 
 
@@ -236,6 +250,7 @@ def lambda_handler(event, context):
         elif action == "test_get_policy":
             resp = get_policy(body["data"]["card_type"],body["data"]["policy_date"])
         else:
+            LOGGER.info("received unrecognised action")
             resp = {
                 "statusCode": 500,
                 "body": "no such action"
@@ -249,5 +264,5 @@ def lambda_handler(event, context):
 
     return {
         "statusCode": 200,
-        "body": json.dumps(resp)
+        "body": json.dumps(resp, cls=JSONEncoder)
     }

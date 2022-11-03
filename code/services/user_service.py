@@ -1,5 +1,6 @@
 import logging
 import os
+from decimal import Decimal
 import requests
 import json
 
@@ -17,6 +18,11 @@ USER_TABLE = DYNAMODB_CLIENT.Table(USER_TABLE_NAME)
 
 APIG_URL = os.environ.get("APIG_URL","https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/")
 
+class JSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return json.JSONEncoder.default(self, obj)
 
 def invoke_lambda(post_request: dict, end_point: str):
     """Packages a JSON message into a http request and invokes another service
@@ -102,5 +108,5 @@ def lambda_handler(event, context):
 
     return {
         "statusCode": 200,
-        "body": json.dumps(resp)
+        "body": json.dumps(resp, cls=JSONEncoder)
     }
