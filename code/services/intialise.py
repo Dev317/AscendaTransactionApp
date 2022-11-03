@@ -6,14 +6,15 @@
 import requests
 
 # replace with apig of system as necessary
-# APIG_URL = "https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod"
-APIG_URL = "https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/"
+APIG_URL = "https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/"
+# APIG_URL = "https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/"
 
 
 def invoke_lambda(post_request: dict, end_point: str):
     """Packages a JSON message into a http request and invokes another service
     Returns a jsonified response object"""
     return requests.post(APIG_URL + end_point, json=post_request).json()
+
 
 # sets the start and end dates for all 4 campaigns and standard exclusions
 BASE_START_DATE = "09-06-2022"
@@ -32,9 +33,9 @@ BASE_CAMPAIGNS = [
                 "amount_greater_than": "100",
                 "merchant_name_include": ["Grab"],
                 "percentage_of_amount": "4",
-                "calculation_reason": "Grab Promo - 4 miles per dollar with Grab, min spend 100 SGD"
+                "calculation_reason": "Grab Promo - 4 miles per dollar with Grab, min spend 100 SGD",
             }
-        ]
+        ],
     },
     {
         "campaign_name": "Kaligo.com promo",
@@ -47,9 +48,9 @@ BASE_CAMPAIGNS = [
             {
                 "merchant_name_include": ["Kaligo"],
                 "percentage_of_amount": "6",
-                "calculation_reason": "6 miles per dollar on all spend with Kaligo.com"
+                "calculation_reason": "6 miles per dollar on all spend with Kaligo.com",
             }
-        ]
+        ],
     },
     {
         "campaign_name": "Kaligo.com promo",
@@ -62,9 +63,9 @@ BASE_CAMPAIGNS = [
             {
                 "merchant_name_include": ["Kaligo"],
                 "percentage_of_amount": "10",
-                "calculation_reason": "10 miles per dollar on all spend with Kaligo.com"
+                "calculation_reason": "10 miles per dollar on all spend with Kaligo.com",
             }
-        ]
+        ],
     },
     {
         "campaign_name": "Shell petrol promo",
@@ -77,9 +78,9 @@ BASE_CAMPAIGNS = [
             {
                 "mcc_include": ["5542"],
                 "percentage_of_amount": "0.05",
-                "calculation_reason": "5 percent cashback on all petrol spend with Shell till 31 December 2021"
+                "calculation_reason": "5 percent cashback on all petrol spend with Shell till 31 December 2021",
             }
-        ]
+        ],
     },
     {
         "campaign_name": "SCIS Shopping Card Base",
@@ -92,18 +93,15 @@ BASE_CAMPAIGNS = [
             {
                 "merchant_category_include": "Online",
                 "percentage_of_amount": "10",
-                "calculation_reason": "10 points/SGD on all online spend"
+                "calculation_reason": "10 points/SGD on all online spend",
             },
             {
                 "merchant_category_include": "Shopping",
                 "percentage_of_amount": "4",
-                "calculation_reason": "4 points/SGD on all shopping spend"
+                "calculation_reason": "4 points/SGD on all shopping spend",
             },
-            {
-                "percentage_of_amount": "1",
-                "calculation_reason": "1 point/SGD on spend"
-            }
-        ]
+            {"percentage_of_amount": "1", "calculation_reason": "1 point/SGD on spend"},
+        ],
     },
     # {
     #     "campaign_name": "Shopee promo",
@@ -131,18 +129,18 @@ BASE_CAMPAIGNS = [
             {
                 "amount_greater_than": "2000",
                 "percentage_of_amount": "0.03",
-                "calculation_reason": "3 percent cashback for all expenditure above 2000 SGD"
+                "calculation_reason": "3 percent cashback for all expenditure above 2000 SGD",
             },
             {
                 "amount_greater_than": "500",
                 "percentage_of_amount": "0.01",
-                "calculation_reason": "1 percent cashback for all expenditure above 500 SGD"
+                "calculation_reason": "1 percent cashback for all expenditure above 500 SGD",
             },
             {
                 "percentage_of_amount": "0.005",
-                "calculation_reason": "0.5 percent cashback for all expenditure"
-            }
-        ]
+                "calculation_reason": "0.5 percent cashback for all expenditure",
+            },
+        ],
     },
     {
         "campaign_name": "Platinum Miles Card Base",
@@ -156,23 +154,23 @@ BASE_CAMPAIGNS = [
                 "mcc_type_include": "hotel",
                 "currency_exclude": "SGD",
                 "percentage_of_amount": "6",
-                "calculation_reason": "6 miles/SGD on all foreign hotel spend"
+                "calculation_reason": "6 miles/SGD on all foreign hotel spend",
             },
             {
                 "mcc_type_include": "hotel",
                 "percentage_of_amount": "3",
-                "calculation_reason": "3 miles/SGD on all hotels spend"
+                "calculation_reason": "3 miles/SGD on all hotels spend",
             },
             {
                 "currency_exclude": "SGD",
                 "percentage_of_amount": "3",
-                "calculation_reason": "3 miles/SGD on all foreign card spend"
+                "calculation_reason": "3 miles/SGD on all foreign card spend",
             },
             {
                 "percentage_of_amount": "1.4",
-                "calculation_reason": "1.4 miles/SGD spent"
-            }
-        ]
+                "calculation_reason": "1.4 miles/SGD spent",
+            },
+        ],
     },
     {
         "campaign_name": "Premium Miles Card Base",
@@ -185,19 +183,19 @@ BASE_CAMPAIGNS = [
             {
                 "mcc_type_include": "hotel",
                 "percentage_of_amount": "3",
-                "calculation_reason": "3 miles/SGD on all hotels spend"
+                "calculation_reason": "3 miles/SGD on all hotels spend",
             },
             {
                 "currency_exclude": "SGD",
                 "percentage_of_amount": "2.2",
-                "calculation_reason": "2.2 miles/SGD on all foreign card spend"
+                "calculation_reason": "2.2 miles/SGD on all foreign card spend",
             },
             {
                 "percentage_of_amount": "1.1",
-                "calculation_reason": "1.1 miles/SGD spent"
-            }
-        ]
-    }
+                "calculation_reason": "1.1 miles/SGD spent",
+            },
+        ],
+    },
 ]
 
 BASE_EXCLUSIONS = [
@@ -205,29 +203,28 @@ BASE_EXCLUSIONS = [
         "exclusion_name": "Standard Exclusions",
         "exclusion_start_date": BASE_START_DATE,
         "exclusion_end_date": BASE_END_DATE,
-        "card_type": ["scis_shopping", "scis_freedom", "scis_premiummiles", "scis_platinummiles"],
+        "card_type": [
+            "scis_shopping",
+            "scis_freedom",
+            "scis_premiummiles",
+            "scis_platinummiles",
+        ],
         "exclusion_conditions": {
-            "mcc":
-            {
+            "mcc": {
                 "6051": "Quasi Cash Merchants - Prepaid top-ups",
                 "9399": "Government Services-Not Elsewhere Classified | Excluded",
-                "6540": "POI (Point of Interaction) Funding Transactions (Excluding MoneySend) | Taxis & public transport"
+                "6540": "POI (Point of Interaction) Funding Transactions (Excluding MoneySend) | Taxis & public transport",
             },
-            "merchant":
-            {
-                "Blacklisted Merchant": "Merchant has been blacklisted"
-            }
-        }
+            "merchant": {"Blacklisted Merchant": "Merchant has been blacklisted"},
+        },
     }
 ]
+
 
 def create_campaigns(campaign_list: list):
     for campaign in campaign_list:
         try:
-            post_request = {
-                "action": "create",
-                "data": campaign
-            }
+            post_request = {"action": "create", "data": campaign}
             invoke_lambda(post_request, "campaign")
         except Exception as exception:
             print("Failed to add campaign: ", campaign["campaign_name"])
@@ -237,80 +234,150 @@ def create_campaigns(campaign_list: list):
 def create_exclusions(exclusion_list: list):
     for exclusion in exclusion_list:
         try:
-            post_request = {
-                "action": "create",
-                "data": exclusion
-            }
+            post_request = {"action": "create", "data": exclusion}
             invoke_lambda(post_request, "exclusion")
         except Exception as exception:
             print("Failed to add exclusion: ", exclusion["exclusion_name"])
             print(exception)
 
-create_campaigns(BASE_CAMPAIGNS)
-create_exclusions(BASE_EXCLUSIONS)
 
-print("complete")
+def create_users(user_list: list):
+    for user in user_list:
+        try:
+            post_request = {"action": "create", "data": user}
+            invoke_lambda(post_request, "user")
+        except Exception as exception:
+            print("Failed to add user: ", user["first_name"])
+            print(exception)
 
-#mockup transactions
-transaction1 = {
-        "id": "7ce56f44-659a-453f-8bc4-5a102faada42",
-        "card_id": "0fd148a9-a350-4567-9e6d-d768ab9c1932",
+
+def create_rewards(transaction_list: list):
+    # TODO do the transaction step!! especially the SQS part. this is just temp for testing of frontend
+    for transaction in transaction_list:
+        try:
+            post_request = {"action": "calculate_reward", "data": transaction}
+            invoke_lambda(post_request, "reward")
+        except Exception as exception:
+            print("Failed to calculate and add_reward: ", transaction["transaction_id"])
+            print(exception)
+
+
+TEST_USERS = [
+    {
+        "user_id": "marcusgohsh",
+        "first_name": "Marcus",
+        "last_name": "Goh",
+        "phone": "94223757",
+        "email": "hi@marcu.sg",
+        "created_at": "02-01-2022",
+        "updated_at": "02-01-2022",
+        "card_id": "marcus_card_id_1",
+        "card_pan": "1234-1234-1234-1111",
+        "card_type": "scis_freedom",
+    },
+    {
+        "user_id": "marcusgohsh",
+        "first_name": "Marcus",
+        "last_name": "Goh",
+        "phone": "94223757",
+        "email": "hi@marcu.sg",
+        "created_at": "02-01-2022",
+        "updated_at": "02-01-2022",
+        "card_id": "marcus_card_id_2",
+        "card_pan": "1234-1234-1234-2222",
+        "card_type": "scis_platinummiles",
+    },
+    {
+        "user_id": "marcusgohsh",
+        "first_name": "Marcus",
+        "last_name": "Goh",
+        "phone": "94223757",
+        "email": "hi@marcu.sg",
+        "created_at": "02-01-2022",
+        "updated_at": "02-01-2022",
+        "card_id": "marcus_card_id_3",
+        "card_pan": "1234-1234-1234-3333",
+        "card_type": "scis_premiummiles",
+    },
+    {
+        "user_id": "marcusgohsh",
+        "first_name": "Marcus",
+        "last_name": "Goh",
+        "phone": "94223757",
+        "email": "hi@marcu.sg",
+        "created_at": "02-01-2022",
+        "updated_at": "02-01-2022",
+        "card_id": "marcus_card_id_4",
+        "card_pan": "1234-1234-1234-4444",
+        "card_type": "scis_shopping",
+    },
+]
+
+
+TEST_TRANSACTIONS = [
+    {
+        "id": "asdf1",
+        "card_id": "marcus_card_id_1",
         "merchant": "Collier",
         "mcc": "4642",
         "currency": "SGD",
-        "amount": "285.96",
+        "amount": "2001",
         "sgd_amount": "2001",
-        "transaction_id": "07110e8bf85f1a1229eaa5dcbdea68c51d537218143d0021945cfae8861e3efc",
+        "transaction_id": "testtx1",
         "transaction_date": "09-06-2022",
-        "card_pan": "6771-8964-5359-9669",
-        "card_type": "scis_freedom"
-    }
-
-get_reward(transaction1)
-
-
-transaction2 = {
-        "id": "7ce56f44-659a-453f-8bc4-5a102faada42",
-        "card_id": "0fd148a9-a350-4567-9e6d-d768ab9c1932",
+        "card_pan": "1234-1234-1234-1111",
+        "card_type": "scis_freedom",
+    },
+    {
+        "id": "asdf2",
+        "card_id": "marcus_card_id_1",
         "merchant": "Grab",
         "mcc": "4642",
         "currency": "SGD",
         "amount": "285.96",
         "sgd_amount": "132.81",
-        "transaction_id": "07110e8bf85f1a1229eaa5dcbdea68c51d537218143d0021945cfae8861e3efc",
+        "transaction_id": "testtx2",
         "transaction_date": "09-06-2022",
-        "card_pan": "6771-8964-5359-9669",
-        "card_type": "scis_freedom"
-    }
-
-get_reward(transaction2)
-
-transaction3 = {
-        "id": "7ce56f44-659a-453f-8bc4-5a102faada42",
-        "card_id": "0fd148a9-a350-4567-9e6d-d768ab9c1932",
+        "card_pan": "1234-1234-1234-1111",
+        "card_type": "scis_freedom",
+    },
+    {
+        "id": "asdf3",
+        "card_id": "marcus_card_id_1",
         "merchant": "AXS",
         "mcc": "9399",
         "currency": "SGD",
         "amount": "285.96",
         "sgd_amount": "100.53",
-        "transaction_id": "07110e8bf85f1a1229eaa5dcbdea68c51d537218143d0021945cfae8861e3efc",
+        "transaction_id": "testtx3",
         "transaction_date": "09-06-2022",
-        "card_pan": "6771-8964-5359-9669",
-        "card_type": "scis_freedom"
-    }
-
-get_reward(transaction3)
-
-transaction4 = {
-        "id": "7ce56f44-659a-453f-8bc4-5a102faada42",
-        "card_id": "0fd148a9-a350-4567-9e6d-d768ab9c1932",
+        "card_pan": "1234-1234-1234-1111",
+        "card_type": "scis_freedom",
+    },
+    {
+        "id": "asdf4",
+        "card_id": "marcus_card_id_1",
         "merchant": "Blacklisted Merchant",
         "mcc": "9399",
         "currency": "SGD",
         "amount": "285.96",
         "sgd_amount": "50.67",
-        "transaction_id": "07110e8bf85f1a1229eaa5dcbdea68c51d537218143d0021945cfae8861e3efc",
+        "transaction_id": "testtx4",
         "transaction_date": "09-06-2022",
-        "card_pan": "6771-8964-5359-9669",
-        "card_type": "scis_freedom"
-    }
+        "card_pan": "1234-1234-1234-1111",
+        "card_type": "scis_freedom",
+    },
+]
+
+
+def run():
+
+    # create_campaigns(BASE_CAMPAIGNS)
+    # create_exclusions(BASE_EXCLUSIONS)
+    create_users(TEST_USERS)
+    create_rewards(TEST_TRANSACTIONS)
+
+    print("complete")
+
+
+run()

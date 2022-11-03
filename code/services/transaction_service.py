@@ -10,51 +10,63 @@
 # DELETE
 # ? luxury
 
+import json
+
 # When threshold transaction records are added, will invoke reward_service to generate new rewards
 # after bulk processing a csv, will sort the records by card type then date,
 #  then invoke reward service in batches
 #  (to improve speed by caching, where many txs with the same policy can be calculated at the same timeimport json
 import logging
 import os
-import requests
-import json
+from decimal import Decimal
 
 import boto3
-from boto3.dynamodb.conditions import Key, Attr
+import requests
+from boto3.dynamodb.conditions import Attr
 
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
 
 AWS_REGION = os.environ.get("AWS_REGION", "ap-southeast-1")
-TRANSACTION_TABLE_NAME = os.environ.get("TRANSACTION_TABLE_NAME", "transaction_service_table")
+TRANSACTION_TABLE_NAME = os.environ.get(
+    "TRANSACTION_TABLE_NAME", "transaction_service_table"
+)
 
 DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 TRANSACTION_TABLE = DYNAMODB_CLIENT.Table(TRANSACTION_TABLE_NAME)
 
-APIG_URL = os.environ.get("APIG_URL","https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/")
+APIG_URL = os.environ.get(
+    "APIG_URL", "https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/"
+)
+
+
+class JSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return json.JSONEncoder.default(self, obj)
 
 
 def invoke_lambda(post_request: dict, end_point: str):
     """Packages a JSON message into a http request and invokes another service
     Returns a jsonified response object"""
-    return requests.post(APIG_URL + end_point, json = post_request).json()
+    return requests.post(APIG_URL + end_point, json=post_request).json()
 
 
 def create_transaction(data: dict):
     """Takes in a json of transaction data (from csv processor/APIG) and creates DB object"""
     transaction_item = data
-    #TODO input verification to check that the fields are correctly set? or relegate to frontend?
+    # TODO input verification to check that the fields are correctly set? or relegate to frontend?
 
     try:
-        response = TRANSACTION_TABLE.put_item(
-            Item = transaction_item
-        )
+        response = TRANSACTION_TABLE.put_item(Item=transaction_item)
         LOGGER.info("transaction created")
     except Exception as exception:
         return {
             "statusCode": 500,
-                "message": "An error occurred creating the transaction.",
-                "error": str(exception)
+            "headers": {"Access-Control-Allow-Origin": "*"},
+            "message": "An error occurred creating the transaction.",
+            "error": str(exception),
         }
     return response
 
@@ -68,19 +80,21 @@ def batch_create_transactions(transaction_list: list):
             create_transaction(transaction)
         except Exception as exception:
             errorred_transactions.append(transaction)
-            LOGGER.error("Transaction <%s> failed to be saved", transaction["transaction_id"])
+            LOGGER.error(
+                "Transaction <%s> failed to be saved", transaction["transaction_id"]
+            )
             LOGGER.error(exception)
-    LOGGER.info("Transactions saved. Total errored values: %d", len(errorred_transactions))
-    
-    post_request = {
-        "action": "batch_create_reward",
-        "data": transaction_list
-    }
+    LOGGER.info(
+        "Transactions saved. Total errored values: %d", len(errorred_transactions)
+    )
+
+    post_request = {"action": "batch_create_reward", "data": transaction_list}
     invoke_lambda(post_request, "reward")
 
     return {
         "statusCode": 200,
-        "body": "Successfully processed batch of transactions"
+        "headers": {"Access-Control-Allow-Origin": "*"},
+        "body": "Successfully processed batch of transactions",
     }
 
 
@@ -89,16 +103,18 @@ def get_by_card_id(card_id: str):
     LOGGER.info("Attempting to get %s", card_id)
     try:
         # response = TRANSACTION_TABLE.get_item(Key={"card_id": card_id})
-        response = TRANSACTION_TABLE.scan(FilterExpression=Attr('card_id').eq(card_id))
+        response = TRANSACTION_TABLE.scan(FilterExpression=Attr("card_id").eq(card_id))
         LOGGER.info(json.dumps(response))
         # note: if the item is not found, response will not have key "item"
     except Exception as exception:
         return {
             "statusCode": 500,
-                "message": "An error occurred getting transactions by card_id.",
-                "error": str(exception)
+            "headers": {"Access-Control-Allow-Origin": "*"},
+            "message": "An error occurred getting transactions by card_id.",
+            "error": str(exception),
         }
     return response
+
 
 def get_by_card_type(user_id: str, card_type: str):
     response = "response"
@@ -109,15 +125,16 @@ def lambda_handler(event, context):
     """Main function that lambda passes trigger input into"""
 
     try:
-        if "body" in event: #if the event comes from APIG
+        if "body" in event:  # if the event comes from APIG
             body = json.loads(event["body"])
             action = body["action"]
-        else: #if the event comes from lambda test
+        else:  # if the event comes from lambda test
             body = event
             action = event["action"]
     except Exception as exception:
         return {
             "statusCode": 500,
+            "headers": {"Access-Control-Allow-Origin": "*"},
             "message": "Incorrect input",
             "error": repr(exception),
         }
@@ -128,21 +145,22 @@ def lambda_handler(event, context):
         elif action == "get_by_card_id":
             dynamo_resp = get_by_card_id(body["data"]["card_id"])
         elif action == "get_by_id":
-            dynamo_resp = get_by_card_type(body["data"]["user_id"], body["data"]["card_type"])
+            dynamo_resp = get_by_card_type(
+                body["data"]["user_id"], body["data"]["card_type"]
+            )
         else:
-            dynamo_resp = {
-                "statusCode": 500,
-                "body": "no such action"
-            }
-    #TODO: format error returns properly so apig can give proper error response reporting (rather than having to check cloud watch)
+            dynamo_resp = {"statusCode": 500, "body": "no such action"}
+    # TODO: format error returns properly so apig can give proper error response reporting (rather than having to check cloud watch)
     except Exception as exception:
         return {
             "statusCode": 500,
+            "headers": {"Access-Control-Allow-Origin": "*"},
             "message": "An error occurred processing the action.",
             "error": str(exception),
         }
 
     return {
         "statusCode": 200,
-        "body": json.dumps(dynamo_resp)
+        "headers": {"Access-Control-Allow-Origin": "*"},
+        "body": json.dumps(dynamo_resp, cls=JSONEncoder),
     }
