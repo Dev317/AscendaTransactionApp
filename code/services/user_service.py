@@ -1,11 +1,11 @@
+import json
 import logging
 import os
 from decimal import Decimal
-import requests
-import json
 
 import boto3
-from boto3.dynamodb.conditions import Key, Attr
+import requests
+from boto3.dynamodb.conditions import Attr
 
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
@@ -16,7 +16,10 @@ USER_TABLE_NAME = os.environ.get("USER_TABLE_NAME", "user_service_table")
 DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 USER_TABLE = DYNAMODB_CLIENT.Table(USER_TABLE_NAME)
 
-APIG_URL = os.environ.get("APIG_URL","https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/")
+APIG_URL = os.environ.get(
+    "APIG_URL", "https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/"
+)
+
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -24,23 +27,23 @@ class JSONEncoder(json.JSONEncoder):
             return float(obj)
         return json.JSONEncoder.default(self, obj)
 
+
 def invoke_lambda(post_request: dict, end_point: str):
     """Packages a JSON message into a http request and invokes another service
     Returns a jsonified response object"""
-    return requests.post(APIG_URL + end_point, json = post_request).json()
+    return requests.post(APIG_URL + end_point, json=post_request).json()
 
 
 def create_user(data: dict):
     try:
-        response = USER_TABLE.put_item(
-            Item = data
-        )
+        response = USER_TABLE.put_item(Item=data)
         LOGGER.info("campaign created")
     except Exception as exception:
         return {
             "statusCode": 500,
-                "message": "An error occurred creating the campaign.",
-                "error": str(exception)
+            "headers": {"Access-Control-Allow-Origin": "*"},
+            "message": "An error occurred creating the campaign.",
+            "error": str(exception),
         }
     return response
 
@@ -49,10 +52,11 @@ def batch_create_user(user_list: list):
     """Takes a list of user objects and adds them to dynamodb"""
     for user in user_list:
         create_user(user)
-    
+
     return {
         "statusCode": 200,
-        "body": "successfully batch added"
+        "headers": {"Access-Control-Allow-Origin": "*"},
+        "body": "successfully batch added",
     }
 
 
@@ -63,7 +67,7 @@ def get_cards_by_user_id(user_id):
     while "LastEvaluatedKey" in response:
         response = USER_TABLE.scan(ExclusiveStartKey=response["LastEvaluatedKey"])
         data.extend(response["Items"])
-    
+
     return data
 
 
@@ -80,6 +84,7 @@ def lambda_handler(event, context):
     except Exception as exception:
         return {
             "statusCode": 500,
+            "headers": {"Access-Control-Allow-Origin": "*"},
             "message": "Incorrect input",
             "error": repr(exception),
         }
@@ -97,16 +102,19 @@ def lambda_handler(event, context):
         else:
             resp = {
                 "statusCode": 500,
-                "body": "no such action"
+                "headers": {"Access-Control-Allow-Origin": "*"},
+                "body": "no such action",
             }
     except Exception as exception:
         return {
             "statusCode": 500,
+            "headers": {"Access-Control-Allow-Origin": "*"},
             "message": "An error occurred processing the action.",
             "error": str(exception),
         }
 
     return {
         "statusCode": 200,
-        "body": json.dumps(resp, cls=JSONEncoder)
+        "headers": {"Access-Control-Allow-Origin": "*"},
+        "body": json.dumps(resp, cls=JSONEncoder),
     }

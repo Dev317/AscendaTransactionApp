@@ -26,9 +26,9 @@ import json
 import logging
 import os
 from decimal import Decimal
-import requests
 
 import boto3
+import requests
 
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
@@ -39,7 +39,9 @@ CAMPAIGN_TABLE_NAME = os.environ.get("CAMPAIGN_TABLE_NAME", "campaign_service_ta
 DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 CAMPAIGN_TABLE = DYNAMODB_CLIENT.Table(CAMPAIGN_TABLE_NAME)
 
-APIG_URL = os.environ.get("APIG_URL","https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/")
+APIG_URL = os.environ.get(
+    "APIG_URL", "https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/"
+)
 
 
 class JSONEncoder(json.JSONEncoder):
@@ -52,68 +54,68 @@ class JSONEncoder(json.JSONEncoder):
 def invoke_lambda(post_request: dict, end_point: str):
     """Packages a JSON message into a http request and invokes another service
     Returns a jsonified response object"""
-    return requests.post(APIG_URL + end_point, json = post_request).json()
+    return requests.post(APIG_URL + end_point, json=post_request).json()
 
 
 def create_campaign(data):
     """Takes in a json of campaign data (from APIG) and creates DB object
     Then, invokes the calculation service to apply the campaign"""
 
-    #TODO input verification to check that the fields are correctly set? or relegate to frontend?
+    # TODO input verification to check that the fields are correctly set? or relegate to frontend?
 
-    #check if campaign exists
-    existing_campaign = get_by_card_type_and_name(data["card_type"], data["campaign_name"])
+    # check if campaign exists
+    existing_campaign = get_by_card_type_and_name(
+        data["card_type"], data["campaign_name"]
+    )
     if "Item" in existing_campaign:
         return {
             "statusCode": 500,
-            "message": "Campaign already exists. Did you mean to update instead?"
+            "headers": {"Access-Control-Allow-Origin": "*"},
+            "message": "Campaign already exists. Did you mean to update instead?",
         }
 
     try:
-        response = CAMPAIGN_TABLE.put_item(
-            Item = data
-        )
+        response = CAMPAIGN_TABLE.put_item(Item=data)
         LOGGER.info("campaign created")
     except Exception as exception:
         return {
             "statusCode": 500,
-                "message": "An error occurred creating the campaign.",
-                "error": str(exception)
+            "headers": {"Access-Control-Allow-Origin": "*"},
+            "message": "An error occurred creating the campaign.",
+            "error": str(exception),
         }
-    
+
     try:
-        post_request = {
-            "action": "add_new_campaign",
-            "data": data
-        }
+        post_request = {"action": "add_new_campaign", "data": data}
         invoke_lambda(post_request, "calculation")
         LOGGER.info("calculation successfully invoked")
     except Exception as exception:
         return {
             "statusCode": 500,
-                "message": "An error occurred invoking the calculation service.",
-                "error": str(exception)
+            "headers": {"Access-Control-Allow-Origin": "*"},
+            "message": "An error occurred invoking the calculation service.",
+            "error": str(exception),
         }
 
-                
     return response
-
-
 
 
 def get_all():
     """get all campaigns from the campaigns table"""
     try:
         response = CAMPAIGN_TABLE.scan()
-        data = response['Items']
-        while 'LastEvaluatedKey' in response:
-            response = CAMPAIGN_TABLE.scan(ExclusiveStartKey=response['LastEvaluatedKey'])
-            data.extend(response['Items'])
+        data = response["Items"]
+        while "LastEvaluatedKey" in response:
+            response = CAMPAIGN_TABLE.scan(
+                ExclusiveStartKey=response["LastEvaluatedKey"]
+            )
+            data.extend(response["Items"])
     except Exception as exception:
         return {
             "statusCode": 500,
-                "message": "An error occurred getting all campaigns.",
-                "error": str(exception)
+            "headers": {"Access-Control-Allow-Origin": "*"},
+            "message": "An error occurred getting all campaigns.",
+            "error": str(exception),
         }
     return data
 
@@ -122,14 +124,17 @@ def get_by_card_type_and_name(card_type: str, campaign_name: str):
     """CRUD: get by card type and name"""
     LOGGER.info("Attempting to get %s", campaign_name)
     try:
-        response = CAMPAIGN_TABLE.get_item(Key={"card_type": card_type,"campaign_name": campaign_name})
+        response = CAMPAIGN_TABLE.get_item(
+            Key={"card_type": card_type, "campaign_name": campaign_name}
+        )
         LOGGER.info(json.dumps(response))
         # note: if the item is not found, response will not have key "item"
     except Exception as exception:
         return {
             "statusCode": 500,
-                "message": "An error occurred getting campaign by id.",
-                "error": str(exception)
+            "headers": {"Access-Control-Allow-Origin": "*"},
+            "message": "An error occurred getting campaign by id.",
+            "error": str(exception),
         }
     return response
 
@@ -138,15 +143,16 @@ def lambda_handler(event, context):
     """Main function that lambda passes trigger input into"""
 
     try:
-        if "body" in event: #if the event comes from APIG
+        if "body" in event:  # if the event comes from APIG
             body = json.loads(event["body"])
             action = body["action"]
-        else: #if the event comes from lambda test
+        else:  # if the event comes from lambda test
             body = event
             action = event["action"]
     except Exception as exception:
         return {
             "statusCode": 500,
+            "headers": {"Access-Control-Allow-Origin": "*"},
             "message": "Incorrect input",
             "error": repr(exception),
         }
@@ -157,21 +163,22 @@ def lambda_handler(event, context):
         elif action == "get_all":
             dynamo_resp = get_all()
         elif action == "get_by_card_type_and_name":
-            dynamo_resp = get_by_card_type_and_name(body["data"]["card_type"], body["data"]["campaign_name"])
+            dynamo_resp = get_by_card_type_and_name(
+                body["data"]["card_type"], body["data"]["campaign_name"]
+            )
         else:
-            dynamo_resp = {
-                "statusCode": 500,
-                "body": "no such action"
-            }
-    #TODO: format error returns properly so apig can give proper error response reporting (rather than having to check cloud watch)
+            dynamo_resp = {"statusCode": 500, "body": "no such action"}
+    # TODO: format error returns properly so apig can give proper error response reporting (rather than having to check cloud watch)
     except Exception as exception:
         return {
             "statusCode": 500,
+            "headers": {"Access-Control-Allow-Origin": "*"},
             "message": "An error occurred processing the action.",
             "error": str(exception),
         }
 
     return {
         "statusCode": 200,
-        "body": json.dumps(dynamo_resp, cls=JSONEncoder)
+        "headers": {"Access-Control-Allow-Origin": "*"},
+        "body": json.dumps(dynamo_resp, cls=JSONEncoder),
     }
