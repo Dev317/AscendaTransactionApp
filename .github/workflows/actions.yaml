@@ -90,4 +90,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ap-southeast-1
         working-directory: ./terraform
-        run: terraform apply -auto-approve -input=false -var="github_token=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"
+        run: terraform apply -auto-approve -input=false -var="github_token=${{ secrets.DEPLOY_TOKEN }}"
