@@ -20,7 +20,7 @@ TEST_CSV_FILE_HEADER = [
     "amount",
     "sgd_amount",
     "transaction_id",
-    "date",
+    "transaction_date",
     "card_pan",
     "card_type",
 ]
@@ -47,7 +47,7 @@ S3_TEST_FILE_CONTENT = [
         "amount": 285.96,
         "sgd_amount": 0.0,
         "transaction_id": "07110e8bf85f1a1229eaa5dcbdea68c51d537218143d0021945cfae8861e3efc",
-        "date": "27/8/2021",
+        "transaction_date": "27/8/2021",
         "card_pan": "6771-8964-5359-9669",
         "card_type": "scis_platinummiles",
     }

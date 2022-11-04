@@ -67,7 +67,7 @@ def get_data_from_file(bucket, key, start_byte, end_byte):
             "amount": float(record_data[5]),
             "sgd_amount": float(record_data[6]),
             "transaction_id": str(record_data[7]),
-            "date": str(record_data[8]),
+            "transaction_date": str(record_data[8]),
             "card_pan": str(record_data[9]),
             "card_type": str(record_data[10]),
         }
