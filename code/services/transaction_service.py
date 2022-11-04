@@ -54,7 +54,7 @@ def invoke_lambda(post_request: dict, end_point: str):
 
 
 def create_transaction(data: dict):
-    """Takes in a json of transaction data (from csv processor/APIG) and creates DB object"""
+    """Takes in a dict of transaction data (from csv processor/APIG) and creates DB object"""
     transaction_item = data
     # TODO input verification to check that the fields are correctly set? or relegate to frontend?
 
@@ -125,7 +125,13 @@ def lambda_handler(event, context):
     """Main function that lambda passes trigger input into"""
 
     try:
-        if "body" in event:  # if the event comes from APIG
+        if "Records" in event:  # if the event comes from SQS
+            messages = [
+                json.loads(message["body"], parse_float=Decimal)
+                for message in event["Records"]
+            ]
+            action = "batch_create"
+        elif "body" in event:  # if the event comes from APIG
             body = json.loads(event["body"])
             action = body["action"]
         else:  # if the event comes from lambda test
@@ -145,9 +151,9 @@ def lambda_handler(event, context):
         elif action == "get_by_card_id":
             resp = get_by_card_id(body["data"]["card_id"])
         elif action == "get_by_id":
-            resp = get_by_card_type(
-                body["data"]["user_id"], body["data"]["card_type"]
-            )
+            resp = get_by_card_type(body["data"]["user_id"], body["data"]["card_type"])
+        elif action == "batch_create":
+            resp = batch_create_transactions(messages)
         elif action == "health":
             resp = "Service is healthy"
         else:
