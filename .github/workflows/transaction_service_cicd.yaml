@@ -14,7 +14,7 @@ env:
   SG_S3_BUCKET_NAME: lambda-archive-g1t1-singapore
   NV_S3_BUCKET_NAME: lambda-archive-g1t1-north-virginia
   S3_FOLDER_NAME: transaction
-  SRC_FILE_NAME: transaction_service.py
+  SRC_FILE_NAME: transaction_service
   LAMBDA_NAME: transaction_service
 
 jobs:
