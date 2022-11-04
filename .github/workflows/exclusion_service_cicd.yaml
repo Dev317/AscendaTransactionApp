@@ -25,3 +25,4 @@ jobs:
       s3-folder-name: exclusion
       src-file-name: exclusion_service
       lambda-name: exclusion_service
+    secrets: inherit
