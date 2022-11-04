@@ -220,7 +220,6 @@ resource "aws_sfn_state_machine" "stepfunction_file_processor" {
 
 # Create SQS Queue
 resource "aws_sqs_queue" "transactions_queue" {
-  name                        = "transactions-queue.fifo"
-  fifo_queue                  = true
-  content_based_deduplication = true
+  name                        = "transactions-queue"
+  fifo_queue                  = false
 }
