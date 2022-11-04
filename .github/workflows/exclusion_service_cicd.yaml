@@ -22,6 +22,7 @@ jobs:
     # needs: [ci]
     with:
       s3-folder-name: exclusion
+      src-file-dir: code/services
       src-file-name: exclusion_service
       lambda-name: exclusion_service
     secrets: inherit

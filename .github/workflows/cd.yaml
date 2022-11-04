@@ -7,6 +7,10 @@ on:
         required: true
         type: string
         description: "Name of S3 key folder path"
+      src-file-dir:
+        required: true
+        type: string
+        description: "Path to directory where source file is"
       src-file-name:
         required: true
         type: string
@@ -20,6 +24,7 @@ env:
   SG_S3_BUCKET_NAME: lambda-archive-g1t1-singapore
   NV_S3_BUCKET_NAME: lambda-archive-g1t1-north-virginia
   S3_FOLDER_NAME: ${{ inputs.s3-folder-name }}
+  SRC_FILE_DIR: ${{ inputs.src-file-dir }}
   SRC_FILE_NAME: ${{ inputs.src-file-name }}
   LAMBDA_NAME: ${{ inputs.lambda-name }}
 
@@ -38,10 +43,12 @@ jobs:
         run: |
           rm -rf build
           mkdir build
+          
       - name: Zip Code Files
         run: |
-          cd code/services
+          cd ${{ env.SRC_FILE_DIR }}
           zip ../../build/${{ env.S3_FOLDER_NAME }}-${{ github.run_id }}.zip ${{ env.SRC_FILE_NAME }}.py
+
       - name: Create Artifact
         uses: actions/upload-artifact@v3
         with:
