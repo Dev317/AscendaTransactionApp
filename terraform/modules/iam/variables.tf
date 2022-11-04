@@ -59,7 +59,9 @@ data "aws_iam_policy_document" "lambda_policy" {
       "states:StartExecution",
       # AWS SQS policy
       "sqs:SendMessage",
-      "sqs:ReceiveMessage"
+      "sqs:ReceiveMessage",
+      "sqs:DeleteMessage",
+      "sqs:GetQueueAttributes"
     ]
 
     // arn:aws:dynamodb:ap-southeast-1:717942231127:table/campaign_service_table
