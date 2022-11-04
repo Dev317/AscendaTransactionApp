@@ -2,6 +2,7 @@ name: Continuous Deployment
 
 on:
   workflow_call:
+    secrets: inherit
     inputs:
       s3-folder-name:
         required: true
