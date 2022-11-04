@@ -9,7 +9,7 @@ on:
       - ".github/workflows/transaction_service_cicd.yaml"
   pull_request:
     branches:
-      - "feature/health"
+      - "microservices"
 
 env:
   SG_S3_BUCKET_NAME: lambda-archive-g1t1-singapore
