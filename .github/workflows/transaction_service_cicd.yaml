@@ -6,6 +6,7 @@ on:
       - "microservices"
     paths:
       - "code/services/transaction_service.py"
+      - ".github/workflows/transaction_service_cicd.yaml"
   pull_request:
     branches:
       - "feature/health"
