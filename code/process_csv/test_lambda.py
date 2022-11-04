@@ -86,7 +86,7 @@ class TestLambdaFunction(unittest.TestCase):
         )
 
         # SQS Mock Setup
-        self.sqs = boto3.resource("sqs")
+        self.sqs = boto3.resource("sqs", region_name=DEFAULT_REGION)
         self.queue = self.sqs.create_queue(QueueName="test-transactions-queue")
 
     def test_get_data_from_file(self):
