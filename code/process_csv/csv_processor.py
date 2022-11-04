@@ -6,7 +6,6 @@ its content to DynamoDB table
 import json
 import logging
 import os
-import uuid
 from decimal import Decimal
 
 import boto3

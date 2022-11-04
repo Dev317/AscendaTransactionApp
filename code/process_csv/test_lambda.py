@@ -87,9 +87,7 @@ class TestLambdaFunction(unittest.TestCase):
 
         # SQS Mock Setup
         self.sqs = boto3.resource("sqs")
-        self.queue = self.sqs.create_queue(
-            QueueName="test-transactions-queue"
-        )
+        self.queue = self.sqs.create_queue(QueueName="test-transactions-queue")
 
     def test_get_data_from_file(self):
         from csv_processor import get_data_from_file
