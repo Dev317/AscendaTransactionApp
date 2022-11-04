@@ -7,7 +7,6 @@ on:
     paths:
       - "code/services/exclusion_service.py"
       - ".github/workflows/exclusion_service_cicd.yaml"
-      - ".github/workflows/cd.yaml"
   pull_request:
     branches:
       - "microservices"
