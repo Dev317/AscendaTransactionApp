@@ -88,7 +88,7 @@ class TestLambdaFunction(unittest.TestCase):
         # SQS Mock Setup
         self.sqs = boto3.resource("sqs")
         self.queue = self.sqs.create_queue(
-            QueueName="test-transactions-queue.fifo", Attributes={"FifoQueue": "true"}
+            QueueName="test-transactions-queue"
         )
 
     def test_get_data_from_file(self):
@@ -124,7 +124,7 @@ class TestLambdaFunction(unittest.TestCase):
 
         csv_processor.SQS_QUEUE_URL = self.queue.url
 
-        send_message_to_queue(S3_TEST_FILE_CONTENT[0], "abcd")
+        send_message_to_queue(S3_TEST_FILE_CONTENT[0])
 
         sqs_messages = self.queue.receive_messages()
 

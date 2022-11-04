@@ -89,14 +89,13 @@ def save_data_to_db(data):
     return result
 
 
-def send_message_to_queue(data, message_group):
+def send_message_to_queue(data):
     """
     Function sends a message to SQS Queue
     """
     result = SQS_CLIENT.send_message(
         QueueUrl=SQS_QUEUE_URL,
         MessageBody=json.dumps(data),
-        MessageGroupId=message_group,
     )
     LOGGER.info("message sent to queue")
     return result
@@ -134,11 +133,9 @@ def handler(event, context):
             s3_bucket, s3_file, start_byte, end_byte
         )
 
-        queue_message_group = str(uuid.uuid4())
-
         for item in data:
             save_data_to_db(item)
-            send_message_to_queue(item, queue_message_group)
+            send_message_to_queue(item)
             # put calculatiton code here
             # put save_reward_to_db here
             # todo: error handling to catch failed calculations and flag it
