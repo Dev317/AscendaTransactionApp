@@ -43,9 +43,9 @@ resource "aws_api_gateway_method" "create_transaction" {
 
 # Integrate with API Gateway with Lambda function
 resource "aws_api_gateway_integration" "create_transaction_lambda" {
-  rest_api_id = aws_api_gateway_rest_api.orchestrator_apigw.id
-  resource_id = aws_api_gateway_resource.transaction.id
-  http_method = aws_api_gateway_method.create_transaction.http_method
+  rest_api_id             = aws_api_gateway_rest_api.orchestrator_apigw.id
+  resource_id             = aws_api_gateway_resource.transaction.id
+  http_method             = aws_api_gateway_method.create_transaction.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
 
@@ -57,13 +57,13 @@ resource "aws_lambda_permission" "apigw-create-transaction" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.transaction_lambda.function_name
   principal     = "apigateway.amazonaws.com"
-  source_arn = "${aws_api_gateway_rest_api.orchestrator_apigw.execution_arn}/*/POST/transaction"
+  source_arn    = "${aws_api_gateway_rest_api.orchestrator_apigw.execution_arn}/*/POST/transaction"
 }
 
 
 # Deploy the endpoint as /prod/${resource}
 resource "aws_api_gateway_deployment" "transaction_api_deployment" {
-  depends_on = [ aws_api_gateway_integration.create_transaction_lambda ]
+  depends_on = [aws_api_gateway_integration.create_transaction_lambda]
 
   rest_api_id = aws_api_gateway_rest_api.orchestrator_apigw.id
 
@@ -80,4 +80,12 @@ resource "aws_api_gateway_deployment" "transaction_api_deployment" {
   }
 
   stage_name = "prod"
+}
+
+# SQS trigger for lambda
+resource "aws_lambda_event_source_mapping" "transaction_sqs_trigger" {
+  event_source_arn                   = var.transactions_queue_arn
+  function_name                      = aws_lambda_function.transaction_lambda.arn
+  maximum_batching_window_in_seconds = 60
+  batch_size                         = 50
 }

@@ -101,3 +101,7 @@ variable "route53_hosted_zone_id" {
   type        = string
 }
 
+variable "transactions_queue_arn" {
+  description = "Transactions Queue ARN"
+  type        = string
+}

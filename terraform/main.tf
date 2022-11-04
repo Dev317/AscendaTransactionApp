@@ -60,6 +60,7 @@ module "api_sg" {
   apigw_region             = "ap-southeast-1"
   certificate_arn          = module.acm_sg.certificate_arn
   route53_hosted_zone_id   = var.route53_hosted_zone_id
+  transactions_queue_arn   = module.file_processor_sg.transactions_queue_arn
 }
 
 module "file_processor_sg" {
@@ -103,6 +104,7 @@ module "api_north_virginia" {
   apigw_region             = "us-east-1"
   certificate_arn          = module.acm_north_virginia.certificate_arn
   route53_hosted_zone_id   = var.route53_hosted_zone_id
+  transactions_queue_arn   = module.file_processor_north_virginia.transactions_queue_arn
 }
 
 module "file_processor_north_virginia" {
