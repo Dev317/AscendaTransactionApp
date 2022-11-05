@@ -200,6 +200,20 @@ def calculate_reward(transaction: dict) -> dict:
         }
     return reward
 
+def batch_calculate_reward(transaction_list: list):
+    """Takes a list of transaction dicts and invokes calculate_reward multiple times"""
+    errored_transactions = []
+    for transaction in transaction_list:
+        try:
+            calculate_reward(transaction)
+        except Exception as exception:
+            errored_transactions.append(transaction)
+            LOGGER.error("Failed to calculate reward for transaction <%s>", transaction["transaction_id"])
+            LOGGER.error(exception)
+    LOGGER.info(
+        "Rewards saved. Total errored values: %d", len(errored_transactions)
+    )
+
 
 def put_reward(reward: dict):
     """Takes a reward dict and stores it into dynamodb table"""
@@ -259,6 +273,8 @@ def lambda_handler(event, context):
             resp = calculate_reward(body["data"])
         elif action == "get_all_by_card_id":
             resp = get_all_by_card_id(body["data"]["card_id"])
+        elif action == "batch_calculate_reward":
+            resp = batch_calculate_reward(body["data"])
         elif action == "health":
             resp = "Service is healthy"
 

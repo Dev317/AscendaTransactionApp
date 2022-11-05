@@ -88,7 +88,7 @@ def batch_create_transactions(transaction_list: list):
         "Transactions saved. Total errored values: %d", len(errorred_transactions)
     )
 
-    post_request = {"action": "batch_create_reward", "data": transaction_list}
+    post_request = {"action": "batch_calculate_reward", "data": transaction_list}
     invoke_lambda(post_request, "reward")
 
     return {
