@@ -46,7 +46,7 @@ jobs:
 
   cd:
     uses: ./.github/workflows/cd.yaml
-    # needs: [ci]
+    needs: [ci]
     with:
       s3-folder-name: user
       src-file-dir: code/services
