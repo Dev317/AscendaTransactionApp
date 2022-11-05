@@ -287,54 +287,56 @@ def lambda_handler(event, context):
     """Main function that lambda passes trigger input into"""
     LOGGER.info("Reward service starting up")
 
-    # try:
-    if "body" in event:  # if the event comes from APIG
-        body = json.loads(event["body"])
-        LOGGER.info(type(event["body"]))
-        LOGGER.info("this is body: %s", body)
-        LOGGER.info(type(body))
-        action = body["action"]
-    else:  # if the event comes from lambda test
-        body = event
-        action = event["action"]
-    # except Exception as exception:
-    #     return {
-    #         "statusCode": 500,
-    #         "headers": {"Access-Control-Allow-Origin": "*"},
-    #         "message": "Incorrect input",
-    #         "error": repr(exception),
-    #     }
-
-    # try:
-    # PRODUCTION ENDPOINTS
-    if action == "calculate_reward":
-        resp = calculate_reward(body["data"])
-    elif action == "get_all_by_card_id":
-        resp = get_all_by_card_id(body["data"]["card_id"])
-    elif action == "batch_calculate_reward":
-        LOGGER.info("batch_calculate_reward called")
-        LOGGER.info(body["data"])
-        resp = batch_calculate_reward(body["data"])
-    elif action == "health":
-        resp = "Service is healthy"
-
-    # TESTING ENDPOINTS
-    elif action == "test_get_policy":
-        resp = get_policy(body["data"]["card_type"], body["data"]["policy_date"])
-    else:
+    try:
+        if "body" in event:  # if the event comes from APIG
+            body = json.loads(event["body"])
+            LOGGER.info(type(event["body"]))
+            LOGGER.info("this is body: %s", body)
+            LOGGER.info(type(body))
+            action = body["action"]
+        else:  # if the event comes from lambda test
+            body = event
+            action = event["action"]
+    except Exception as exception:
         LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
-            "body": "no such action",
+            "message": "Incorrect input",
+            "error": repr(exception),
         }
-    # except Exception as exception:
-    #     return {
-    #         "statusCode": 500,
-    #         "headers": {"Access-Control-Allow-Origin": "*"},
-    #         "message": "An error occurred processing the action.",
-    #         "error": str(exception),
-    #     }
+
+    try:
+        # PRODUCTION ENDPOINTS
+        if action == "calculate_reward":
+            resp = calculate_reward(body["data"])
+        elif action == "get_all_by_card_id":
+            resp = get_all_by_card_id(body["data"]["card_id"])
+        elif action == "batch_calculate_reward":
+            LOGGER.info("batch_calculate_reward called")
+            LOGGER.info(body["data"])
+            resp = batch_calculate_reward(body["data"])
+        elif action == "health":
+            resp = "Service is healthy"
+
+        # TESTING ENDPOINTS
+        elif action == "test_get_policy":
+            resp = get_policy(body["data"]["card_type"], body["data"]["policy_date"])
+        else:
+            LOGGER.error("ERROR: no such action")
+            return {
+                "statusCode": 500,
+                "headers": {"Access-Control-Allow-Origin": "*"},
+                "body": "no such action",
+            }
+    except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
+        return {
+            "statusCode": 500,
+            "headers": {"Access-Control-Allow-Origin": "*"},
+            "message": "An error occurred processing the action.",
+            "error": str(exception),
+        }
 
     return {
         "statusCode": 200,
