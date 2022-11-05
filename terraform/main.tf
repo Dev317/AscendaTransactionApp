@@ -37,6 +37,14 @@ module "route53" {
   apigw_endpoint_secondary    = module.api_north_virginia.apigw_base_url
 }
 
+module "kms" {
+  providers = {
+    aws = aws.northvirginia
+  }
+  source                      = "./modules/kms"
+  route53_hosted_zone_id      = var.route53_hosted_zone_id
+}
+
 # -----------------------------------
 # Singapore Configuration
 # -----------------------------------
