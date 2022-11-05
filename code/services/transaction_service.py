@@ -50,6 +50,8 @@ class JSONEncoder(json.JSONEncoder):
 def invoke_lambda(post_request: dict, end_point: str):
     """Packages a JSON message into a http request and invokes another service
     Returns a jsonified response object"""
+    LOGGER.info("%s invoked", end_point)
+    LOGGER.info(post_request)
     return requests.post(APIG_URL + end_point, json=post_request).json()
 
 
