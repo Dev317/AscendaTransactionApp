@@ -34,28 +34,6 @@ resource "aws_s3_bucket_cors_configuration" "cors_config" {
   }
 }
 
-# Create DynamoDB to store records -- TO DELETE
-resource "aws_dynamodb_table" "transactions_records_table" {
-  name           = "transaction-records-table"
-  billing_mode   = "PROVISIONED"
-  read_capacity  = "30"
-  write_capacity = "30"
-  hash_key       = "id"
-
-  attribute {
-    name = "id"
-    type = "S"
-  }
-
-  ttl {
-    enabled        = true
-    attribute_name = "expiryPeriod"
-  }
-  point_in_time_recovery { enabled = true }
-  server_side_encryption { enabled = true }
-  lifecycle { ignore_changes = [write_capacity, read_capacity] }
-}
-
 # Create AWS Lambda Function for File Upload
 
 resource "aws_lambda_function" "file_upload" {
@@ -71,7 +49,6 @@ resource "aws_lambda_function" "file_upload" {
 
   environment {
     variables = {
-      DB_TABLE_NAME = aws_dynamodb_table.transactions_records_table.name
       CHUNK_SIZE    = 100000
       SQS_QUEUE_URL = aws_sqs_queue.transactions_queue.url
     }
@@ -220,6 +197,7 @@ resource "aws_sfn_state_machine" "stepfunction_file_processor" {
 
 # Create SQS Queue
 resource "aws_sqs_queue" "transactions_queue" {
-  name                        = "transactions-queue"
-  fifo_queue                  = false
+  name          = "transactions-queue"
+  fifo_queue    = false
+  delay_seconds = 2
 }

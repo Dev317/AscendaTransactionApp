@@ -21,6 +21,7 @@ resource "aws_lambda_function" "transaction_lambda" {
   s3_key           = aws_s3_object.transaction_code.key
   source_code_hash = filebase64sha256(var.transaction_service_zip)
   runtime          = "python3.7"
+  timeout          = 30
 
   environment {
     variables = {
@@ -86,6 +87,6 @@ resource "aws_api_gateway_deployment" "transaction_api_deployment" {
 resource "aws_lambda_event_source_mapping" "transaction_sqs_trigger" {
   event_source_arn                   = var.transactions_queue_arn
   function_name                      = aws_lambda_function.transaction_lambda.arn
-  maximum_batching_window_in_seconds = 60
-  batch_size                         = 50
+  maximum_batching_window_in_seconds = 10
+  batch_size                         = 2
 }
