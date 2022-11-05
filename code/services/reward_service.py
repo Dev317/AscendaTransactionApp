@@ -76,18 +76,8 @@ def invoke_lambda(post_request: dict, end_point: str):
 
 
 def convert_date(input_date: str):
-    # return parse(date_input).strftime("%d-%m-%y")
-    date_things = input_date.split("/")
-    # LOGGER.info("date string: %s", str(date_things))
-    in_day = date_things[0]
-    in_mth = date_things[1]
-    in_yr = date_things[2]
-    # LOGGER.info("date items: %s %s %s", in_day, in_mth, in_yr)
-    date_time_obj = datetime.date(
-        year=int(in_yr), month=int(in_mth), day=int(in_day)
-    )
-    # LOGGER.info("here")
-    return date_time_obj.strftime("%d-%m-%Y")
+    """Function to parse any date format into what we want grrr"""
+    return parse(input_date, dayfirst=True).strftime("%d-%m-%Y")
 
 #   ______ .______       __    __   _______
 #  /      ||   _  \     |  |  |  | |       \
