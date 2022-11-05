@@ -58,7 +58,7 @@ def get_data_from_file(bucket, key, start_byte, end_byte):
             "id": str(record_data[0]),
             "card_id": str(record_data[1]),
             "merchant": str(record_data[2]),
-            "mcc": int(record_data[3]) if len(record_data[3]) > 0 else 0,
+            "mcc": int(record_data[3].strip('\"')) if len(record_data[3]) > 0 else 0,
             "currency": str(record_data[4]),
             "amount": float(record_data[5]),
             "sgd_amount": float(record_data[6]),
