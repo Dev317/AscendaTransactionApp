@@ -134,7 +134,7 @@ def handler(event, context):
 
         for item in data:
             save_data_to_db(item)
-        
+
         send_message_to_queue(data)
 
         final_iteration = is_final_iteration(start_byte, file_size, CHUNK_SIZE)
@@ -158,7 +158,7 @@ def handler(event, context):
 
         for item in data:
             save_data_to_db(item)
-        
+
         send_message_to_queue(data)
 
         event["handler"]["results"] = {
