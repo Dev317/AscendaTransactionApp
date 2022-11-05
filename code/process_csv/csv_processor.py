@@ -6,7 +6,6 @@ its content to DynamoDB table
 import json
 import logging
 import os
-from decimal import Decimal
 
 import boto3
 
@@ -14,13 +13,10 @@ LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
 
 AWS_REGION = os.environ.get("AWS_REGION", "ap-southeast-1")
-DB_TABLE_NAME = os.environ.get("DB_TABLE_NAME", "transaction-records-table")
 
 CHUNK_SIZE = int(os.environ.get("CHUNK_SIZE", 1000))
 
 S3_CLIENT = boto3.client("s3")
-DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
-DYNAMODB_TABLE = DYNAMODB_CLIENT.Table(DB_TABLE_NAME)
 
 SQS_CLIENT = boto3.client("sqs")
 SQS_QUEUE_URL = os.environ.get("SQS_QUEUE_URL")
@@ -80,15 +76,6 @@ def get_data_from_file(bucket, key, start_byte, end_byte):
     return (data, new_start_byte)
 
 
-def save_data_to_db(data):
-    """
-    Function saves data to DynamoDB table
-    """
-    item = json.loads(json.dumps(data), parse_float=Decimal)
-    result = DYNAMODB_TABLE.put_item(Item=item)
-    return result
-
-
 def send_message_to_queue(data):
     """
     Function sends a message to SQS Queue
@@ -133,9 +120,6 @@ def handler(event, context):
             s3_bucket, s3_file, start_byte, end_byte
         )
 
-        for item in data:
-            save_data_to_db(item)
-
         send_message_to_queue(data)
 
         final_iteration = is_final_iteration(start_byte, file_size, CHUNK_SIZE)
@@ -156,9 +140,6 @@ def handler(event, context):
         data, next_start_byte = get_data_from_file(
             s3_bucket, s3_file, start_byte, end_byte
         )
-
-        for item in data:
-            save_data_to_db(item)
 
         send_message_to_queue(data)
 

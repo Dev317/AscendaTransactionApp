@@ -53,13 +53,9 @@ S3_TEST_FILE_CONTENT = [
     }
 ]
 
-DYNAMODB_TABLE_NAME = "transaction-records-table"
-
 
 @mock_s3
-@mock_dynamodb
 @mock_sqs
-@mock.patch.dict(os.environ, {"DB_TABLE_NAME": DYNAMODB_TABLE_NAME})
 class TestLambdaFunction(unittest.TestCase):
     def setUp(self):
         # S3 Mock Setup
@@ -70,20 +66,6 @@ class TestLambdaFunction(unittest.TestCase):
         self.s3 = boto3.resource("s3", region_name=DEFAULT_REGION)
         self.s3_bucket = self.s3.create_bucket(Bucket=S3_BUCKET_NAME)
         self.s3_bucket.put_object(Key=S3_TEST_FILE_KEY, Body=open("testfile.csv", "rb"))
-
-        # DynamoDB Mock Setup
-        self.dynamodb = boto3.client("dynamodb", region_name="ap-southeast-1")
-
-        self.table_dict = self.dynamodb.create_table(
-            TableName=DYNAMODB_TABLE_NAME,
-            KeySchema=[{"KeyType": "HASH", "AttributeName": "id"}],
-            AttributeDefinitions=[{"AttributeName": "id", "AttributeType": "S"}],
-            ProvisionedThroughput={"ReadCapacityUnits": 30, "WriteCapacityUnits": 30},
-        )
-
-        self.table = boto3.resource("dynamodb", region_name="ap-southeast-1").Table(
-            DYNAMODB_TABLE_NAME
-        )
 
         # SQS Mock Setup
         self.sqs = boto3.resource("sqs")
@@ -97,24 +79,6 @@ class TestLambdaFunction(unittest.TestCase):
         )
 
         self.assertEqual(file_content, S3_TEST_FILE_CONTENT)
-
-    def test_save_data_to_db(self):
-        from csv_processor import save_data_to_db
-
-        for item in S3_TEST_FILE_CONTENT:
-            save_data_to_db(item)
-
-        db_response = self.table.scan(Limit=1)
-
-        db_records = db_response["Items"]
-
-        while "LastEvaluatedKey" in db_response:
-            db_response = self.table.scan(
-                Limit=1, ExclusiveStartKey=db_response["LastEvaluatedKey"]
-            )
-            db_records += db_response["Items"]
-
-        self.assertEqual(len(S3_TEST_FILE_CONTENT), len(db_records))
 
     def test_send_message_to_queue(self):
         import csv_processor
