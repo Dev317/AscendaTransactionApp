@@ -191,6 +191,7 @@ def calculate_reward(transaction: dict) -> dict:
         policy = get_policy(transaction["card_type"], transaction["transaction_date"])
         reward = apply_policy(policy, transaction)
         put_reward(reward)
+        LOGGER.info("Reward stored: {reward[reward_id]}")
     except Exception as exception:
         return {
             "statusCode": 500,
@@ -206,8 +207,8 @@ def batch_calculate_reward(transaction_list: list):
     errored_transactions = []
     for transaction in transaction_list:
         try:
-            calculate_reward(transaction)
-            LOGGER.info(transaction)
+            reward = calculate_reward(transaction)
+            LOGGER.info(json.dumps(reward))
         except Exception as exception:
             errored_transactions.append(transaction)
             LOGGER.error(
@@ -216,6 +217,13 @@ def batch_calculate_reward(transaction_list: list):
             )
             LOGGER.error(exception)
     LOGGER.info("Rewards saved. Total errored values: %d", len(errored_transactions))
+    return {
+        "statusCode": 200,
+        "headers": {"Access-Control-Allow-Origin": "*"},
+        "body": "Successfully saved batch rewards.",
+        "errored values": json.dumps(errored_transactions)
+    }
+
 
 
 def put_reward(reward: dict):

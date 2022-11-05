@@ -158,6 +158,8 @@ def lambda_handler(event, context):
             resp = get_by_card_type(body["data"]["user_id"], body["data"]["card_type"])
         elif action == "batch_create":
             resp = batch_create_transactions(messages)
+        elif action == "test_reward":
+            resp = invoke_lambda({"action":"batch_calculate_reward", "data": body["data"]}, "reward")
         elif action == "health":
             resp = "Service is healthy"
         else:
