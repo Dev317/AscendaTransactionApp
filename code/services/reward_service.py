@@ -207,6 +207,7 @@ def batch_calculate_reward(transaction_list: list):
     for transaction in transaction_list:
         try:
             calculate_reward(transaction)
+            LOGGER.info(transaction)
         except Exception as exception:
             errored_transactions.append(transaction)
             LOGGER.error(
@@ -276,6 +277,8 @@ def lambda_handler(event, context):
         elif action == "get_all_by_card_id":
             resp = get_all_by_card_id(body["data"]["card_id"])
         elif action == "batch_calculate_reward":
+            LOGGER.info("batch_calculate_reward called")
+            LOGGER.info(body["data"])
             resp = batch_calculate_reward(body["data"])
         elif action == "health":
             resp = "Service is healthy"
