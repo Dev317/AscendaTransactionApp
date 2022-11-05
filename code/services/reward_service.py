@@ -11,6 +11,7 @@
 # ? luxury
 
 import json
+import datetime
 
 # DELETE
 # ? luxury
@@ -21,6 +22,7 @@ from decimal import Decimal
 import boto3
 import requests
 from boto3.dynamodb.conditions import Attr
+from dateutil.parser import parse
 
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
@@ -66,8 +68,26 @@ class JSONEncoder(json.JSONEncoder):
 def invoke_lambda(post_request: dict, end_point: str):
     """Packages a JSON message into a http request and invokes another service
     Returns a jsonified response object"""
-    return requests.post(APIG_URL + end_point, json=post_request).json()
+    LOGGER.info("%s invoked", end_point)
+    LOGGER.info(post_request)
+    lambda_response = requests.post(APIG_URL + end_point, json=post_request).json()
+    LOGGER.info("%s response: %s", end_point, lambda_response)
+    return lambda_response
 
+
+def convert_date(input_date: str):
+    # return parse(date_input).strftime("%d-%m-%y")
+    date_things = input_date.split("/")
+    # LOGGER.info("date string: %s", str(date_things))
+    in_day = date_things[0]
+    in_mth = date_things[1]
+    in_yr = date_things[2]
+    # LOGGER.info("date items: %s %s %s", in_day, in_mth, in_yr)
+    date_time_obj = datetime.date(
+        year=int(in_yr), month=int(in_mth), day=int(in_day)
+    )
+    # LOGGER.info("here")
+    return date_time_obj.strftime("%d-%m-%Y")
 
 #   ______ .______       __    __   _______
 #  /      ||   _  \     |  |  |  | |       \
@@ -79,14 +99,15 @@ def invoke_lambda(post_request: dict, end_point: str):
 
 
 def get_policy(card_type: str, policy_date: str) -> dict:
-    try:
-        post_request = {
-            "action": "get_policy",
-            "data": {"policy_date": policy_date, "card_type": card_type},
-        }
-        policy = invoke_lambda(post_request, "calculation")
-    except Exception as exception:
-        print("error retrieving policy from calculation_service: " + str(exception))
+    # try:
+    policy_date = convert_date(policy_date)
+    post_request = {
+        "action": "get_policy",
+        "data": {"policy_date": policy_date, "card_type": card_type},
+    }
+    policy = invoke_lambda(post_request, "calculation")
+    # except Exception as exception:
+    #     print("error retrieving policy from calculation_service: " + str(exception))
 
     if "policy_date" in policy:
         return policy
@@ -191,7 +212,7 @@ def calculate_reward(transaction: dict) -> dict:
         policy = get_policy(transaction["card_type"], transaction["transaction_date"])
         reward = apply_policy(policy, transaction)
         put_reward(reward)
-        LOGGER.info("Reward stored: {reward[reward_id]}")
+        LOGGER.info("Reward stored: %s", reward["reward_id"])
     except Exception as exception:
         return {
             "statusCode": 500,
@@ -204,6 +225,7 @@ def calculate_reward(transaction: dict) -> dict:
 
 def batch_calculate_reward(transaction_list: list):
     """Takes a list of transaction dicts and invokes calculate_reward multiple times"""
+    LOGGER.info("Batch processing begins...")
     errored_transactions = []
     for transaction in transaction_list:
         try:
@@ -228,8 +250,9 @@ def batch_calculate_reward(transaction_list: list):
 def put_reward(reward: dict):
     """Takes a reward dict and stores it into dynamodb table"""
     try:
+        item = json.loads(json.dumps(reward), parse_float=Decimal)
         LOGGER.info("Attempting to save reward %s to db", reward["reward_id"])
-        response = REWARD_TABLE.put_item(Item=reward)
+        response = REWARD_TABLE.put_item(Item=item)
         LOGGER.info("reward %s - %s saved to db", reward["reward_id"], reward["date"])
     except Exception as exception:
         LOGGER.error(str(exception))
@@ -261,51 +284,53 @@ def get_all_by_card_id(card_id: str):
 
 def lambda_handler(event, context):
     """Main function that lambda passes trigger input into"""
+    LOGGER.info("Reward service starting up")
 
-    try:
-        if "body" in event:  # if the event comes from APIG
-            body = json.loads(event["body"])
-            action = body["action"]
-        else:  # if the event comes from lambda test
-            body = event
-            action = event["action"]
-    except Exception as exception:
+    # try:
+    if "body" in event:  # if the event comes from APIG
+        body = json.loads(event["body"])
+        LOGGER.info("this is body: %s", body)
+        action = body["action"]
+    else:  # if the event comes from lambda test
+        body = event
+        action = event["action"]
+    # except Exception as exception:
+    #     return {
+    #         "statusCode": 500,
+    #         "headers": {"Access-Control-Allow-Origin": "*"},
+    #         "message": "Incorrect input",
+    #         "error": repr(exception),
+    #     }
+
+    # try:
+    # PRODUCTION ENDPOINTS
+    if action == "calculate_reward":
+        resp = calculate_reward(body["data"])
+    elif action == "get_all_by_card_id":
+        resp = get_all_by_card_id(body["data"]["card_id"])
+    elif action == "batch_calculate_reward":
+        LOGGER.info("batch_calculate_reward called")
+        LOGGER.info(body["data"])
+        resp = batch_calculate_reward(body["data"])
+    elif action == "health":
+        resp = "Service is healthy"
+
+    # TESTING ENDPOINTS
+    elif action == "test_get_policy":
+        resp = get_policy(body["data"]["card_type"], body["data"]["policy_date"])
+    else:
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
-            "message": "Incorrect input",
-            "error": repr(exception),
+            "body": "no such action",
         }
-
-    try:
-        # PRODUCTION ENDPOINTS
-        if action == "calculate_reward":
-            resp = calculate_reward(body["data"])
-        elif action == "get_all_by_card_id":
-            resp = get_all_by_card_id(body["data"]["card_id"])
-        elif action == "batch_calculate_reward":
-            LOGGER.info("batch_calculate_reward called")
-            LOGGER.info(body["data"])
-            resp = batch_calculate_reward(body["data"])
-        elif action == "health":
-            resp = "Service is healthy"
-
-        # TESTING ENDPOINTS
-        elif action == "test_get_policy":
-            resp = get_policy(body["data"]["card_type"], body["data"]["policy_date"])
-        else:
-            return {
-                "statusCode": 500,
-                "headers": {"Access-Control-Allow-Origin": "*"},
-                "body": "no such action",
-            }
-    except Exception as exception:
-        return {
-            "statusCode": 500,
-            "headers": {"Access-Control-Allow-Origin": "*"},
-            "message": "An error occurred processing the action.",
-            "error": str(exception),
-        }
+    # except Exception as exception:
+    #     return {
+    #         "statusCode": 500,
+    #         "headers": {"Access-Control-Allow-Origin": "*"},
+    #         "message": "An error occurred processing the action.",
+    #         "error": str(exception),
+    #     }
 
     return {
         "statusCode": 200,

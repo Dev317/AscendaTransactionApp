@@ -52,7 +52,9 @@ def invoke_lambda(post_request: dict, end_point: str):
     Returns a jsonified response object"""
     LOGGER.info("%s invoked", end_point)
     LOGGER.info(post_request)
-    return requests.post(APIG_URL + end_point, json=post_request).json()
+    lambda_response = requests.post(APIG_URL + end_point, json=post_request).json()
+    LOGGER.info(lambda_response)
+    return lambda_response
 
 
 def create_transaction(data: dict):
@@ -77,6 +79,7 @@ def batch_create_transactions(transaction_list: list):
     """Takes a list of transaction dicts and invokes create_transaction multiple times,
     Then enqueues the batch transactions to generate rewards"""
     errorred_transactions = []
+    LOGGER.info("Creating a batch of %d transactions", len(transaction_list))
     for transaction in transaction_list:
         try:
             create_transaction(transaction)
@@ -90,10 +93,13 @@ def batch_create_transactions(transaction_list: list):
         "Transactions saved. Total errored values: %d", len(errorred_transactions)
     )
 
-    post_request = {"action": "batch_calculate_reward", "data": transaction_list}
+    LOGGER.info("Transaction list: %s", transaction_list)
+
+    post_request = json.dumps({"action": "batch_calculate_reward", "data": transaction_list},  cls=JSONEncoder)
     res = invoke_lambda(post_request, "reward")
 
-    LOGGER.info(res)
+    LOGGER.info("response from reward service received")
+    LOGGER.info(json.dumps(res))
 
     return {
         "statusCode": 200,
@@ -133,6 +139,8 @@ def lambda_handler(event, context):
             transactions = list()
             for message in event["Records"]:
                 transactions += json.loads(message["body"])
+            LOGGER.info("total messages: %d", len(event["Records"]))
+            LOGGER.info(messages)
             action = "batch_create"
         elif "body" in event:  # if the event comes from APIG
             body = json.loads(event["body"])
@@ -171,6 +179,7 @@ def lambda_handler(event, context):
             }
     # TODO: format error returns properly so apig can give proper error response reporting (rather than having to check cloud watch)
     except Exception as exception:
+        LOGGER.error(repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
