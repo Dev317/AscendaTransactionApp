@@ -289,6 +289,7 @@ def lambda_handler(event, context):
     # try:
     if "body" in event:  # if the event comes from APIG
         body = json.loads(event["body"])
+        LOGGER.info(type(event["body"]))
         LOGGER.info("this is body: %s", body)
         LOGGER.info(type(body))
         action = body["action"]
