@@ -261,6 +261,15 @@ def create_rewards(transaction_list: list):
             print("Failed to calculate and add_reward: ", transaction["transaction_id"])
             print(exception)
 
+def create_card_groups(cardgroup_list: list):
+    for cardgroup in cardgroup_list:
+        try:
+            post_request = {"action": "create", "data": cardgroup}
+            invoke_lambda(post_request, "card")
+        except Exception as exception:
+            print("Failed to add card group: ", cardgroup["group_name"])
+            print(exception)
+
 
 TEST_USERS = [
     {
@@ -369,6 +378,41 @@ TEST_TRANSACTIONS = [
     },
 ]
 
+CARD_GROUPS = [
+    {
+    "card_group": "scis_miles_group",
+    "card_type": "scis_premiummiles",
+    "group_name": "SCIS Miles Programme",
+    "group_description": "Rack up miles, reap more rewards.",
+    "unit_prefix": "",
+    "unit_suffix": " miles"
+    },
+    {
+    "card_group": "scis_miles_group",
+    "card_type": "scis_platinummiles",
+    "group_name": "SCIS Miles Programme",
+    "group_description": "Rack up miles, reap more rewards.",
+    "unit_prefix": "",
+    "unit_suffix": " miles"
+    },
+    {
+    "card_group": "cashback_group",
+    "card_type": "scis_shopping",
+    "group_name": "Cashback Programmes",
+    "group_description": "Earn some quick cashback with SCIS!",
+    "unit_prefix": "$",
+    "unit_suffix": ""
+    },
+    {
+    "card_group": "freedom_points_group",
+    "card_type": "scis_freedom",
+    "group_name": "SCIS Freedom",
+    "group_description": "Experience financial freedom with Freedom Points",
+    "unit_prefix": "",
+    "unit_suffix": " pts"
+    }
+]
+
 
 def run():
 
@@ -376,6 +420,7 @@ def run():
     create_exclusions(BASE_EXCLUSIONS)
     create_users(TEST_USERS)
     create_rewards(TEST_TRANSACTIONS)
+    create_card_groups(CARD_GROUPS)
     print("complete")
 
 

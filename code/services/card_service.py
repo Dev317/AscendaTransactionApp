@@ -65,6 +65,7 @@ def create_card(data):
         data["card_type"], data["card_group"]
     )
     if "Item" in existing_card:
+        LOGGER.error("ERROR: Card already exists. Did you mean to update instead?")
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -75,6 +76,7 @@ def create_card(data):
         response = CARD_TABLE.put_item(Item=data)
         LOGGER.info("card created")
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -96,6 +98,7 @@ def get_all():
             )
             data.extend(response["Items"])
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -115,13 +118,23 @@ def get_by_card_type_and_group(card_type: str, card_group: str):
         LOGGER.info(json.dumps(response))
         # note: if the item is not found, response will not have key "item"
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
             "message": "An error occurred getting card by id.",
             "error": str(exception),
         }
-    return response
+    if "Item" in response:
+        return response["Item"]
+    else:
+        LOGGER.error("ERROR: no such card + group combination")
+        return {
+            "statusCode": 500,
+            "headers": {"Access-Control-Allow-Origin": "*"},
+            "message": "no such card + group combination",
+            "error": str(exception),
+        }
 
 
 def lambda_handler(event, context):
@@ -135,6 +148,7 @@ def lambda_handler(event, context):
             body = event
             action = event["action"]
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -161,6 +175,7 @@ def lambda_handler(event, context):
             }
     # TODO: format error returns properly so apig can give proper error response reporting (rather than having to check cloud watch)
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
