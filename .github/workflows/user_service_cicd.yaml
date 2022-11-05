@@ -12,10 +12,30 @@ on:
       - "microservices"
 
 jobs:
-  # ci:
-  #   uses: ./.github/workflows/ci.yaml
-  #   with:
-  #     source-path: code/services
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Trunk Check
+        uses: trunk-io/trunk-action@v1
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          cd code/services
+          pip install -r requirements_test.txt
+
+      - name: Run tests
+        run: |
+          pwd
+          ls
+          cd code/services
+          coverage run -m pytest
 
   cd:
     uses: ./.github/workflows/cd.yaml

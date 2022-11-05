@@ -188,7 +188,8 @@ def check_condition(transaction: dict, condition: dict) -> float:
 def calculate_reward(transaction: dict) -> dict:
     """Takes a transaction, finds the right policy, then applies it, then returns the reward dict"""
     try:
-        policy = get_policy(transaction["card_type"], transaction["transaction_date"])
+        policy = get_policy(
+            transaction["card_type"], transaction["transaction_date"])
         reward = apply_policy(policy, transaction)
         put_reward(reward)
         LOGGER.info("Reward stored: {reward[reward_id]}")
@@ -216,7 +217,8 @@ def batch_calculate_reward(transaction_list: list):
                 transaction["transaction_id"],
             )
             LOGGER.error(exception)
-    LOGGER.info("Rewards saved. Total errored values: %d", len(errored_transactions))
+    LOGGER.info("Rewards saved. Total errored values: %d",
+                len(errored_transactions))
     return {
         "statusCode": 200,
         "headers": {"Access-Control-Allow-Origin": "*"},
@@ -225,13 +227,13 @@ def batch_calculate_reward(transaction_list: list):
     }
 
 
-
 def put_reward(reward: dict):
     """Takes a reward dict and stores it into dynamodb table"""
     try:
         LOGGER.info("Attempting to save reward %s to db", reward["reward_id"])
         response = REWARD_TABLE.put_item(Item=reward)
-        LOGGER.info("reward %s - %s saved to db", reward["reward_id"], reward["date"])
+        LOGGER.info("reward %s - %s saved to db",
+                    reward["reward_id"], reward["date"])
     except Exception as exception:
         LOGGER.error(str(exception))
         return {
@@ -252,7 +254,8 @@ def get_all_by_card_id(card_id: str):
 
     while "LastEvaluatedKey" in response:
         LOGGER.info("Still has lastev key")
-        response = REWARD_TABLE.scan(ExclusiveStartKey=response["LastEvaluatedKey"])
+        response = REWARD_TABLE.scan(
+            ExclusiveStartKey=response["LastEvaluatedKey"])
         data.extend(response["Items"])
 
     LOGGER.info("Fetched all, final: ")
@@ -293,7 +296,8 @@ def lambda_handler(event, context):
 
         # TESTING ENDPOINTS
         elif action == "test_get_policy":
-            resp = get_policy(body["data"]["card_type"], body["data"]["policy_date"])
+            resp = get_policy(body["data"]["card_type"],
+                              body["data"]["policy_date"])
         else:
             return {
                 "statusCode": 500,

@@ -87,10 +87,12 @@ def batch_create_transactions(transaction_list: list):
             )
             LOGGER.error(exception)
     LOGGER.info(
-        "Transactions saved. Total errored values: %d", len(errorred_transactions)
+        "Transactions saved. Total errored values: %d", len(
+            errorred_transactions)
     )
 
-    post_request = {"action": "batch_calculate_reward", "data": transaction_list}
+    post_request = {"action": "batch_calculate_reward",
+                    "data": transaction_list}
     res = invoke_lambda(post_request, "reward")
 
     LOGGER.info(res)
@@ -107,7 +109,8 @@ def get_by_card_id(card_id: str):
     LOGGER.info("Attempting to get %s", card_id)
     try:
         # response = TRANSACTION_TABLE.get_item(Key={"card_id": card_id})
-        response = TRANSACTION_TABLE.scan(FilterExpression=Attr("card_id").eq(card_id))
+        response = TRANSACTION_TABLE.scan(
+            FilterExpression=Attr("card_id").eq(card_id))
         LOGGER.info(json.dumps(response))
         # note: if the item is not found, response will not have key "item"
     except Exception as exception:
@@ -155,11 +158,13 @@ def lambda_handler(event, context):
         elif action == "get_by_card_id":
             resp = get_by_card_id(body["data"]["card_id"])
         elif action == "get_by_id":
-            resp = get_by_card_type(body["data"]["user_id"], body["data"]["card_type"])
+            resp = get_by_card_type(
+                body["data"]["user_id"], body["data"]["card_type"])
         elif action == "batch_create":
             resp = batch_create_transactions(messages)
         elif action == "test_reward":
-            resp = invoke_lambda({"action":"batch_calculate_reward", "data": body["data"]}, "reward")
+            resp = invoke_lambda(
+                {"action": "batch_calculate_reward", "data": body["data"]}, "reward")
         elif action == "health":
             resp = "Service is healthy"
         else:

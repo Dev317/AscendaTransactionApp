@@ -10,7 +10,8 @@ LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
 
 AWS_REGION = os.environ.get("AWS_REGION", "ap-southeast-1")
-EXCLUSION_TABLE_NAME = os.environ.get("EXCLUSION_TABLE_NAME", "exclusion_service_table")
+EXCLUSION_TABLE_NAME = os.environ.get(
+    "EXCLUSION_TABLE_NAME", "exclusion_service_table")
 
 DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 EXCLUSION_TABLE = DYNAMODB_CLIENT.Table(EXCLUSION_TABLE_NAME)
@@ -56,13 +57,16 @@ def create_exclusion(data):
         for card_type in card_types_list:
             exclusion_item["card_type"] = card_type
             response = EXCLUSION_TABLE.put_item(Item=exclusion_item)
-            LOGGER.info("exclusion %s - %s created", card_type, data["exclusion_name"])
+            LOGGER.info("exclusion %s - %s created",
+                        card_type, data["exclusion_name"])
             # apply exclusion to existing policies
             try:
-                post_request = {"action": "add_new_exclusion", "data": exclusion_item}
+                post_request = {"action": "add_new_exclusion",
+                                "data": exclusion_item}
                 invoke_lambda(post_request, "calculation")
                 LOGGER.info(
-                    "calculation successfully invoked for %s", str(data["card_type"])
+                    "calculation successfully invoked for %s", str(
+                        data["card_type"])
                 )
             except Exception as exception:
                 return {

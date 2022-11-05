@@ -258,7 +258,8 @@ def create_rewards(transaction_list: list):
             post_request = {"action": "calculate_reward", "data": transaction}
             invoke_lambda(post_request, "reward")
         except Exception as exception:
-            print("Failed to calculate and add_reward: ", transaction["transaction_id"])
+            print("Failed to calculate and add_reward: ",
+                  transaction["transaction_id"])
             print(exception)
 
 
@@ -372,11 +373,10 @@ TEST_TRANSACTIONS = [
 
 def run():
 
-    # create_campaigns(BASE_CAMPAIGNS)
-    # create_exclusions(BASE_EXCLUSIONS)
+    create_campaigns(BASE_CAMPAIGNS)
+    create_exclusions(BASE_EXCLUSIONS)
     create_users(TEST_USERS)
     create_rewards(TEST_TRANSACTIONS)
-
     print("complete")
 
 
