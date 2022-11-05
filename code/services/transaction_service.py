@@ -89,7 +89,9 @@ def batch_create_transactions(transaction_list: list):
     )
 
     post_request = {"action": "batch_calculate_reward", "data": transaction_list}
-    invoke_lambda(post_request, "reward")
+    res = invoke_lambda(post_request, "reward")
+
+    LOGGER.info(res)
 
     return {
         "statusCode": 200,
