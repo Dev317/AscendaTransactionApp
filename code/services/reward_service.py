@@ -214,6 +214,7 @@ def calculate_reward(transaction: dict) -> dict:
         put_reward(reward)
         LOGGER.info("Reward stored: %s", reward["reward_id"])
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -255,7 +256,7 @@ def put_reward(reward: dict):
         response = REWARD_TABLE.put_item(Item=item)
         LOGGER.info("reward %s - %s saved to db", reward["reward_id"], reward["date"])
     except Exception as exception:
-        LOGGER.error(str(exception))
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -321,6 +322,7 @@ def lambda_handler(event, context):
     elif action == "test_get_policy":
         resp = get_policy(body["data"]["card_type"], body["data"]["policy_date"])
     else:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
