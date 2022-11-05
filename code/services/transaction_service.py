@@ -57,7 +57,7 @@ def invoke_lambda(post_request: dict, end_point: str):
 
 def create_transaction(data: dict):
     """Takes in a dict of transaction data (from csv processor/APIG) and creates DB object"""
-    transaction_item = data
+    transaction_item = json.loads(json.dumps(data), parse_float=Decimal)
     # TODO input verification to check that the fields are correctly set? or relegate to frontend?
 
     try:
@@ -132,7 +132,7 @@ def lambda_handler(event, context):
         if "Records" in event:  # if the event comes from SQS
             transactions = list()
             for message in event["Records"]:
-                transactions += json.loads(message["body"], parse_float=Decimal)
+                transactions += json.loads(message["body"])
             action = "batch_create"
         elif "body" in event:  # if the event comes from APIG
             body = json.loads(event["body"])
