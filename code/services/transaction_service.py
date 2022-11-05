@@ -140,7 +140,6 @@ def lambda_handler(event, context):
             for message in event["Records"]:
                 transactions += json.loads(message["body"])
             LOGGER.info("total messages: %d", len(event["Records"]))
-            LOGGER.info(messages)
             action = "batch_create"
         elif "body" in event:  # if the event comes from APIG
             body = json.loads(event["body"])
