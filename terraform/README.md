@@ -104,6 +104,7 @@ Please make sure to update all the resources appropriately.
 | <a name="module_frontend_north_virginia"></a> [frontend\_north\_virginia](#module\_frontend\_north\_virginia) | ./modules/frontend | n/a |
 | <a name="module_frontend_sg"></a> [frontend\_sg](#module\_frontend\_sg) | ./modules/frontend | n/a |
 | <a name="module_iam"></a> [iam](#module\_iam) | ./modules/iam | n/a |
+| <a name="module_kms"></a> [kms](#module\_kms) | ./modules/kms | n/a |
 | <a name="module_route53"></a> [route53](#module\_route53) | ./modules/route53 | n/a |
 
 ## Resources
