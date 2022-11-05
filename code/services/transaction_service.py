@@ -130,10 +130,9 @@ def lambda_handler(event, context):
 
     try:
         if "Records" in event:  # if the event comes from SQS
-            messages = [
-                json.loads(message["body"], parse_float=Decimal)
-                for message in event["Records"]
-            ]
+            transactions = list()
+            for message in event["Records"]:
+                transactions += json.loads(message["body"], parse_float=Decimal)
             action = "batch_create"
         elif "body" in event:  # if the event comes from APIG
             body = json.loads(event["body"])
@@ -157,9 +156,11 @@ def lambda_handler(event, context):
         elif action == "get_by_id":
             resp = get_by_card_type(body["data"]["user_id"], body["data"]["card_type"])
         elif action == "batch_create":
-            resp = batch_create_transactions(messages)
+            resp = batch_create_transactions(transactions)
         elif action == "test_reward":
-            resp = invoke_lambda({"action":"batch_calculate_reward", "data": body["data"]}, "reward")
+            resp = invoke_lambda(
+                {"action": "batch_calculate_reward", "data": body["data"]}, "reward"
+            )
         elif action == "health":
             resp = "Service is healthy"
         else:
