@@ -200,6 +200,7 @@ def calculate_reward(transaction: dict) -> dict:
         }
     return reward
 
+
 def batch_calculate_reward(transaction_list: list):
     """Takes a list of transaction dicts and invokes calculate_reward multiple times"""
     errored_transactions = []
@@ -208,11 +209,12 @@ def batch_calculate_reward(transaction_list: list):
             calculate_reward(transaction)
         except Exception as exception:
             errored_transactions.append(transaction)
-            LOGGER.error("Failed to calculate reward for transaction <%s>", transaction["transaction_id"])
+            LOGGER.error(
+                "Failed to calculate reward for transaction <%s>",
+                transaction["transaction_id"],
+            )
             LOGGER.error(exception)
-    LOGGER.info(
-        "Rewards saved. Total errored values: %d", len(errored_transactions)
-    )
+    LOGGER.info("Rewards saved. Total errored values: %d", len(errored_transactions))
 
 
 def put_reward(reward: dict):
