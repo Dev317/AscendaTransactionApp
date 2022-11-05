@@ -86,7 +86,7 @@ class TestLambdaFunction(unittest.TestCase):
         )
 
         # SQS Mock Setup
-        self.sqs = boto3.resource("sqs", region_name=DEFAULT_REGION)
+        self.sqs = boto3.resource("sqs")
         self.queue = self.sqs.create_queue(QueueName="test-transactions-queue")
 
     def test_get_data_from_file(self):
@@ -122,11 +122,11 @@ class TestLambdaFunction(unittest.TestCase):
 
         csv_processor.SQS_QUEUE_URL = self.queue.url
 
-        send_message_to_queue(S3_TEST_FILE_CONTENT[0])
+        send_message_to_queue(S3_TEST_FILE_CONTENT)
 
         sqs_messages = self.queue.receive_messages()
 
-        self.assertEqual(json.loads(sqs_messages[0].body), S3_TEST_FILE_CONTENT[0])
+        self.assertEqual(json.loads(sqs_messages[0].body), S3_TEST_FILE_CONTENT)
 
     """
     def test_handler(self):

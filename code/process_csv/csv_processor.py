@@ -134,10 +134,8 @@ def handler(event, context):
 
         for item in data:
             save_data_to_db(item)
-            send_message_to_queue(item)
-            # put calculatiton code here
-            # put save_reward_to_db here
-            # todo: error handling to catch failed calculations and flag it
+        
+        send_message_to_queue(data)
 
         final_iteration = is_final_iteration(start_byte, file_size, CHUNK_SIZE)
         event["handler"] = {
@@ -160,7 +158,8 @@ def handler(event, context):
 
         for item in data:
             save_data_to_db(item)
-            send_message_to_queue(item, context["aws_request_id"])
+        
+        send_message_to_queue(data)
 
         event["handler"]["results"] = {
             "startByte": next_start_byte,
