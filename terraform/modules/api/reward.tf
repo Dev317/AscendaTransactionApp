@@ -21,7 +21,7 @@ resource "aws_lambda_function" "reward_lambda" {
   s3_key           = aws_s3_object.reward_code.key
   source_code_hash = filebase64sha256(var.reward_service_zip)
   runtime          = "python3.7"
-  timeout          = 30
+  timeout          = 180
 
   environment {
     variables = {
