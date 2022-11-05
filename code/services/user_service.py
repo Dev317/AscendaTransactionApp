@@ -65,8 +65,7 @@ def get_cards_by_user_id(user_id):
     data = response["Items"]
 
     while "LastEvaluatedKey" in response:
-        response = USER_TABLE.scan(
-            ExclusiveStartKey=response["LastEvaluatedKey"])
+        response = USER_TABLE.scan(ExclusiveStartKey=response["LastEvaluatedKey"])
         data.extend(response["Items"])
 
     return data

@@ -12,8 +12,7 @@ LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
 
 AWS_REGION = os.environ.get("AWS_REGION", "ap-southeast-1")
-POLICY_TABLE_NAME = os.environ.get(
-    "POLICY_TABLE_NAME", "calculation_service_table")
+POLICY_TABLE_NAME = os.environ.get("POLICY_TABLE_NAME", "calculation_service_table")
 
 DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 POLICY_TABLE = DYNAMODB_CLIENT.Table(POLICY_TABLE_NAME)
@@ -185,10 +184,8 @@ def generate_policies(left_bound_date, right_bound_date):
     campaign_list = get_all_campaigns()
     for campaign in campaign_list:
         # set the dates to generate to the tighter range of the inputted date and the campaign's date
-        start_date = get_later_date(
-            left_bound_date, campaign["campaign_start_date"])
-        end_date = get_earlier_date(
-            right_bound_date, campaign["campaign_end_date"])
+        start_date = get_later_date(left_bound_date, campaign["campaign_start_date"])
+        end_date = get_earlier_date(right_bound_date, campaign["campaign_end_date"])
         date_list = generate_dates(start_date, end_date)
         for day in date_list:
             add_campaign_to_policy(campaign, day)
@@ -197,10 +194,8 @@ def generate_policies(left_bound_date, right_bound_date):
     exclusion_list = get_all_exclusions()
     for exclusion in exclusion_list:
         # set the dates to generate to the tighter range of the inputted date and the exclusion's date
-        start_date = get_later_date(
-            left_bound_date, exclusion["exclusion_start_date"])
-        end_date = get_earlier_date(
-            right_bound_date, exclusion["exclusion_end_date"])
+        start_date = get_later_date(left_bound_date, exclusion["exclusion_start_date"])
+        end_date = get_earlier_date(right_bound_date, exclusion["exclusion_end_date"])
         date_list = generate_dates(start_date, end_date)
         for day in date_list:
             add_exclusion_to_policy(exclusion, day)
@@ -216,8 +211,7 @@ def generate_policies(left_bound_date, right_bound_date):
 def add_campaign_to_policy(new_campaign: dict, campaign_date: str):
     """Iterates through all the existing campaign conditions of a given date
     then inserts the new campaign's conditions in the right order"""
-    campaign_test_logger(
-        f"Adding {new_campaign['campaign_name']} to {campaign_date}")
+    campaign_test_logger(f"Adding {new_campaign['campaign_name']} to {campaign_date}")
     # policy_id = str(new_campaign["card_type"]) + "/" + str(campaign_date)
     try:
         policy = get_policy(new_campaign["card_type"], campaign_date)
@@ -254,16 +248,14 @@ def add_campaign_to_policy(new_campaign: dict, campaign_date: str):
                         f"Found index to insert, inserting behind {cur_index}"
                     )
                     for condition in new_campaign["campaign_conditions"]:
-                        policy["campaign_conditions"].insert(
-                            cur_index + 1, condition)
+                        policy["campaign_conditions"].insert(cur_index + 1, condition)
                         cur_index = cur_index + 1
                     break
                 prior_existing = int(
                     policy["campaign_conditions"][cur_index]["campaign_priority"]
                 )
                 prior_new = int(new_campaign["campaign_priority"])
-                campaign_test_logger(
-                    f"Comparing {prior_existing} to {prior_new}")
+                campaign_test_logger(f"Comparing {prior_existing} to {prior_new}")
                 if (
                     prior_existing > prior_new
                 ):  # insert the incoming campaign right behind the next higher priority
@@ -271,8 +263,7 @@ def add_campaign_to_policy(new_campaign: dict, campaign_date: str):
                         f"Found index to insert, inserting behind {cur_index}"
                     )
                     for condition in new_campaign["campaign_conditions"]:
-                        policy["campaign_conditions"].insert(
-                            cur_index + 1, condition)
+                        policy["campaign_conditions"].insert(cur_index + 1, condition)
                         cur_index = cur_index + 1
                     break
                 cur_index = cur_index - 1
@@ -289,8 +280,7 @@ def add_campaign_to_policy(new_campaign: dict, campaign_date: str):
         put_policy(policy)
     except Exception as exception:
         LOGGER.error(
-            "exception encountered while adding campaign to policy: %s", str(
-                exception)
+            "exception encountered while adding campaign to policy: %s", str(exception)
         )
 
 
@@ -358,8 +348,7 @@ def add_exclusion_to_policy(new_exclusion: dict, exclusion_date: str):
         put_policy(policy)
     except Exception as exception:
         LOGGER.error(
-            "exception encountered while adding exclusion to policy: %s", str(
-                exception)
+            "exception encountered while adding exclusion to policy: %s", str(exception)
         )
 
 
@@ -408,8 +397,7 @@ def lambda_handler(event, context):
                 body["data"]["start_date"], body["data"]["end_date"]
             )
         elif action == "get_policy":
-            resp = get_policy(body["data"]["card_type"],
-                              body["data"]["policy_date"])
+            resp = get_policy(body["data"]["card_type"], body["data"]["policy_date"])
         elif action == "health":
             resp = "Service is healthy"
 
