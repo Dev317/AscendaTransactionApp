@@ -55,17 +55,17 @@ def get_data_from_file(bucket, key, start_byte, end_byte):
         record = record.strip()
         record_data = record.split(",")
         item = {
-            "id": str(record_data[0]),
-            "card_id": str(record_data[1]),
-            "merchant": str(record_data[2]),
+            "id": str(record_data[0].strip('"')),
+            "card_id": str(record_data[1].strip('"')),
+            "merchant": str(record_data[2].strip('"')),
             "mcc": int(record_data[3].strip('"')) if len(record_data[3]) > 0 else 0,
-            "currency": str(record_data[4]),
-            "amount": float(record_data[5]),
-            "sgd_amount": float(record_data[6]),
-            "transaction_id": str(record_data[7]),
-            "transaction_date": str(record_data[8]),
-            "card_pan": str(record_data[9]),
-            "card_type": str(record_data[10]),
+            "currency": str(record_data[4].strip('"')),
+            "amount": float(record_data[5].strip('"')),
+            "sgd_amount": float(record_data[6].strip('"')),
+            "transaction_id": str(record_data[7].strip('"')),
+            "transaction_date": str(record_data[8].strip('"')),
+            "card_pan": str(record_data[9].strip('"')),
+            "card_type": str(record_data[10].strip('"')),
         }
         data.append(item)
         LOGGER.info("Processing: %s", item)
