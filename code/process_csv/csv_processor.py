@@ -43,7 +43,7 @@ def get_data_from_file(bucket, key, start_byte, end_byte):
         Bucket=bucket, Key=key, Range=f"bytes={start_byte}-{end_byte}"
     )
 
-    newline = "\r\n".encode()
+    newline = "\n".encode()
 
     chunk = response["Body"].read()
     last_newline = chunk.rfind(newline)
@@ -56,6 +56,7 @@ def get_data_from_file(bucket, key, start_byte, end_byte):
     data = []
     for record in records:
         LOGGER.info(f"Reading {record}...")
+        record = record.strip()
         record_data = record.split(",")
         item = {
             "id": str(record_data[0]),
@@ -75,7 +76,7 @@ def get_data_from_file(bucket, key, start_byte, end_byte):
 
     LOGGER.info(f"Successfully processed {len(data)} records from {bucket}/{key}")
 
-    new_start_byte = start_byte + last_newline + 2
+    new_start_byte = start_byte + last_newline + 1
     return (data, new_start_byte)
 
 
