@@ -1,11 +1,9 @@
 import csv
 import json
-import os
 import unittest
 
 import boto3
-import mock
-from moto import mock_dynamodb, mock_s3, mock_sqs
+from moto import mock_s3, mock_sqs
 
 S3_BUCKET_NAME = "file-upload-8de7e6fe-776a-4481-80c4-e4959b3dfc42"
 DEFAULT_REGION = "us-east-1"
