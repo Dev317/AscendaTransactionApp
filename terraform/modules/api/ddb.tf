@@ -1,15 +1,15 @@
 resource "aws_dynamodb_table" "campaign_service_table" {
-  name     = "campaign_service_table"
-  hash_key = "card_type"
+  name      = "campaign_service_table"
+  hash_key  = "card_type"
   range_key = "campaign_name"
   point_in_time_recovery {
-   enabled = true
+    enabled = true
   }
   restore_to_latest_time = true
-  stream_view_type = "KEYS_ONLY"
-  billing_mode = "PAY_PER_REQUEST"
-  count        = data.aws_region.current.name == var.default_region ? 1 : 0
-  stream_enabled = true
+  stream_view_type       = "KEYS_ONLY"
+  billing_mode           = "PAY_PER_REQUEST"
+  count                  = data.aws_region.current.name == var.default_region ? 1 : 0
+  stream_enabled         = true
   attribute {
     name = "card_type"
     type = "S"
@@ -31,12 +31,12 @@ resource "aws_dynamodb_table" "exclusion_service_table" {
   range_key    = "exclusion_name"
   billing_mode = "PAY_PER_REQUEST"
   point_in_time_recovery {
-   enabled = true
+    enabled = true
   }
   restore_to_latest_time = true
-  stream_view_type = "KEYS_ONLY"
-  count        = data.aws_region.current.name == var.default_region ? 1 : 0
-  stream_enabled = true
+  stream_view_type       = "KEYS_ONLY"
+  count                  = data.aws_region.current.name == var.default_region ? 1 : 0
+  stream_enabled         = true
 
   attribute {
     name = "card_type"
@@ -58,13 +58,14 @@ resource "aws_dynamodb_table" "calculation_service_table" {
   hash_key     = "card_type"
   range_key    = "policy_date"
   billing_mode = "PAY_PER_REQUEST"
+  
   point_in_time_recovery {
-   enabled = true
+    enabled = true
   }
   restore_to_latest_time = true
-  stream_view_type = "KEYS_ONLY"
-  count        = data.aws_region.current.name == var.default_region ? 1 : 0
-  stream_enabled = true
+  stream_view_type       = "KEYS_ONLY"
+  count                  = data.aws_region.current.name == var.default_region ? 1 : 0
+  stream_enabled         = true
 
   attribute {
     name = "card_type"
@@ -88,12 +89,12 @@ resource "aws_dynamodb_table" "transaction_service_table" {
   range_key    = "transaction_id"
   billing_mode = "PAY_PER_REQUEST"
   point_in_time_recovery {
-   enabled = true
+    enabled = true
   }
   restore_to_latest_time = true
-  stream_view_type = "KEYS_ONLY"
-  count        = data.aws_region.current.name == var.default_region ? 1 : 0
-  stream_enabled = true
+  stream_view_type       = "KEYS_ONLY"
+  count                  = data.aws_region.current.name == var.default_region ? 1 : 0
+  stream_enabled         = true
 
   attribute {
     name = "card_id"
@@ -116,12 +117,12 @@ resource "aws_dynamodb_table" "reward_service_table" {
   range_key    = "reward_id"
   billing_mode = "PAY_PER_REQUEST"
   point_in_time_recovery {
-   enabled = true
+    enabled = true
   }
   restore_to_latest_time = true
-  stream_view_type = "KEYS_ONLY"
-  count        = data.aws_region.current.name == var.default_region ? 1 : 0
-  stream_enabled = true
+  stream_view_type       = "KEYS_ONLY"
+  count                  = data.aws_region.current.name == var.default_region ? 1 : 0
+  stream_enabled         = true
 
   attribute {
     name = "card_id"
@@ -140,20 +141,28 @@ resource "aws_dynamodb_table" "reward_service_table" {
 
 resource "aws_dynamodb_table" "card_service_table" {
   name         = "card_service_table"
-  hash_key     = "card_type_id"
+  hash_key     = "card_group"
+  range_key    = "card_type"
   billing_mode = "PAY_PER_REQUEST"
+  table_class  = "STANDARD"
   point_in_time_recovery {
-   enabled = true
+    enabled = true
   }
   restore_to_latest_time = true
-  stream_view_type = "KEYS_ONLY"
-  count        = data.aws_region.current.name == var.default_region ? 1 : 0
-  stream_enabled = true
+  stream_view_type       = "KEYS_ONLY"
+  count                  = data.aws_region.current.name == var.default_region ? 1 : 0
+  stream_enabled         = true
 
   attribute {
-    name = "card_type_id"
+    name = "card_group"
     type = "S"
   }
+
+  attribute {
+    name = "card_type"
+    type = "S"
+  }
+
   replica {
     region_name = var.us_region
   }
@@ -165,12 +174,12 @@ resource "aws_dynamodb_table" "user_card_service_table" {
   range_key    = "card_id"
   billing_mode = "PAY_PER_REQUEST"
   point_in_time_recovery {
-   enabled = true
+    enabled = true
   }
   restore_to_latest_time = true
-  stream_view_type = "KEYS_ONLY"
-  count        = data.aws_region.current.name == var.default_region ? 1 : 0
-  stream_enabled = true
+  stream_view_type       = "KEYS_ONLY"
+  count                  = data.aws_region.current.name == var.default_region ? 1 : 0
+  stream_enabled         = true
 
   attribute {
     name = "user_id"
