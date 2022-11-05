@@ -95,7 +95,7 @@ def batch_create_transactions(transaction_list: list):
 
     LOGGER.info("Transaction list: %s", transaction_list)
 
-    post_request = json.dumps({"action": "batch_calculate_reward", "data": transaction_list},  cls=JSONEncoder)
+    post_request = {"action": "batch_calculate_reward", "data": transaction_list}
     res = invoke_lambda(post_request, "reward")
 
     LOGGER.info("response from reward service received")
