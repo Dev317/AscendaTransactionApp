@@ -66,6 +66,7 @@ def create_transaction(data: dict):
         response = TRANSACTION_TABLE.put_item(Item=transaction_item)
         LOGGER.info("transaction created")
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -117,6 +118,7 @@ def get_by_card_id(card_id: str):
         LOGGER.info(json.dumps(response))
         # note: if the item is not found, response will not have key "item"
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -148,6 +150,7 @@ def lambda_handler(event, context):
             body = event
             action = event["action"]
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -171,6 +174,7 @@ def lambda_handler(event, context):
         elif action == "health":
             resp = "Service is healthy"
         else:
+            LOGGER.error("ERROR: %s", repr(exception))
             return {
                 "statusCode": 500,
                 "headers": {"Access-Control-Allow-Origin": "*"},
