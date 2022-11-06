@@ -60,7 +60,8 @@ def batch_create_user(user_list: list):
     }
 
 
-def get_cards_by_user_id(user_id):
+def get_cards_by_user_id(user_id:str):
+    """Gets all user entries by user_id"""
     response = USER_TABLE.scan(FilterExpression=Attr("user_id").eq(user_id))
     data = response["Items"]
 
@@ -69,6 +70,16 @@ def get_cards_by_user_id(user_id):
         data.extend(response["Items"])
 
     return data
+
+
+def get_user_by_email(email:str):
+    """Gets all user entries by email"""
+    response = USER_TABLE.query(
+        IndexName='email-index',
+        KeyConditionExpression=Key('email').eq(email)
+    )
+
+    return response["Items"]
 
 
 def lambda_handler(event, context):
@@ -97,6 +108,8 @@ def lambda_handler(event, context):
             resp = batch_create_user(body["data"])
         elif action == "get_cards_by_user_id":
             resp = get_cards_by_user_id(body["data"]["user_id"])
+        elif action == "get_user_by_email":
+            resp = get_user_by_email(body["data"]["email"])
         elif action == "health":
             resp = "Service is healthy"
 
