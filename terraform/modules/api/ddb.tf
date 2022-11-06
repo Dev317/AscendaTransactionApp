@@ -163,6 +163,12 @@ resource "aws_dynamodb_table" "card_service_table" {
     type = "S"
   }
 
+  global_secondary_index {
+    name               = "card_type-index"
+    hash_key           = "card_type"
+    projection_type    = "KEYS_ONLY"
+  }
+
   replica {
     region_name = var.us_region
   }
@@ -171,7 +177,6 @@ resource "aws_dynamodb_table" "card_service_table" {
 resource "aws_dynamodb_table" "user_card_service_table" {
   name         = "user_service_table"
   hash_key     = "user_id"
-  range_key    = "card_id"
   billing_mode = "PAY_PER_REQUEST"
   point_in_time_recovery {
     enabled = true
@@ -187,8 +192,14 @@ resource "aws_dynamodb_table" "user_card_service_table" {
   }
 
   attribute {
-    name = "card_id"
+    name = "email"
     type = "S"
+  }
+
+  global_secondary_index {
+    name               = "email-index"
+    hash_key           = "email"
+    projection_type    = "KEYS_ONLY"
   }
 
   replica {
