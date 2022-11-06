@@ -43,6 +43,7 @@ def create_exclusion(data):
         data["card_type"], data["exclusion_name"]
     )
     if "Item" in existing_exclusion:
+        LOGGER.error("ERROR: Exclusion already exists. Did you mean to update instead?")
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -65,6 +66,7 @@ def create_exclusion(data):
                     "calculation successfully invoked for %s", str(data["card_type"])
                 )
             except Exception as exception:
+                LOGGER.error("ERROR: %s", repr(exception))
                 return {
                     "statusCode": 500,
                     "headers": {"Access-Control-Allow-Origin": "*"},
@@ -73,6 +75,7 @@ def create_exclusion(data):
                 }
 
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -97,6 +100,7 @@ def get_all():
             data.extend(response["Items"])
 
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -116,6 +120,7 @@ def get_by_card_type_and_name(card_type: str, exclusion_name: str):
         LOGGER.info(json.dumps(response))
         # note: if the item is not found, response will not have key "item"
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -135,7 +140,7 @@ def lambda_handler(event, context):
             body = event
             action = event["action"]
     except Exception as exception:
-        LOGGER.error(exception)
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -155,6 +160,7 @@ def lambda_handler(event, context):
         elif action == "health":
             resp = "Service is healthy"
         else:
+            LOGGER.error("ERROR: No such action: %s", action)
             return {
                 "statusCode": 500,
                 "headers": {"Access-Control-Allow-Origin": "*"},

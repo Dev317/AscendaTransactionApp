@@ -313,7 +313,7 @@ def lambda_handler(event, context):
         elif action == "test_get_policy":
             resp = get_policy(body["data"]["card_type"], body["data"]["policy_date"])
         else:
-            LOGGER.error("ERROR: no such action")
+            LOGGER.error("ERROR: No such action: %s", action)
             return {
                 "statusCode": 500,
                 "headers": {"Access-Control-Allow-Origin": "*"},

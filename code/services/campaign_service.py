@@ -68,6 +68,7 @@ def create_campaign(data):
         data["card_type"], data["campaign_name"]
     )
     if "Item" in existing_campaign:
+        LOGGER.error("ERROR: Campaign already exists. Did you mean to update instead?")
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -78,6 +79,7 @@ def create_campaign(data):
         response = CAMPAIGN_TABLE.put_item(Item=data)
         LOGGER.info("campaign created")
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -90,6 +92,7 @@ def create_campaign(data):
         invoke_lambda(post_request, "calculation")
         LOGGER.info("calculation successfully invoked")
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -111,6 +114,7 @@ def get_all():
             )
             data.extend(response["Items"])
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -130,6 +134,7 @@ def get_by_card_type_and_name(card_type: str, campaign_name: str):
         LOGGER.info(json.dumps(response))
         # note: if the item is not found, response will not have key "item"
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -150,6 +155,7 @@ def lambda_handler(event, context):
             body = event
             action = event["action"]
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -169,6 +175,7 @@ def lambda_handler(event, context):
         elif action == "health":
             resp = "Service is healthy"
         else:
+            LOGGER.error("ERROR: No such action: %s", action)
             return {
                 "statusCode": 500,
                 "headers": {"Access-Control-Allow-Origin": "*"},
@@ -176,6 +183,7 @@ def lambda_handler(event, context):
             }
     # TODO: format error returns properly so apig can give proper error response reporting (rather than having to check cloud watch)
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},

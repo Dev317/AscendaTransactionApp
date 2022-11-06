@@ -39,6 +39,7 @@ def create_user(data: dict):
         response = USER_TABLE.put_item(Item=data)
         LOGGER.info("campaign created")
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -93,6 +94,7 @@ def lambda_handler(event, context):
             body = event
             action = event["action"]
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -115,12 +117,14 @@ def lambda_handler(event, context):
 
         # TESTING ENDPOINTS
         else:
+            LOGGER.error("ERROR: No such action: %s", action)
             return {
                 "statusCode": 500,
                 "headers": {"Access-Control-Allow-Origin": "*"},
                 "body": "no such action",
             }
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},

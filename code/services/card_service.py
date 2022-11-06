@@ -168,6 +168,7 @@ def lambda_handler(event, context):
         elif action == "health":
             resp = "Service is healthy"
         else:
+            LOGGER.error("ERROR: No such action: %s", action)
             return {
                 "statusCode": 500,
                 "headers": {"Access-Control-Allow-Origin": "*"},
