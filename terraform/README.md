@@ -106,6 +106,8 @@ Please make sure to update all the resources appropriately.
 | <a name="module_iam"></a> [iam](#module\_iam) | ./modules/iam | n/a |
 | <a name="module_kms"></a> [kms](#module\_kms) | ./modules/kms | n/a |
 | <a name="module_route53"></a> [route53](#module\_route53) | ./modules/route53 | n/a |
+| <a name="module_sns_sg"></a> [sns\_sg](#module\_sns\_sg) | ./modules/sns | n/a |
+| <a name="module_sns_us"></a> [sns\_us](#module\_sns\_us) | ./modules/sns | n/a |
 
 ## Resources
 
