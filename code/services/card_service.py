@@ -29,6 +29,7 @@ import os
 from decimal import Decimal
 
 import boto3
+from boto3.dynamodb.conditions import Key
 import requests
 
 LOGGER = logging.getLogger()
@@ -108,32 +109,30 @@ def get_all():
     return data
 
 
-def get_by_card_type_and_group(card_type: str, card_group: str):
-    """CRUD: get by card type and name"""
-    LOGGER.info("Attempting to get %s in %s", card_type, card_group)
+def get_by_card_type(card_type: str):
+    """CRUD: get by card type"""
     try:
-        response = CARD_TABLE.get_item(
-            Key={"card_type": card_type, "card_group": card_group}
+        response = CARD_TABLE.query(
+            IndexName='card_type-index',
+            KeyConditionExpression=Key('card_type').eq(card_type)
         )
-        LOGGER.info(json.dumps(response))
         # note: if the item is not found, response will not have key "item"
     except Exception as exception:
         LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
-            "message": "An error occurred getting card by id.",
+            "message": "An error occurred getting card_group by card_type.",
             "error": str(exception),
         }
-    if "Item" in response:
-        return response["Item"]
+    if "Items" in response:
+        return response["Items"]
     else:
-        LOGGER.error("ERROR: no such card + group combination")
+        LOGGER.error("ERROR: Cannot find card group with given card type %s", card_type)
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
-            "message": "no such card + group combination",
-            "error": "ERROR: no such card + group combination",
+            "message": "Cannot find card group with given card type"
         }
 
 
@@ -161,10 +160,8 @@ def lambda_handler(event, context):
             resp = create_card(body["data"])
         elif action == "get_all":
             resp = get_all()
-        elif action == "get_by_card_type_and_group":
-            resp = get_by_card_type_and_group(
-                body["data"]["card_type"], body["data"]["card_group"]
-            )
+        elif action == "get_by_card_type":
+            resp = get_by_card_type(body["data"]["card_type"])
         elif action == "health":
             resp = "Card service is healthy"
         else:
