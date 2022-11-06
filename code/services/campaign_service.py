@@ -173,7 +173,7 @@ def lambda_handler(event, context):
                 body["data"]["card_type"], body["data"]["campaign_name"]
             )
         elif action == "health":
-            resp = "Service is healthy"
+            resp = "Campaign service is healthy"
         else:
             LOGGER.error("ERROR: No such action: %s", action)
             return {

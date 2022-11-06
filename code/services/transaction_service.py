@@ -172,7 +172,7 @@ def lambda_handler(event, context):
                 {"action": "batch_calculate_reward", "data": body["data"]}, "reward"
             )
         elif action == "health":
-            resp = "Service is healthy"
+            resp = "Transaction service is healthy"
         else:
             LOGGER.error("ERROR: No such action: %s", action)
             return {

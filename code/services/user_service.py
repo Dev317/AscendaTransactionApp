@@ -6,6 +6,7 @@ from decimal import Decimal
 import boto3
 import requests
 from boto3.dynamodb.conditions import Attr
+from boto3.dynamodb.conditions import Key
 
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
@@ -113,7 +114,7 @@ def lambda_handler(event, context):
         elif action == "get_user_by_email":
             resp = get_user_by_email(body["data"]["email"])
         elif action == "health":
-            resp = "Service is healthy"
+            resp = "User service is healthy"
 
         # TESTING ENDPOINTS
         else:

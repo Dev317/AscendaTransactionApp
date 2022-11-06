@@ -307,7 +307,7 @@ def lambda_handler(event, context):
             LOGGER.info(body["data"])
             resp = batch_calculate_reward(body["data"])
         elif action == "health":
-            resp = "Service is healthy"
+            resp = "Reward service is healthy"
 
         # TESTING ENDPOINTS
         elif action == "test_get_policy":

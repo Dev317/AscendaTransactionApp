@@ -166,7 +166,7 @@ def lambda_handler(event, context):
                 body["data"]["card_type"], body["data"]["card_group"]
             )
         elif action == "health":
-            resp = "Service is healthy"
+            resp = "Card service is healthy"
         else:
             LOGGER.error("ERROR: No such action: %s", action)
             return {

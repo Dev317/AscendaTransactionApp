@@ -404,7 +404,7 @@ def lambda_handler(event, context):
         elif action == "get_policy":
             resp = get_policy(body["data"]["card_type"], body["data"]["policy_date"])
         elif action == "health":
-            resp = "Service is healthy"
+            resp = "Campaign service is healthy"
 
         # TESTING ENDPOINTS
         elif action == "test_get_campaign":
