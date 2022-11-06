@@ -105,3 +105,13 @@ variable "transactions_queue_arn" {
   description = "Transactions Queue ARN"
   type        = string
 }
+
+variable "key_id" {
+  description = "AWS key id"
+  type        = string
+}
+
+variable "secret" {
+  description = "AWS secret"
+  type        = string
+}

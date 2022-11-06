@@ -9,3 +9,15 @@ variable "route53_hosted_zone_id" {
   type        = string
   default     = "Z089272719LULOG2M18OT"
 }
+
+variable "key_id" {
+  description = "AWS key id"
+  type        = string
+  sensitive   = true
+}
+
+variable "secret" {
+  description = "AWS secret"
+  type        = string
+  sensitive   = true
+}

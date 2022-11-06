@@ -26,6 +26,9 @@ resource "aws_lambda_function" "reward_lambda" {
   environment {
     variables = {
       APIG_URL = "https://${aws_api_gateway_rest_api.orchestrator_apigw.id}.execute-api.${var.apigw_region}.amazonaws.com/prod/"
+      AWS_KEY_ID = "${var.key_id}"
+      AWS_SECRET = "${var.secret}"
+      EMAIL_TOPIC_ARN = "arn:aws:sns:ap-southeast-1:717942231127:email_reward_topic_${var.apigw_region}"
     }
   }
 

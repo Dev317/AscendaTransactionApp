@@ -10,16 +10,39 @@ config:
     - duration: 20
       arrivalRate: 5
       name: Warm up
-    - duration: 20
+    - duration: 60
       arrivalRate: 5
-      rampTo: 50
+      rampTo: 700
       name: Ramp up load
+  payload:
+    path: "txn.csv"
+    fields:
+      - "action"
+      - "user_id"
+      - "first_name"
+      - "last_name"
+      - "phone"
+      - "email"
+      - "created_at"
+      - "updated_at"
+      - "card_id"
+      - "card_pan"
+      - "card_type"
 scenarios:
   -
     flow:
      - post:
           url: "/user"
           json:
-            action: "get_cards_by_user_id"
+            action: "{{ action }}"
             data:
-              user_id: "marcusgohsh"
+              user_id: "{{ user_id }}"
+              first_name: "{{ first_name }}"
+              last_name: "{{ last_name }}"
+              phone: "{{ phone }}"
+              email: "{{ email }}"
+              created_at: "{{ created_at }}"
+              updated_at: "{{ updated_at }}"
+              card_id: "{{ card_id }}"
+              card_pan: "{{ card_pan }}"
+              card_type: "{{ card_type }}"

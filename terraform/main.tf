@@ -41,8 +41,8 @@ module "kms" {
   providers = {
     aws = aws.northvirginia
   }
-  source                      = "./modules/kms"
-  route53_hosted_zone_id      = var.route53_hosted_zone_id
+  source                 = "./modules/kms"
+  route53_hosted_zone_id = var.route53_hosted_zone_id
 }
 
 # -----------------------------------
@@ -69,6 +69,8 @@ module "api_sg" {
   certificate_arn          = module.acm_sg.certificate_arn
   route53_hosted_zone_id   = var.route53_hosted_zone_id
   transactions_queue_arn   = module.file_processor_sg.transactions_queue_arn
+  key_id                   = var.key_id
+  secret                   = var.secret
 }
 
 module "file_processor_sg" {
@@ -121,6 +123,8 @@ module "api_north_virginia" {
   certificate_arn          = module.acm_north_virginia.certificate_arn
   route53_hosted_zone_id   = var.route53_hosted_zone_id
   transactions_queue_arn   = module.file_processor_north_virginia.transactions_queue_arn
+  key_id                   = var.key_id
+  secret                   = var.secret
 }
 
 module "file_processor_north_virginia" {
