@@ -133,7 +133,7 @@ def get_by_card_type_and_group(card_type: str, card_group: str):
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
             "message": "no such card + group combination",
-            "error": str(exception),
+            "error": "ERROR: no such card + group combination",
         }
 
 
