@@ -76,6 +76,22 @@ def create_transaction(data: dict):
     return response
 
 
+def single_create_transaction(transaction: dict):
+    """Takes a single transaction item and add it
+    Then triggers reward to generate the reward"""
+    create_transaction(transaction)
+
+    post_request = {"action": "calculate_reward", "data": transaction}
+    res = invoke_lambda(post_request, "reward")
+
+    return {
+        "statusCode": 200,
+        "headers": {"Access-Control-Allow-Origin": "*"},
+        "body": res,
+    }
+
+
+
 def batch_create_transactions(transaction_list: list):
     """Takes a list of transaction dicts and invokes create_transaction multiple times,
     Then enqueues the batch transactions to generate rewards"""
@@ -159,8 +175,8 @@ def lambda_handler(event, context):
         }
 
     try:
-        if action == "create":
-            resp = create_transaction(body["data"])
+        if action == "single_create":
+            resp = single_create_transaction(body["data"])
         elif action == "get_by_card_id":
             resp = get_by_card_id(body["data"]["card_id"])
         elif action == "get_by_id":
