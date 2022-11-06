@@ -84,6 +84,17 @@ def get_user_by_email(email:str):
     return response["Items"]
 
 
+def get_user_by_card_id(card_id:str):
+    """Gets all user entries by card_id"""
+    response = USER_TABLE.query(
+        IndexName='card_id-index',
+        KeyConditionExpression=Key('card_id').eq(card_id)
+    )
+
+    #returns just the first one
+    return response["Items"][0]
+
+
 def lambda_handler(event, context):
     """Main function that lambda passes trigger input into"""
 
@@ -113,6 +124,8 @@ def lambda_handler(event, context):
             resp = get_cards_by_user_id(body["data"]["user_id"])
         elif action == "get_user_by_email":
             resp = get_user_by_email(body["data"]["email"])
+        elif action == "get_user_by_card_id":
+            resp = get_user_by_card_id(body["data"]["card_id"])
         elif action == "health":
             resp = "User service is healthy"
 
