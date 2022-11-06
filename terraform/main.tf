@@ -91,6 +91,14 @@ module "frontend_sg" {
   waftech_branch = "fe-ap-se-1"
 }
 
+module "sns_sg" {
+  source = "./modules/sns"
+  providers = {
+    aws = aws.singapore
+  }
+  sns_region = "ap-southeast-1"
+}
+
 # -----------------------------------
 # North Virginia Configuration
 # -----------------------------------
@@ -133,6 +141,14 @@ module "frontend_north_virginia" {
   github_token   = var.github_token
   waftech_region = "us-east-1"
   waftech_branch = "fe-us-east-1"
+}
+
+module "sns_us" {
+  source = "./modules/sns"
+  providers = {
+    aws = aws.northvirginia
+  }
+  sns_region = "us-east-1"
 }
 
 

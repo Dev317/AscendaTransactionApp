@@ -208,6 +208,12 @@ resource "aws_dynamodb_table" "user_card_service_table" {
     projection_type    = "ALL"
   }
 
+  global_secondary_index {
+    name               = "card_id-index"
+    hash_key           = "card_id"
+    projection_type    = "ALL"
+  }
+
   replica {
     region_name = var.us_region
   }
