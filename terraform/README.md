@@ -124,7 +124,9 @@ Please make sure to update all the resources appropriately.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_github_token"></a> [github\_token](#input\_github\_token) | Github access token | `string` | n/a | yes |
+| <a name="input_key_id"></a> [key\_id](#input\_key\_id) | AWS key id | `string` | n/a | yes |
 | <a name="input_route53_hosted_zone_id"></a> [route53\_hosted\_zone\_id](#input\_route53\_hosted\_zone\_id) | Route 53 Hosted Zone ID | `string` | `"Z089272719LULOG2M18OT"` | no |
+| <a name="input_secret"></a> [secret](#input\_secret) | AWS secret | `string` | n/a | yes |
 
 ## Outputs
 
