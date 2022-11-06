@@ -38,13 +38,13 @@ def invoke_lambda(post_request: dict, end_point: str):
 def create_user(data: dict):
     try:
         response = USER_TABLE.put_item(Item=data)
-        LOGGER.info("campaign created")
+        LOGGER.info("User created")
     except Exception as exception:
         LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
-            "message": "An error occurred creating the campaign.",
+            "message": "An error occurred creating the user.",
             "error": str(exception),
         }
     return response
