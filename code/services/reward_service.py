@@ -33,6 +33,11 @@ REWARD_TABLE_NAME = os.environ.get("REWARD_TABLE_NAME", "reward_service_table")
 DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 REWARD_TABLE = DYNAMODB_CLIENT.Table(REWARD_TABLE_NAME)
 
+AWS_KEY_ID = os.environ.get("AWS_KEY_ID")
+AWS_SECRET = os.environ.get("AWS_SECRET")
+EMAIL_TOPIC_ARN = os.environ.get("EMAIL_TOPIC_ARN")
+
+
 APIG_URL = os.environ.get(
     "APIG_URL", "https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/"
 )
@@ -254,6 +259,45 @@ def put_reward(reward: dict):
             "error": str(exception),
         }
     return response
+
+
+def get_user_email(card_id: str):
+    """Helper function that invokes user service to fetch a user's email, returns the email
+    Raises error if email cannot be found"""
+    post_request = {
+        "action": "get_user_by_card_id",
+        "data": {"card_id": card_id}
+    }
+    response = invoke_lambda(post_request, "user")
+    if response:
+        return response["email"]
+    else:
+        LOGGER.error("ERROR: could not find user email")
+        raise Exception("email could not be found")
+
+
+
+def send_notification(reward: dict):
+    """Takes a reward dict, finds the email, then sends the notification"""
+    try:
+        email = get_user_email(reward["card_id"])
+        sns = boto3.client("sns",
+                   region_name=AWS_REGION,
+                   aws_access_key_id=AWS_KEY_ID,
+                   aws_secret_access_key=AWS_SECRET)
+
+        response = sns.subscribe(TopicArn=EMAIL_TOPIC_ARN, Protocol="email", Endpoint=email, ReturnSubscriptionArn=True)
+    except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
+        return {
+            "statusCode": 500,
+            "headers": {"Access-Control-Allow-Origin": "*"},
+            "message": "Error sending notification",
+            "error": repr(exception),
+        }
+    
+    return response
+
 
 
 def get_all_by_card_id(card_id: str):
