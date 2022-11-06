@@ -208,6 +208,7 @@ def calculate_reward(transaction: dict) -> dict:
         reward = apply_policy(policy, transaction)
         put_reward(reward)
         LOGGER.info("Reward stored: %s", reward["reward_id"])
+        send_notification(reward)
     except Exception as exception:
         LOGGER.error("ERROR: %s", repr(exception))
         return {
