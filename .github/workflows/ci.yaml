@@ -8,6 +8,9 @@ on:
         type: string
         description: "Source code folder"
 
+env:
+  AWS_DEFAULT_REGION: us-east-1
+
 jobs:
   all:
     runs-on: ubuntu-latest
