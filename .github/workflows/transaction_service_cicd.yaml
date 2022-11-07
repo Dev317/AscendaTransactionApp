@@ -3,13 +3,12 @@ name: Transaction Service CI/CD
 on:
   push:
     branches:
-      - "microservices"
+      - "project-2022-23t1-g1-team1-microservices"
     paths:
       - "code/services/transaction_service.py"
-      - ".github/workflows/transaction_service_cicd.yaml"
   pull_request:
     branches:
-      - "microservices"
+      - "project-2022-23t1-g1-team1-microservices"
 
 jobs:
   # ci:

@@ -3,13 +3,12 @@ name: Exclusion Service CI/CD
 on:
   push:
     branches:
-      - "microservices"
+      - "project-2022-23t1-g1-team1-microservices"
     paths:
       - "code/services/exclusion_service.py"
-      - ".github/workflows/exclusion_service_cicd.yaml"
   pull_request:
     branches:
-      - "microservices"
+      - "project-2022-23t1-g1-team1-microservices"
 
 jobs:
   # ci:
