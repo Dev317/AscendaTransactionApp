@@ -49,8 +49,9 @@ resource "aws_lambda_function" "file_upload" {
 
   environment {
     variables = {
-      CHUNK_SIZE    = 100000
-      SQS_QUEUE_URL = aws_sqs_queue.transactions_queue.url
+      CHUNK_SIZE      = 100000
+      SQS_QUEUE_URL   = aws_sqs_queue.transactions_queue.url
+      USD_TO_SGD_RATE = 1.4
     }
   }
 
