@@ -111,6 +111,22 @@ def get_all():
     return data
 
 
+def get_all_grouped():
+    """Get all exclusions, then group them by exclusion name"""
+    all_exclusions = get_all()
+    grouped_dict = {}
+    for exclusion in all_exclusions:
+        if exclusion["exclusion_name"] not in grouped_dict:
+            grouped_dict[exclusion["exclusion_name"]] = {}
+            # if doesnt exist, create a new list put first item
+            grouped_dict[exclusion["exclusion_name"]] = exclusion
+            grouped_dict[exclusion["exclusion_name"]]["card_type"] = [exclusion["card_type"]]
+        else:
+            # else add it to the list
+            grouped_dict[exclusion["exclusion_name"]]["card_type"].append(exclusion["card_type"])
+    return grouped_dict
+
+
 def get_by_card_type_and_name(card_type: str, exclusion_name: str):
     """CRUD: get by card type and name"""
     LOGGER.info("Attempting to get %s", exclusion_name)
@@ -180,6 +196,8 @@ def lambda_handler(event, context):
             resp = create_exclusion(body["data"])
         elif action == "get_all":
             resp = get_all()
+        elif action == "get_all_grouped":
+            resp = get_all_grouped()
         elif action == "get_by_card_type_and_name":
             resp = get_by_card_type_and_name(
                 body["data"]["card_type"], body["data"]["exclusion_name"]
