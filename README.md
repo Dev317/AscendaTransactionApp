@@ -37,6 +37,33 @@ There are 3 main branches that govern the production of Waftech application
    cd terraform
    terraform init
    ```
+- If need to create new bucket to host tf files
+
+   ```
+   aws s3api create-bucket --bucket "{new_bucket_name}" --region "{region}" --create-bucket-configuration LocationConstraint="{region}"
+
+   ```
+   
+   Change the tf state backend
+   
+   ```
+   terraform {
+     required_providers {
+       aws = {
+         source  = "hashicorp/aws"
+         version = "~> 4.0"
+       }
+     }
+
+     backend "s3" {
+       bucket         = "{new_bucket_name}"
+       key            = "terraform.tfstate"
+       region         = "{region}"
+       dynamodb_table = "terraform-locks"
+       encrypt        = true
+     }
+   }
+   ```
  
 - Terraform files are split into modules for the purpose of resusability and failover. 
 
