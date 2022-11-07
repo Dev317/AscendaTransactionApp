@@ -1,121 +1,123 @@
-# name: Health Check CI/CD
+name: Health Check CI/CD
 
-# on:
-#   push:
-#     branches:
-#       - "feature/health"
-#   pull_request:
-#     branches:
-#       - "feature/health"
+on:
+  push:
+    branches:
+      - "feature/health"
+    paths:
+      - "code/health/health_check.py"
+  pull_request:
+    branches:
+      - "feature/health"
 
-# env:
-#   SG_S3_BUCKET_NAME: lambda-archive-g1t1-singapore
-#   NV_S3_BUCKET_NAME: lambda-archive-g1t1-north-virginia
-#   LAMBDA_NAME: health-check
+env:
+  SG_S3_BUCKET_NAME: lambda-archive-g1t1-singapore
+  NV_S3_BUCKET_NAME: lambda-archive-g1t1-north-virginia
+  LAMBDA_NAME: health_check
 
-# jobs:
-#   ci:
-#     uses: ./.github/workflows/ci.yaml
-#     with:
-#       source-path: code/health
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yaml
+    with:
+      source-path: code/health
 
-#   build:
-#     runs-on: ubuntu-latest
-#     needs: [ci]
-#     steps:
-#       - uses: actions/checkout@v3
+  build:
+    runs-on: ubuntu-latest
+    needs: [ci]
+    steps:
+      - uses: actions/checkout@v3
 
-#       - name: Set up Python
-#         uses: actions/setup-python@v4
-#         with:
-#           python-version: "3.9"
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
 
-#       - name: Create Build folder
-#         run: |
-#           rm -rf build
-#           mkdir build
-#       - name: Zip Code Files
-#         run: |
-#           cd code/health
-#           zip ../../build/health-${{ github.run_id }}.zip health_check.py
-#       - name: Create Artifact
-#         uses: actions/upload-artifact@v3
-#         with:
-#           name: build-files
-#           path: build/
+      - name: Create Build folder
+        run: |
+          rm -rf build
+          mkdir build
+      - name: Zip Code Files
+        run: |
+          cd code/health
+          zip ../../build/health-${{ github.run_id }}.zip health_check.py
+      - name: Create Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-files
+          path: build/
 
-#   deploy-sg:
-#     runs-on: ubuntu-latest
-#     needs: [build]
-#     steps:
-#       - uses: actions/checkout@v3
+  deploy-sg:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v3
 
-#       - name: Download Artifact
-#         id: download
-#         uses: actions/download-artifact@v3
-#         with:
-#           name: build-files
+      - name: Download Artifact
+        id: download
+        uses: actions/download-artifact@v3
+        with:
+          name: build-files
 
-#       - name: List all files
-#         run: ls -R
+      - name: List all files
+        run: ls -R
 
-#       - name: Configure AWS Credentials
-#         uses: aws-actions/configure-aws-credentials@v1
-#         with:
-#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           aws-region: ap-southeast-1
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-1
 
-#       - name: Upload to S3
-#         run: |
-#           echo "Update Singapore S3"
-#           aws s3 cp health-${{ github.run_id }}.zip s3://${{ env.SG_S3_BUCKET_NAME }}/health/${{ github.run_id }}.zip
-#       - name: Update lambda function code
-#         run: |
-#           echo "Update Singapore Lambda Function"
-#           aws lambda update-function-code --function-name ${{ env.LAMBDA_NAME }} --s3-bucket ${{ env.SG_S3_BUCKET_NAME }} --s3-key health/${{ github.run_id }}.zip
+      - name: Upload to S3
+        run: |
+          echo "Update Singapore S3"
+          aws s3 cp health-${{ github.run_id }}.zip s3://${{ env.SG_S3_BUCKET_NAME }}/health/${{ github.run_id }}.zip
+      - name: Update lambda function code
+        run: |
+          echo "Update Singapore Lambda Function"
+          aws lambda update-function-code --function-name ${{ env.LAMBDA_NAME }} --s3-bucket ${{ env.SG_S3_BUCKET_NAME }} --s3-key health/${{ github.run_id }}.zip
 
-#       - name: Sleep for 5 seconds
-#         run: sleep 5s
-#         shell: bash
+      - name: Sleep for 5 seconds
+        run: sleep 5s
+        shell: bash
 
-#       - name: Release lambda function version
-#         run: |
-#           aws lambda publish-version --function-name ${{ env.LAMBDA_NAME }} --description ${{ github.run_id }}
+      - name: Release lambda function version
+        run: |
+          aws lambda publish-version --function-name ${{ env.LAMBDA_NAME }} --description ${{ github.run_id }}
 
-#   deploy-nv:
-#     runs-on: ubuntu-latest
-#     needs: [build]
-#     steps:
-#       - uses: actions/checkout@v3
+  deploy-nv:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v3
 
-#       - name: Download Artifact
-#         id: download
-#         uses: actions/download-artifact@v3
-#         with:
-#           name: build-files
+      - name: Download Artifact
+        id: download
+        uses: actions/download-artifact@v3
+        with:
+          name: build-files
 
-#       - name: Configure AWS Credentials
-#         uses: aws-actions/configure-aws-credentials@v1
-#         with:
-#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           aws-region: us-east-1
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
-#       - name: Upload to S3
-#         run: |
-#           echo "Update North Virginia S3"
-#           aws s3 cp health-${{ github.run_id }}.zip s3://${{ env.NV_S3_BUCKET_NAME }}/health/${{ github.run_id }}.zip
+      - name: Upload to S3
+        run: |
+          echo "Update North Virginia S3"
+          aws s3 cp health-${{ github.run_id }}.zip s3://${{ env.NV_S3_BUCKET_NAME }}/health/${{ github.run_id }}.zip
 
-#       - name: Update lambda function code
-#         run: |
-#           echo "Update North Virginia Lambda Function"
-#           aws lambda update-function-code --function-name ${{ env.LAMBDA_NAME }} --s3-bucket ${{ env.NV_S3_BUCKET_NAME }} --s3-key health/${{ github.run_id }}.zip
+      - name: Update lambda function code
+        run: |
+          echo "Update North Virginia Lambda Function"
+          aws lambda update-function-code --function-name ${{ env.LAMBDA_NAME }} --s3-bucket ${{ env.NV_S3_BUCKET_NAME }} --s3-key health/${{ github.run_id }}.zip
 
-#       - name: Sleep for 5 seconds
-#         run: sleep 5s
-#         shell: bash
+      - name: Sleep for 5 seconds
+        run: sleep 5s
+        shell: bash
 
-#       - name: Release lambda function version
-#         run: |
-#           aws lambda publish-version --function-name ${{ env.LAMBDA_NAME }} --description ${{ github.run_id }}
+      - name: Release lambda function version
+        run: |
+          aws lambda publish-version --function-name ${{ env.LAMBDA_NAME }} --description ${{ github.run_id }}

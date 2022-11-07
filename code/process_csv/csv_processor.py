@@ -3,11 +3,9 @@ Simple Lambda function that reads file from S3 bucket and saves
 its content to DynamoDB table
 """
 #!/usr/bin/env python3
-
 import json
 import logging
 import os
-from decimal import Decimal
 
 import boto3
 
@@ -15,13 +13,15 @@ LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.INFO)
 
 AWS_REGION = os.environ.get("AWS_REGION", "ap-southeast-1")
-DB_TABLE_NAME = os.environ.get("DB_TABLE_NAME", "transaction-records-table")
 
 CHUNK_SIZE = int(os.environ.get("CHUNK_SIZE", 1000))
 
 S3_CLIENT = boto3.client("s3")
-DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
-DYNAMODB_TABLE = DYNAMODB_CLIENT.Table(DB_TABLE_NAME)
+
+SQS_CLIENT = boto3.client("sqs")
+SQS_QUEUE_URL = os.environ.get("SQS_QUEUE_URL")
+
+USD_TO_SGD_RATE = os.environ.get("USD_TO_SGD_RATE", 1.4)
 
 
 def get_filesize(bucket, key):
@@ -41,7 +41,7 @@ def get_data_from_file(bucket, key, start_byte, end_byte):
         Bucket=bucket, Key=key, Range=f"bytes={start_byte}-{end_byte}"
     )
 
-    newline = "\r\n".encode()
+    newline = "\n".encode()
 
     chunk = response["Body"].read()
     last_newline = chunk.rfind(newline)
@@ -51,38 +51,54 @@ def get_data_from_file(bucket, key, start_byte, end_byte):
     if start_byte == 0:
         records.pop(0)
 
+    errored_transactions = []
     data = []
     for record in records:
         LOGGER.info(f"Reading {record}...")
+        record = record.strip()
         record_data = record.split(",")
-        item = {
-            "id": str(record_data[0]),
-            "cardId": str(record_data[1]),
-            "merchant": str(record_data[2]),
-            "mcc": int(record_data[3]) if len(record_data[3]) > 0 else 0,
-            "currency": str(record_data[4]),
-            "amount": float(record_data[5]),
-            "sgdAmount": float(record_data[6]),
-            "transactionId": str(record_data[7]),
-            "date": str(record_data[8]),
-            "cardPan": str(record_data[9]),
-            "cardType": str(record_data[10]),
-        }
-        data.append(item)
-        LOGGER.info("Processing: %s", item)
+
+        try:
+            if record_data[4].strip('"') == "USD":
+                sgd_amount = float(USD_TO_SGD_RATE) * float(record_data[5].strip('"'))
+            else:
+                sgd_amount = float(record_data[5].strip('"'))
+
+            item = {
+                "id": str(record_data[0].strip('"')),
+                "transaction_id": str(record_data[1].strip('"')),
+                "merchant": str(record_data[2].strip('"')),
+                "mcc": int(record_data[3].strip('"')) if len(record_data[3]) > 0 else 0,
+                "currency": str(record_data[4].strip('"')),
+                "amount": float(record_data[5].strip('"')),
+                "sgd_amount": sgd_amount,
+                "transaction_date": str(record_data[6].strip('"')),
+                "card_id": str(record_data[7].strip('"')),
+                "card_pan": str(record_data[8].strip('"')),
+                "card_type": str(record_data[9].strip('"')),
+            }
+            data.append(item)
+            LOGGER.info("Processing: %s", item)
+        except Exception:
+            errored_transactions.append(record)
 
     LOGGER.info(f"Successfully processed {len(data)} records from {bucket}/{key}")
+    LOGGER.warning(f"Number of errored transactions: {len(errored_transactions)}")
+    LOGGER.warning("Errored transactions: %s", str(errored_transactions))
 
-    new_start_byte = start_byte + last_newline + 2
+    new_start_byte = start_byte + last_newline + 1
     return (data, new_start_byte)
 
 
-def save_data_to_db(data):
+def send_message_to_queue(data):
     """
-    Function saves data to DynamoDB table
+    Function sends a message to SQS Queue
     """
-    item = json.loads(json.dumps(data), parse_float=Decimal)
-    result = DYNAMODB_TABLE.put_item(Item=item)
+    result = SQS_CLIENT.send_message(
+        QueueUrl=SQS_QUEUE_URL,
+        MessageBody=json.dumps(data),
+    )
+    LOGGER.info("message sent to queue")
     return result
 
 
@@ -118,11 +134,7 @@ def handler(event, context):
             s3_bucket, s3_file, start_byte, end_byte
         )
 
-        for item in data:
-            save_data_to_db(item)
-            # put calculatiton code here
-            # put save_reward_to_db here
-            # todo: error handling to catch failed calculations and flag it
+        send_message_to_queue(data)
 
         final_iteration = is_final_iteration(start_byte, file_size, CHUNK_SIZE)
         event["handler"] = {
@@ -143,8 +155,7 @@ def handler(event, context):
             s3_bucket, s3_file, start_byte, end_byte
         )
 
-        for item in data:
-            save_data_to_db(item)
+        send_message_to_queue(data)
 
         event["handler"]["results"] = {
             "startByte": next_start_byte,
