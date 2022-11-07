@@ -28,6 +28,7 @@ import os
 from decimal import Decimal
 
 import boto3
+from boto3.dynamodb.conditions import Key
 import requests
 
 LOGGER = logging.getLogger()
@@ -144,6 +145,32 @@ def get_by_card_type_and_name(card_type: str, campaign_name: str):
     return response
 
 
+def get_by_card_type(card_type: str):
+    """CRUD: get by card type only"""
+    LOGGER.info("Attempting to get all campaigns for %s", card_type)
+    try:
+        response = CAMPAIGN_TABLE.query(
+            KeyConditionExpression=Key('card_type').eq(card_type)
+            )
+        data = response["Items"]
+        while "LastEvaluatedKey" in response:
+            response = CAMPAIGN_TABLE.scan(
+                ExclusiveStartKey=response["LastEvaluatedKey"]
+            )
+            data.extend(response["Items"])
+        LOGGER.info(json.dumps(response))
+        # note: if the item is not found, response will not have key "item"
+    except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
+        return {
+            "statusCode": 500,
+            "headers": {"Access-Control-Allow-Origin": "*"},
+            "message": "An error occurred getting campaign by card_type.",
+            "error": str(exception),
+        }
+    return response
+
+
 def lambda_handler(event, context):
     """Main function that lambda passes trigger input into"""
 
@@ -171,6 +198,10 @@ def lambda_handler(event, context):
         elif action == "get_by_card_type_and_name":
             resp = get_by_card_type_and_name(
                 body["data"]["card_type"], body["data"]["campaign_name"]
+            )
+        elif action == "get_by_card_type":
+            resp = get_by_card_type(
+                body["data"]["card_type"]
             )
         elif action == "health":
             resp = "Campaign service is healthy"
