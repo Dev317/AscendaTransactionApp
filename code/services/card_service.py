@@ -62,8 +62,8 @@ def invoke_lambda(post_request: dict, end_point: str):
 def create_card(data):
     """Takes in a json of card data (from APIG) and creates DB object"""
     # check if card exists
-    existing_card = get_by_card_type_and_group(
-        data["card_type"], data["card_group"]
+    existing_card = get_by_card_type(
+        data["card_type"]
     )
     if "Item" in existing_card:
         LOGGER.error("ERROR: Card already exists. Did you mean to update instead?")
