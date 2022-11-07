@@ -59,7 +59,6 @@ There are 3 main branches that govern the production of Waftech application
        bucket         = "{new_bucket_name}"
        key            = "terraform.tfstate"
        region         = "{region}"
-       dynamodb_table = "terraform-locks"
        encrypt        = true
      }
    }
