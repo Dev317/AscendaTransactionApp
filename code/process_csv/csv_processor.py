@@ -79,7 +79,7 @@ def get_data_from_file(bucket, key, start_byte, end_byte):
             }
             data.append(item)
             LOGGER.info("Processing: %s", item)
-        except:
+        except Exception:
             errored_transactions.append(record)
 
     LOGGER.info(f"Successfully processed {len(data)} records from {bucket}/{key}")
