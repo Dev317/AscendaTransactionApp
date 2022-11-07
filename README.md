@@ -33,7 +33,7 @@ There are 3 main branches that govern the production of Waftech application
 
    ```bash
    cd terraform
-   tf init
+   terraform init
    ```
  
 - Terraform files are split into modules for the purpose of resusability and failover. 
