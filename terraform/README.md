@@ -89,69 +89,61 @@ Please make sure to update all the resources appropriately.
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | ~> 4.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.38.0 |
 
 ## Modules
 
-No modules.
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_acm_north_virginia"></a> [acm\_north\_virginia](#module\_acm\_north\_virginia) | ./modules/acm | n/a |
+| <a name="module_acm_sg"></a> [acm\_sg](#module\_acm\_sg) | ./modules/acm | n/a |
+| <a name="module_api_north_virginia"></a> [api\_north\_virginia](#module\_api\_north\_virginia) | ./modules/api | n/a |
+| <a name="module_api_sg"></a> [api\_sg](#module\_api\_sg) | ./modules/api | n/a |
+| <a name="module_file_processor_north_virginia"></a> [file\_processor\_north\_virginia](#module\_file\_processor\_north\_virginia) | ./modules/file-processor | n/a |
+| <a name="module_file_processor_sg"></a> [file\_processor\_sg](#module\_file\_processor\_sg) | ./modules/file-processor | n/a |
+| <a name="module_frontend_north_virginia"></a> [frontend\_north\_virginia](#module\_frontend\_north\_virginia) | ./modules/frontend | n/a |
+| <a name="module_frontend_sg"></a> [frontend\_sg](#module\_frontend\_sg) | ./modules/frontend | n/a |
+| <a name="module_iam"></a> [iam](#module\_iam) | ./modules/iam | n/a |
+| <a name="module_kms"></a> [kms](#module\_kms) | ./modules/kms | n/a |
+| <a name="module_route53"></a> [route53](#module\_route53) | ./modules/route53 | n/a |
+| <a name="module_sns_sg"></a> [sns\_sg](#module\_sns\_sg) | ./modules/sns | n/a |
+| <a name="module_sns_us"></a> [sns\_us](#module\_sns\_us) | ./modules/sns | n/a |
 
 ## Resources
 
 | Name | Type |
 |------|------|
-| [aws_amplify_app.Waftech](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/amplify_app) | resource |
-| [aws_amplify_branch.fe](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/amplify_branch) | resource |
-| [aws_budgets_budget.under_10_USD](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/budgets_budget) | resource |
-| [aws_cognito_user_pool.fe_userpool](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cognito_user_pool) | resource |
-| [aws_cognito_user_pool_client.client](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cognito_user_pool_client) | resource |
 | [aws_dynamodb_table.terraform_locks](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table) | resource |
-| [aws_dynamodb_table.transactions_records_table](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table) | resource |
-| [aws_iam_group.developers](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_group) | resource |
-| [aws_iam_group_membership.team](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_group_membership) | resource |
-| [aws_iam_group_policy_attachment.for-developers](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_group_policy_attachment) | resource |
-| [aws_iam_policy.policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
-| [aws_iam_role.amplify-github](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role.iam_lambda_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role.iam_stepfunction_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role) | resource |
-| [aws_iam_role_policy.lambda_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
-| [aws_iam_role_policy.stepfunction_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role_policy) | resource |
-| [aws_iam_user.bradley](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user) | resource |
-| [aws_iam_user.elizabeth](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user) | resource |
-| [aws_iam_user.jennifer](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user) | resource |
-| [aws_iam_user.marcus](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user) | resource |
-| [aws_iam_user.michelle](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user) | resource |
-| [aws_iam_user.minh](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user) | resource |
-| [aws_lambda_alias.file_upload_alias](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_alias) | resource |
-| [aws_lambda_alias.stepfunction_trigger_alias](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_alias) | resource |
-| [aws_lambda_function.file_upload](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
-| [aws_lambda_function.stepfunction_trigger](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
-| [aws_lambda_permission.s3_permission_to_trigger_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission) | resource |
-| [aws_route53_zone.primary](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_zone) | resource |
-| [aws_s3_bucket.file_upload_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
-| [aws_s3_bucket.lambda_function_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket.terraform_state](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
-| [aws_s3_bucket_notification.file_upload_trigger](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_notification) | resource |
 | [aws_s3_bucket_public_access_block.public_access](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
 | [aws_s3_bucket_server_side_encryption_configuration.default](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_server_side_encryption_configuration) | resource |
 | [aws_s3_bucket_versioning.enabled](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_versioning) | resource |
-| [aws_sfn_state_machine.stepfunction_file_processor](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sfn_state_machine) | resource |
-| [aws_iam_policy_document.assume_role](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.developer_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
-| [aws_iam_policy_document.lambda_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_aws_region"></a> [aws\_region](#input\_aws\_region) | AWS region | `string` | `"ap-southeast-1"` | no |
-| <a name="input_force_destroy"></a> [force\_destroy](#input\_force\_destroy) | Force deleting a resource | `bool` | `true` | no |
 | <a name="input_github_token"></a> [github\_token](#input\_github\_token) | Github access token | `string` | n/a | yes |
-| <a name="input_lambda_role"></a> [lambda\_role](#input\_lambda\_role) | Name of IAM lambda role | `string` | `"iam-lambda-role"` | no |
+| <a name="input_key_id"></a> [key\_id](#input\_key\_id) | AWS key id | `string` | n/a | yes |
+| <a name="input_route53_hosted_zone_id"></a> [route53\_hosted\_zone\_id](#input\_route53\_hosted\_zone\_id) | Route 53 Hosted Zone ID | `string` | `"Z089272719LULOG2M18OT"` | no |
+| <a name="input_secret"></a> [secret](#input\_secret) | AWS secret | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
+| <a name="output_base_url_calculation_sg"></a> [base\_url\_calculation\_sg](#output\_base\_url\_calculation\_sg) | Base URL for API Gateway for Calculation in SG. |
+| <a name="output_base_url_calculation_us"></a> [base\_url\_calculation\_us](#output\_base\_url\_calculation\_us) | Base URL for API Gateway for Calculation in US. |
+| <a name="output_base_url_campaign_sg"></a> [base\_url\_campaign\_sg](#output\_base\_url\_campaign\_sg) | Base URL for API Gateway for Campaign in SG. |
+| <a name="output_base_url_campaign_us"></a> [base\_url\_campaign\_us](#output\_base\_url\_campaign\_us) | Base URL for API Gateway for Campaign in US. |
+| <a name="output_base_url_exclusion_sg"></a> [base\_url\_exclusion\_sg](#output\_base\_url\_exclusion\_sg) | Base URL for API Gateway for Exclusion in SG. |
+| <a name="output_base_url_exclusion_us"></a> [base\_url\_exclusion\_us](#output\_base\_url\_exclusion\_us) | Base URL for API Gateway for Exclusion in US. |
+| <a name="output_base_url_reward_sg"></a> [base\_url\_reward\_sg](#output\_base\_url\_reward\_sg) | Base URL for API Gateway for Reward in SG. |
+| <a name="output_base_url_reward_us"></a> [base\_url\_reward\_us](#output\_base\_url\_reward\_us) | Base URL for API Gateway for Reward in US. |
+| <a name="output_base_url_transaction_sg"></a> [base\_url\_transaction\_sg](#output\_base\_url\_transaction\_sg) | Base URL for API Gateway for Transaction in SG. |
+| <a name="output_base_url_transaction_us"></a> [base\_url\_transaction\_us](#output\_base\_url\_transaction\_us) | Base URL for API Gateway for Transaction in US. |
+| <a name="output_base_url_user_sg"></a> [base\_url\_user\_sg](#output\_base\_url\_user\_sg) | Base URL for API Gateway for User in SG. |
+| <a name="output_base_url_user_us"></a> [base\_url\_user\_us](#output\_base\_url\_user\_us) | Base URL for API Gateway for User in US. |
 | <a name="output_dynamodb_table_name"></a> [dynamodb\_table\_name](#output\_dynamodb\_table\_name) | The name of the DynamoDB table |
 | <a name="output_s3_bucket_arn"></a> [s3\_bucket\_arn](#output\_s3\_bucket\_arn) | The ARN of the S3 bucket |
 <!-- END_TF_DOCS -->

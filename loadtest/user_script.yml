@@ -1,0 +1,50 @@
+# Thank you for trying serverless-artillery!
+# This default script is intended to get you started quickly.
+# There is a lot more that Artillery can do.
+# You can find great documentation of the possibilities at:
+# https://artillery.io/docs/
+
+
+config:
+  # this hostname will be used as a prefix for each URI in the flow unless a complete URI is specified
+  target: "https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/"
+  phases:
+    - duration: 20
+      arrivalRate: 5
+      name: Warm up
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 700
+      name: Ramp up load
+  payload:
+    path: "user.csv"
+    fields:
+      - "action"
+      - "user_id"
+      - "first_name"
+      - "last_name"
+      - "phone"
+      - "email"
+      - "created_at"
+      - "updated_at"
+      - "card_id"
+      - "card_pan"
+      - "card_type"
+scenarios:
+  -
+    flow:
+     - post:
+          url: "/user"
+          json:
+            action: "{{ action }}"
+            data:
+              user_id: "{{ user_id }}"
+              first_name: "{{ first_name }}"
+              last_name: "{{ last_name }}"
+              phone: "{{ phone }}"
+              email: "{{ email }}"
+              created_at: "{{ created_at }}"
+              updated_at: "{{ updated_at }}"
+              card_id: "{{ card_id }}"
+              card_pan: "{{ card_pan }}"
+              card_type: "{{ card_type }}"

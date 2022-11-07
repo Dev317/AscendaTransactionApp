@@ -1,88 +1,23 @@
-variable "aws_region" {
-  description = "AWS region"
-  type        = string
-  default     = "ap-southeast-1"
-}
-
 variable "github_token" {
   description = "Github access token"
   type        = string
   sensitive   = true
 }
 
-variable "lambda_role" {
-  description = "Name of IAM lambda role"
+variable "route53_hosted_zone_id" {
+  description = "Route 53 Hosted Zone ID"
   type        = string
-  default     = "iam-lambda-role"
+  default     = "Z089272719LULOG2M18OT"
 }
 
-variable "force_destroy" {
-  description = "Force deleting a resource"
-  type        = bool
-  default     = true
+variable "key_id" {
+  description = "AWS key id"
+  type        = string
+  sensitive   = true
 }
 
-data "aws_iam_policy_document" "lambda_policy" {
-  statement {
-    actions = [
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:PutLogEvents",
-      # S3 policies
-      "s3:DeleteObject",
-      "s3:ListBucket",
-      "s3:HeadObject",
-      "s3:GetObject",
-      "s3:GetObjectVersion",
-      "s3:PutObject",
-      # add DynamoDB policies
-      "dynamodb:BatchGetItem",
-      "dynamodb:GetItem",
-      "dynamodb:Query",
-      "dynamodb:Scan",
-      "dynamodb:BatchWriteItem",
-      "dynamodb:PutItem",
-      "dynamodb:UpdateItem",
-      # AWS Step Function policy
-      "states:StartExecution"
-    ]
-    resources = ["arn:aws:s3:::*", "arn:aws:dynamodb:::*", "arn:aws:logs:::*", "arn:aws:states:::*"]
-    effect    = "Allow"
-  }
-}
-
-data "aws_iam_policy_document" "developer_policy" {
-  statement {
-    actions = ["rds:*",
-      "cloudtrail:*",
-      "dynamodb:*",
-      "sqs:*",
-      "rolesanywhere:*",
-      "cloudfront:*",
-      "access-analyzer:*",
-      "kms:*",
-      "kinesis:*",
-      "events:*",
-      "sns:*",
-      "states:*",
-      "rds-db:*",
-      "cognito-identity:*",
-      "dax:*",
-      "s3:*",
-      "apigateway:*",
-      "rds-data:*",
-      "amplifybackend:*",
-      "appsync:*",
-      "sts:*",
-      "iam:*",
-      "cloudwatch:*",
-      "sso:*",
-      "lambda:*",
-      "route53:*",
-      "cognito-idp:*",
-      "aws-portal:*",
-    "billingconductor:*"]
-    resources = ["*"]
-    effect    = "Allow"
-  }
+variable "secret" {
+  description = "AWS secret"
+  type        = string
+  sensitive   = true
 }
