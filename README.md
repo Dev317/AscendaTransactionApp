@@ -3,7 +3,9 @@
 There are 3 main branches that govern the production of Waftech application
 
 1. infrastructure
+ - project-2022-23t1-g1-team1-infrastructure
 2. microservices
+ - project-2022-23t1-g1-team1-microservices
 3. front-end branches for SG and US region:
  - project-2022-23t1-g1-team1-frontend-ap-southeast-1
  - project-2022-23t1-g1-team1-frontend-us-east-1
