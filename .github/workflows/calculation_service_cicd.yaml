@@ -1,0 +1,28 @@
+name: Calculation Service CI/CD
+
+on:
+  push:
+    branches:
+      - "microservices"
+    paths:
+      - "code/services/calculation_service.py"
+      - ".github/workflows/calculation_service_cicd.yaml"
+  pull_request:
+    branches:
+      - "microservices"
+
+jobs:
+  # ci:
+  #   uses: ./.github/workflows/ci.yaml
+  #   with:
+  #     source-path: code/services
+
+  cd:
+    uses: ./.github/workflows/cd.yaml
+    # needs: [ci]
+    with:
+      s3-folder-name: calculation
+      src-file-dir: code/services
+      src-file-name: calculation_service
+      lambda-name: calculation_service
+    secrets: inherit
