@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - "feature/health"
+    paths:
+      - "code/health/health_check.py"
   pull_request:
     branches:
       - "feature/health"
