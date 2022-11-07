@@ -3,10 +3,12 @@ name: Process CSV CI/CD
 on:
   push:
     branches:
-      - "feature/process-csv"
+      - "project-2022-23t1-g1-team1-feature/process-csv"
+    paths:
+      - "code/process_csv/**"
   pull_request:
     branches:
-      - "feature/process-csv"
+      - "project-2022-23t1-g1-team1-feature/process-csv"
 
 env:
   SG_S3_BUCKET_NAME: lambda-archive-g1t1-singapore
