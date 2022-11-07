@@ -16,6 +16,8 @@ USER_TABLE_NAME = os.environ.get("USER_TABLE_NAME", "user_service_table")
 
 DYNAMODB_CLIENT = boto3.resource("dynamodb", region_name=AWS_REGION)
 USER_TABLE = DYNAMODB_CLIENT.Table(USER_TABLE_NAME)
+AWS_KEY_ID = os.environ.get("AWS_KEY_ID")
+AWS_SECRET = os.environ.get("AWS_SECRET")
 
 APIG_URL = os.environ.get(
     "APIG_URL", "https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/"
@@ -38,7 +40,22 @@ def invoke_lambda(post_request: dict, end_point: str):
 def create_user(data: dict):
     try:
         response = USER_TABLE.put_item(Item=data)
-        LOGGER.info("User created")
+        LOGGER.info("User added. Trying to send email")
+
+        # email verification for email notification
+        client = boto3.client(service_name = "ses", aws_access_key_id= AWS_KEY_ID, aws_secret_access_key= AWS_SECRET)
+        email = data["email"]
+        # check if user is already verified
+        verified_list = client.list_verified_email_addresses()["VerifiedEmailAddresses"]
+        LOGGER.info("verified_list: %s", verified_list)
+        if email in verified_list:
+            LOGGER.info("Found email among verifieds")
+        else:
+            response_email = client.verify_email_identity(
+                EmailAddress = email
+            )
+            LOGGER.info("email not verified. sending verification email to %s", email)
+            LOGGER.info(json.dumps(response_email))
     except Exception as exception:
         LOGGER.error("ERROR: %s", repr(exception))
         return {
