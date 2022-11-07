@@ -21,6 +21,8 @@ S3_CLIENT = boto3.client("s3")
 SQS_CLIENT = boto3.client("sqs")
 SQS_QUEUE_URL = os.environ.get("SQS_QUEUE_URL")
 
+USD_TO_SGD_RATE = os.environ.get("USD_TO_SGD_RATE", 1.4)
+
 
 def get_filesize(bucket, key):
     try:
@@ -54,18 +56,23 @@ def get_data_from_file(bucket, key, start_byte, end_byte):
         LOGGER.info(f"Reading {record}...")
         record = record.strip()
         record_data = record.split(",")
+
+        if record_data[4].strip('"') == "USD":
+            sgd_amount = float(USD_TO_SGD_RATE) * float(record_data[5].strip('"'))
+        else:
+            sgd_amount = float(record_data[5].strip('"'))
         item = {
             "id": str(record_data[0].strip('"')),
-            "card_id": str(record_data[1].strip('"')),
+            "transaction_id": str(record_data[1].strip('"')),
             "merchant": str(record_data[2].strip('"')),
             "mcc": int(record_data[3].strip('"')) if len(record_data[3]) > 0 else 0,
             "currency": str(record_data[4].strip('"')),
             "amount": float(record_data[5].strip('"')),
-            "sgd_amount": float(record_data[6].strip('"')),
-            "transaction_id": str(record_data[7].strip('"')),
-            "transaction_date": str(record_data[8].strip('"')),
-            "card_pan": str(record_data[9].strip('"')),
-            "card_type": str(record_data[10].strip('"')),
+            "sgd_amount": sgd_amount,
+            "transaction_date": str(record_data[6].strip('"')),
+            "card_id": str(record_data[7].strip('"')),
+            "card_pan": str(record_data[8].strip('"')),
+            "card_type": str(record_data[9].strip('"')),
         }
         data.append(item)
         LOGGER.info("Processing: %s", item)
