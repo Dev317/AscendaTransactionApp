@@ -81,7 +81,8 @@ def invoke_lambda(post_request: dict, end_point: str):
 
 def convert_date(input_date: str):
     """Function to parse any date format into what we want grrr"""
-    return parse(input_date, dayfirst=True).strftime("%d-%m-%Y")
+    # return parse(input_date, dayfirst=True).strftime("%d-%m-%Y")
+    return parse(input_date).strftime("%d-%m-%Y")
 
 #   ______ .______       __    __   _______
 #  /      ||   _  \     |  |  |  | |       \
