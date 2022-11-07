@@ -13,8 +13,6 @@ def lambda_handler(event, context):
     status = os.environ["STATUS"]
     statusCode = 200
 
-    logger.info("status: " + status)
-
     if status != "ok":
         statusCode = 500
 
