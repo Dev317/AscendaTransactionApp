@@ -1,4 +1,5 @@
 """Return health."""
+import json
 import logging
 import os
 
@@ -9,7 +10,13 @@ logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
     """Lambda handler for getting the health."""
+    status = os.environ["STATUS"]
+    statusCode = 200
 
-    logger.info("status: " + os.environ["STATUS"])
+    if status != "ok":
+        statusCode = 500
 
-    return {"status": os.environ["STATUS"]}
+    return {
+        "statusCode": statusCode,
+        "body": json.dumps({"status": status, "region": os.environ["AWS_REGION"]}),
+    }

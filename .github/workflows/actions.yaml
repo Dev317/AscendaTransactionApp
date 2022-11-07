@@ -3,7 +3,7 @@ name: Deploy Infrastructure
 on:
   push:
     branches:
-      - infrastructure
+      - project-2022-23t1-g1-team1-infrastructure
 
 jobs:
   tf_fmt:

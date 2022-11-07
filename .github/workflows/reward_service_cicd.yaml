@@ -1,0 +1,27 @@
+name: Reward Service CI/CD
+
+on:
+  push:
+    branches:
+      - "project-2022-23t1-g1-team1-microservices"
+    paths:
+      - "code/services/reward_service.py"
+  pull_request:
+    branches:
+      - "project-2022-23t1-g1-team1-microservices"
+
+jobs:
+  # ci:
+  #   uses: ./.github/workflows/ci.yaml
+  #   with:
+  #     source-path: code/services
+
+  cd:
+    uses: ./.github/workflows/cd.yaml
+    # needs: [ci]
+    with:
+      s3-folder-name: reward
+      src-file-dir: code/services
+      src-file-name: reward_service
+      lambda-name: reward_service
+    secrets: inherit

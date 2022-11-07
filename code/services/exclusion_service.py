@@ -4,6 +4,7 @@ import os
 from decimal import Decimal
 
 import boto3
+from boto3.dynamodb.conditions import Key
 import requests
 
 LOGGER = logging.getLogger()
@@ -43,6 +44,7 @@ def create_exclusion(data):
         data["card_type"], data["exclusion_name"]
     )
     if "Item" in existing_exclusion:
+        LOGGER.error("ERROR: Exclusion already exists. Did you mean to update instead?")
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -65,6 +67,7 @@ def create_exclusion(data):
                     "calculation successfully invoked for %s", str(data["card_type"])
                 )
             except Exception as exception:
+                LOGGER.error("ERROR: %s", repr(exception))
                 return {
                     "statusCode": 500,
                     "headers": {"Access-Control-Allow-Origin": "*"},
@@ -73,6 +76,7 @@ def create_exclusion(data):
                 }
 
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -97,6 +101,7 @@ def get_all():
             data.extend(response["Items"])
 
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -104,6 +109,22 @@ def get_all():
             "error": str(exception),
         }
     return data
+
+
+def get_all_grouped():
+    """Get all exclusions, then group them by exclusion name"""
+    all_exclusions = get_all()
+    grouped_dict = {}
+    for exclusion in all_exclusions:
+        if exclusion["exclusion_name"] not in grouped_dict:
+            grouped_dict[exclusion["exclusion_name"]] = {}
+            # if doesnt exist, create a new list put first item
+            grouped_dict[exclusion["exclusion_name"]] = exclusion
+            grouped_dict[exclusion["exclusion_name"]]["card_type"] = [exclusion["card_type"]]
+        else:
+            # else add it to the list
+            grouped_dict[exclusion["exclusion_name"]]["card_type"].append(exclusion["card_type"])
+    return grouped_dict
 
 
 def get_by_card_type_and_name(card_type: str, exclusion_name: str):
@@ -116,10 +137,37 @@ def get_by_card_type_and_name(card_type: str, exclusion_name: str):
         LOGGER.info(json.dumps(response))
         # note: if the item is not found, response will not have key "item"
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
             "message": "An error occurred getting exclusion by id.",
+            "error": str(exception),
+        }
+    return response
+
+
+def get_by_card_type(card_type: str):
+    """CRUD: get by card type only"""
+    LOGGER.info("Attempting to get all exclusions for %s", card_type)
+    try:
+        response = EXCLUSION_TABLE.query(
+            KeyConditionExpression=Key('card_type').eq(card_type)
+            )
+        data = response["Items"]
+        while "LastEvaluatedKey" in response:
+            response = EXCLUSION_TABLE.scan(
+                ExclusiveStartKey=response["LastEvaluatedKey"]
+            )
+            data.extend(response["Items"])
+        LOGGER.info(json.dumps(response))
+        # note: if the item is not found, response will not have key "item"
+    except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
+        return {
+            "statusCode": 500,
+            "headers": {"Access-Control-Allow-Origin": "*"},
+            "message": "An error occurred getting exclusion by card_type.",
             "error": str(exception),
         }
     return response
@@ -135,7 +183,7 @@ def lambda_handler(event, context):
             body = event
             action = event["action"]
     except Exception as exception:
-        LOGGER.error(exception)
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -145,15 +193,28 @@ def lambda_handler(event, context):
 
     try:
         if action == "create":
-            dynamo_resp = create_exclusion(body["data"])
+            resp = create_exclusion(body["data"])
         elif action == "get_all":
-            dynamo_resp = get_all()
+            resp = get_all()
+        elif action == "get_all_grouped":
+            resp = get_all_grouped()
         elif action == "get_by_card_type_and_name":
-            dynamo_resp = get_by_card_type_and_name(
+            resp = get_by_card_type_and_name(
                 body["data"]["card_type"], body["data"]["exclusion_name"]
             )
+        elif action == "get_by_card_type":
+            resp = get_by_card_type(
+                body["data"]["card_type"]
+            )
+        elif action == "health":
+            resp = "Exclusion service is healthy"
         else:
-            dynamo_resp = {"statusCode": 500, "body": "no such action"}
+            LOGGER.error("ERROR: No such action: %s", action)
+            return {
+                "statusCode": 500,
+                "headers": {"Access-Control-Allow-Origin": "*"},
+                "body": "no such action",
+            }
     # TODO: format error returns properly so apig can give proper error response reporting (rather than having to check cloud watch)
     except Exception as exception:
         LOGGER.error(exception)
@@ -167,5 +228,5 @@ def lambda_handler(event, context):
     return {
         "statusCode": 200,
         "headers": {"Access-Control-Allow-Origin": "*"},
-        "body": json.dumps(dynamo_resp, cls=JSONEncoder),
+        "body": json.dumps(resp, cls=JSONEncoder),
     }

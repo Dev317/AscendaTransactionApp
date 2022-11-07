@@ -53,6 +53,7 @@ def get_all_campaigns() -> list:
     try:
         return invoke_lambda(post_request, "campaign")
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -68,6 +69,7 @@ def get_all_exclusions() -> list:
     try:
         return invoke_lambda(post_request, "exclusion")
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -88,6 +90,7 @@ def get_policy(card_type: str, policy_date: dict) -> dict:
         )
         LOGGER.info(json.dumps(response))
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -113,7 +116,7 @@ def put_policy(policy):
             "Policy %s - %s saved to db", policy["card_type"], policy["policy_date"]
         )
     except Exception as exception:
-        LOGGER.error(str(exception))
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -296,6 +299,7 @@ def add_new_campaign(new_campaign: dict):
         for date_to_add in date_list:
             add_campaign_to_policy(new_campaign, date_to_add)
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -380,6 +384,7 @@ def lambda_handler(event, context):
             body = event
             action = event["action"]
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "message": "Incorrect input",
@@ -398,6 +403,8 @@ def lambda_handler(event, context):
             )
         elif action == "get_policy":
             resp = get_policy(body["data"]["card_type"], body["data"]["policy_date"])
+        elif action == "health":
+            resp = "Campaign service is healthy"
 
         # TESTING ENDPOINTS
         elif action == "test_get_campaign":
@@ -407,12 +414,14 @@ def lambda_handler(event, context):
         elif action == "test_put_policy":
             resp = put_policy(body["data"])
         else:
-            resp = {
+            LOGGER.error("ERROR: No such action: %s", action)
+            return {
                 "statusCode": 500,
                 "headers": {"Access-Control-Allow-Origin": "*"},
                 "body": "no such action",
             }
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},

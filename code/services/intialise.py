@@ -7,7 +7,6 @@ import requests
 
 # replace with apig of system as necessary
 APIG_URL = "https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/"
-# APIG_URL = "https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/"
 
 
 def invoke_lambda(post_request: dict, end_point: str):
@@ -17,16 +16,19 @@ def invoke_lambda(post_request: dict, end_point: str):
 
 
 # sets the start and end dates for all 4 campaigns and standard exclusions
-BASE_START_DATE = "09-06-2022"
-BASE_END_DATE = "11-06-2022"
+BASE_START_DATE = "01-06-2021"
+BASE_END_DATE = "31-12-2021"
 
-BASE_CAMPAIGNS = [
+PROMO_START_DATE = "01-10-2021"
+PROMO_END_DATE = "31-10-2021"
+
+PROMO_CAMPAIGNS = [
     {
         "campaign_name": "Grab promo",
-        "campaign_start_date": "10-06-2022",
+        "campaign_start_date": PROMO_START_DATE,
+        "campaign_end_date": PROMO_END_DATE,
         "campaign_description": "Grab promo",
         "card_type": "scis_shopping",
-        "campaign_end_date": "11-06-2022",
         "campaign_priority": "50",
         "campaign_conditions": [
             {
@@ -39,10 +41,10 @@ BASE_CAMPAIGNS = [
     },
     {
         "campaign_name": "Kaligo.com promo",
-        "campaign_start_date": "10-06-2022",
+        "campaign_start_date": PROMO_START_DATE,
+        "campaign_end_date": PROMO_END_DATE,
         "campaign_description": "Kaligo.com promo",
         "card_type": "scis_premiummiles",
-        "campaign_end_date": "11-06-2022",
         "campaign_priority": "50",
         "campaign_conditions": [
             {
@@ -54,10 +56,10 @@ BASE_CAMPAIGNS = [
     },
     {
         "campaign_name": "Kaligo.com promo",
-        "campaign_start_date": "10-06-2022",
+        "campaign_start_date": PROMO_START_DATE,
+        "campaign_end_date": PROMO_END_DATE,
         "campaign_description": "Kaligo.com promo",
         "card_type": "scis_platinummiles",
-        "campaign_end_date": "11-06-2022",
         "campaign_priority": "50",
         "campaign_conditions": [
             {
@@ -69,10 +71,10 @@ BASE_CAMPAIGNS = [
     },
     {
         "campaign_name": "Shell petrol promo",
-        "campaign_start_date": "10-06-2022",
+        "campaign_start_date": "01-08-2021",
+        "campaign_end_date": "30-08-2021",
         "campaign_description": "Shell petrol promo",
         "card_type": "scis_freedom",
-        "campaign_end_date": "11-06-2022",
         "campaign_priority": "50",
         "campaign_conditions": [
             {
@@ -82,6 +84,25 @@ BASE_CAMPAIGNS = [
             }
         ],
     },
+    # {
+    #     "campaign_name": "Shopee promo",
+    #     "campaign_start_date": BASE_START_DATE,
+    #     "campaign_description": "Shopee promo",
+    #     "card_type": "scis_shopping",
+    #     "campaign_end_date": "10-06-2022",
+    #     "campaign_priority": "100",
+    #     "campaign_conditions": [
+    #         {
+    #             "merchant_name_include": ["Shopee"],
+    #             "percentage_of_amount": "5",
+    #             "calculation_reason": "Shopee Promo - 5 points per dollar with Shopee"
+    #         }
+    #     ]
+    # },
+
+]
+
+BASE_CAMPAIGNS = [
     {
         "campaign_name": "SCIS Shopping Card Base",
         "campaign_start_date": BASE_START_DATE,
@@ -103,21 +124,6 @@ BASE_CAMPAIGNS = [
             {"percentage_of_amount": "1", "calculation_reason": "1 point/SGD on spend"},
         ],
     },
-    # {
-    #     "campaign_name": "Shopee promo",
-    #     "campaign_start_date": BASE_START_DATE,
-    #     "campaign_description": "Shopee promo",
-    #     "card_type": "scis_shopping",
-    #     "campaign_end_date": "10-06-2022",
-    #     "campaign_priority": "100",
-    #     "campaign_conditions": [
-    #         {
-    #             "merchant_name_include": ["Shopee"],
-    #             "percentage_of_amount": "5",
-    #             "calculation_reason": "Shopee Promo - 5 points per dollar with Shopee"
-    #         }
-    #     ]
-    # },
     {
         "campaign_name": "Freedom Card Base",
         "campaign_start_date": BASE_START_DATE,
@@ -261,6 +267,15 @@ def create_rewards(transaction_list: list):
             print("Failed to calculate and add_reward: ", transaction["transaction_id"])
             print(exception)
 
+def create_card_groups(cardgroup_list: list):
+    for cardgroup in cardgroup_list:
+        try:
+            post_request = {"action": "create", "data": cardgroup}
+            invoke_lambda(post_request, "card")
+        except Exception as exception:
+            print("Failed to add card group: ", cardgroup["group_name"])
+            print(exception)
+
 
 TEST_USERS = [
     {
@@ -269,8 +284,8 @@ TEST_USERS = [
         "last_name": "Goh",
         "phone": "94223757",
         "email": "hi@marcu.sg",
-        "created_at": "02-01-2022",
-        "updated_at": "02-01-2022",
+        "created_at": "02-01-2021",
+        "updated_at": "02-01-2021",
         "card_id": "marcus_card_id_1",
         "card_pan": "1234-1234-1234-1111",
         "card_type": "scis_freedom",
@@ -281,8 +296,8 @@ TEST_USERS = [
         "last_name": "Goh",
         "phone": "94223757",
         "email": "hi@marcu.sg",
-        "created_at": "02-01-2022",
-        "updated_at": "02-01-2022",
+        "created_at": "02-01-2021",
+        "updated_at": "02-01-2021",
         "card_id": "marcus_card_id_2",
         "card_pan": "1234-1234-1234-2222",
         "card_type": "scis_platinummiles",
@@ -293,8 +308,8 @@ TEST_USERS = [
         "last_name": "Goh",
         "phone": "94223757",
         "email": "hi@marcu.sg",
-        "created_at": "02-01-2022",
-        "updated_at": "02-01-2022",
+        "created_at": "02-01-2021",
+        "updated_at": "02-01-2021",
         "card_id": "marcus_card_id_3",
         "card_pan": "1234-1234-1234-3333",
         "card_type": "scis_premiummiles",
@@ -305,8 +320,8 @@ TEST_USERS = [
         "last_name": "Goh",
         "phone": "94223757",
         "email": "hi@marcu.sg",
-        "created_at": "02-01-2022",
-        "updated_at": "02-01-2022",
+        "created_at": "02-01-2021",
+        "updated_at": "02-01-2021",
         "card_id": "marcus_card_id_4",
         "card_pan": "1234-1234-1234-4444",
         "card_type": "scis_shopping",
@@ -324,7 +339,7 @@ TEST_TRANSACTIONS = [
         "amount": "2001",
         "sgd_amount": "2001",
         "transaction_id": "testtx1",
-        "transaction_date": "09-06-2022",
+        "transaction_date": "09-06-2021",
         "card_pan": "1234-1234-1234-1111",
         "card_type": "scis_freedom",
     },
@@ -337,7 +352,7 @@ TEST_TRANSACTIONS = [
         "amount": "285.96",
         "sgd_amount": "132.81",
         "transaction_id": "testtx2",
-        "transaction_date": "09-06-2022",
+        "transaction_date": "09-06-2021",
         "card_pan": "1234-1234-1234-1111",
         "card_type": "scis_freedom",
     },
@@ -350,7 +365,7 @@ TEST_TRANSACTIONS = [
         "amount": "285.96",
         "sgd_amount": "100.53",
         "transaction_id": "testtx3",
-        "transaction_date": "09-06-2022",
+        "transaction_date": "09-06-2021",
         "card_pan": "1234-1234-1234-1111",
         "card_type": "scis_freedom",
     },
@@ -363,20 +378,60 @@ TEST_TRANSACTIONS = [
         "amount": "285.96",
         "sgd_amount": "50.67",
         "transaction_id": "testtx4",
-        "transaction_date": "09-06-2022",
+        "transaction_date": "09-06-2021",
         "card_pan": "1234-1234-1234-1111",
         "card_type": "scis_freedom",
     },
+]
+
+CARD_GROUPS = [
+    {
+    "card_group": "scis_miles_group",
+    "card_type": "scis_premiummiles",
+    "card_name": "SCIS Premium Miles Card",
+    "group_name": "SCIS Miles Programme",
+    "group_description": "Rack up miles, reap more rewards.",
+    "unit_prefix": "",
+    "unit_suffix": " miles"
+    },
+    {
+    "card_group": "scis_miles_group",
+    "card_type": "scis_platinummiles",
+    "card_name": "SCIS Platinum Miles Card",
+    "group_name": "SCIS Miles Programme",
+    "group_description": "Rack up miles, reap more rewards.",
+    "unit_prefix": "",
+    "unit_suffix": " miles"
+    },
+    {
+    "card_group": "cashback_group",
+    "card_type": "scis_shopping",
+    "card_name": "SCIS Shopping Card",
+    "group_name": "Cashback Programmes",
+    "group_description": "Earn some quick cashback with SCIS!",
+    "unit_prefix": "$",
+    "unit_suffix": ""
+    },
+    {
+    "card_group": "freedom_points_group",
+    "card_type": "scis_freedom",
+    "card_name": "SCIS Freedom Card",
+    "group_name": "SCIS Freedom",
+    "group_description": "Experience financial freedom with Freedom Points",
+    "unit_prefix": "",
+    "unit_suffix": " pts"
+    }
 ]
 
 
 def run():
 
     # create_campaigns(BASE_CAMPAIGNS)
+    create_campaigns(PROMO_CAMPAIGNS)
     # create_exclusions(BASE_EXCLUSIONS)
-    create_users(TEST_USERS)
-    create_rewards(TEST_TRANSACTIONS)
-
+    # create_users(TEST_USERS)
+    # create_rewards(TEST_TRANSACTIONS)
+    # create_card_groups(CARD_GROUPS)
     print("complete")
 
 

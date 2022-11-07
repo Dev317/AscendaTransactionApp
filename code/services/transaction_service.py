@@ -50,18 +50,23 @@ class JSONEncoder(json.JSONEncoder):
 def invoke_lambda(post_request: dict, end_point: str):
     """Packages a JSON message into a http request and invokes another service
     Returns a jsonified response object"""
-    return requests.post(APIG_URL + end_point, json=post_request).json()
+    LOGGER.info("%s invoked", end_point)
+    LOGGER.info(post_request)
+    lambda_response = requests.post(APIG_URL + end_point, json=post_request).json()
+    LOGGER.info(lambda_response)
+    return lambda_response
 
 
 def create_transaction(data: dict):
-    """Takes in a json of transaction data (from csv processor/APIG) and creates DB object"""
-    transaction_item = data
+    """Takes in a dict of transaction data (from csv processor/APIG) and creates DB object"""
+    transaction_item = json.loads(json.dumps(data), parse_float=Decimal)
     # TODO input verification to check that the fields are correctly set? or relegate to frontend?
 
     try:
         response = TRANSACTION_TABLE.put_item(Item=transaction_item)
         LOGGER.info("transaction created")
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -71,10 +76,27 @@ def create_transaction(data: dict):
     return response
 
 
+def single_create_transaction(transaction: dict):
+    """Takes a single transaction item and add it
+    Then triggers reward to generate the reward"""
+    create_transaction(transaction)
+
+    post_request = {"action": "calculate_reward", "data": transaction}
+    res = invoke_lambda(post_request, "reward")
+
+    return {
+        "statusCode": 200,
+        "headers": {"Access-Control-Allow-Origin": "*"},
+        "body": res,
+    }
+
+
+
 def batch_create_transactions(transaction_list: list):
     """Takes a list of transaction dicts and invokes create_transaction multiple times,
     Then enqueues the batch transactions to generate rewards"""
     errorred_transactions = []
+    LOGGER.info("Creating a batch of %d transactions", len(transaction_list))
     for transaction in transaction_list:
         try:
             create_transaction(transaction)
@@ -88,8 +110,13 @@ def batch_create_transactions(transaction_list: list):
         "Transactions saved. Total errored values: %d", len(errorred_transactions)
     )
 
-    post_request = {"action": "batch_create_reward", "data": transaction_list}
-    invoke_lambda(post_request, "reward")
+    LOGGER.info("Transaction list: %s", transaction_list)
+
+    post_request = {"action": "batch_calculate_reward", "data": transaction_list}
+    res = invoke_lambda(post_request, "reward")
+
+    LOGGER.info("response from reward service received")
+    LOGGER.info(json.dumps(res))
 
     return {
         "statusCode": 200,
@@ -107,6 +134,7 @@ def get_by_card_id(card_id: str):
         LOGGER.info(json.dumps(response))
         # note: if the item is not found, response will not have key "item"
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -125,13 +153,20 @@ def lambda_handler(event, context):
     """Main function that lambda passes trigger input into"""
 
     try:
-        if "body" in event:  # if the event comes from APIG
+        if "Records" in event:  # if the event comes from SQS
+            transactions = list()
+            for message in event["Records"]:
+                transactions += json.loads(message["body"])
+            LOGGER.info("total messages: %d", len(event["Records"]))
+            action = "batch_create"
+        elif "body" in event:  # if the event comes from APIG
             body = json.loads(event["body"])
             action = body["action"]
         else:  # if the event comes from lambda test
             body = event
             action = event["action"]
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -140,18 +175,30 @@ def lambda_handler(event, context):
         }
 
     try:
-        if action == "create":
-            dynamo_resp = create_transaction(body["data"])
+        if action == "single_create":
+            resp = single_create_transaction(body["data"])
         elif action == "get_by_card_id":
-            dynamo_resp = get_by_card_id(body["data"]["card_id"])
+            resp = get_by_card_id(body["data"]["card_id"])
         elif action == "get_by_id":
-            dynamo_resp = get_by_card_type(
-                body["data"]["user_id"], body["data"]["card_type"]
+            resp = get_by_card_type(body["data"]["user_id"], body["data"]["card_type"])
+        elif action == "batch_create":
+            resp = batch_create_transactions(transactions)
+        elif action == "test_reward":
+            resp = invoke_lambda(
+                {"action": "batch_calculate_reward", "data": body["data"]}, "reward"
             )
+        elif action == "health":
+            resp = "Transaction service is healthy"
         else:
-            dynamo_resp = {"statusCode": 500, "body": "no such action"}
+            LOGGER.error("ERROR: No such action: %s", action)
+            return {
+                "statusCode": 500,
+                "headers": {"Access-Control-Allow-Origin": "*"},
+                "body": "no such action",
+            }
     # TODO: format error returns properly so apig can give proper error response reporting (rather than having to check cloud watch)
     except Exception as exception:
+        LOGGER.error(repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -162,5 +209,5 @@ def lambda_handler(event, context):
     return {
         "statusCode": 200,
         "headers": {"Access-Control-Allow-Origin": "*"},
-        "body": json.dumps(dynamo_resp, cls=JSONEncoder),
+        "body": json.dumps(resp, cls=JSONEncoder),
     }

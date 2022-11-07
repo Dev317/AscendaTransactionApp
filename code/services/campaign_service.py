@@ -28,6 +28,7 @@ import os
 from decimal import Decimal
 
 import boto3
+from boto3.dynamodb.conditions import Key
 import requests
 
 LOGGER = logging.getLogger()
@@ -68,6 +69,7 @@ def create_campaign(data):
         data["card_type"], data["campaign_name"]
     )
     if "Item" in existing_campaign:
+        LOGGER.error("ERROR: Campaign already exists. Did you mean to update instead?")
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -78,6 +80,7 @@ def create_campaign(data):
         response = CAMPAIGN_TABLE.put_item(Item=data)
         LOGGER.info("campaign created")
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -90,6 +93,7 @@ def create_campaign(data):
         invoke_lambda(post_request, "calculation")
         LOGGER.info("calculation successfully invoked")
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -111,6 +115,7 @@ def get_all():
             )
             data.extend(response["Items"])
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -130,10 +135,37 @@ def get_by_card_type_and_name(card_type: str, campaign_name: str):
         LOGGER.info(json.dumps(response))
         # note: if the item is not found, response will not have key "item"
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
             "message": "An error occurred getting campaign by id.",
+            "error": str(exception),
+        }
+    return response
+
+
+def get_by_card_type(card_type: str):
+    """CRUD: get by card type only"""
+    LOGGER.info("Attempting to get all campaigns for %s", card_type)
+    try:
+        response = CAMPAIGN_TABLE.query(
+            KeyConditionExpression=Key('card_type').eq(card_type)
+            )
+        data = response["Items"]
+        while "LastEvaluatedKey" in response:
+            response = CAMPAIGN_TABLE.scan(
+                ExclusiveStartKey=response["LastEvaluatedKey"]
+            )
+            data.extend(response["Items"])
+        LOGGER.info(json.dumps(response))
+        # note: if the item is not found, response will not have key "item"
+    except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
+        return {
+            "statusCode": 500,
+            "headers": {"Access-Control-Allow-Origin": "*"},
+            "message": "An error occurred getting campaign by card_type.",
             "error": str(exception),
         }
     return response
@@ -150,6 +182,7 @@ def lambda_handler(event, context):
             body = event
             action = event["action"]
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -159,17 +192,29 @@ def lambda_handler(event, context):
 
     try:
         if action == "create":
-            dynamo_resp = create_campaign(body["data"])
+            resp = create_campaign(body["data"])
         elif action == "get_all":
-            dynamo_resp = get_all()
+            resp = get_all()
         elif action == "get_by_card_type_and_name":
-            dynamo_resp = get_by_card_type_and_name(
+            resp = get_by_card_type_and_name(
                 body["data"]["card_type"], body["data"]["campaign_name"]
             )
+        elif action == "get_by_card_type":
+            resp = get_by_card_type(
+                body["data"]["card_type"]
+            )
+        elif action == "health":
+            resp = "Campaign service is healthy"
         else:
-            dynamo_resp = {"statusCode": 500, "body": "no such action"}
+            LOGGER.error("ERROR: No such action: %s", action)
+            return {
+                "statusCode": 500,
+                "headers": {"Access-Control-Allow-Origin": "*"},
+                "body": "no such action",
+            }
     # TODO: format error returns properly so apig can give proper error response reporting (rather than having to check cloud watch)
     except Exception as exception:
+        LOGGER.error("ERROR: %s", repr(exception))
         return {
             "statusCode": 500,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -180,5 +225,5 @@ def lambda_handler(event, context):
     return {
         "statusCode": 200,
         "headers": {"Access-Control-Allow-Origin": "*"},
-        "body": json.dumps(dynamo_resp, cls=JSONEncoder),
+        "body": json.dumps(resp, cls=JSONEncoder),
     }
