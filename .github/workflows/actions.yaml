@@ -13,7 +13,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
         with:
-          ref: infrastructure
+          ref: project-2022-23t1-g1-team1-infrastructure
 
       - name: Verify Terraform version
         run: terraform --version
@@ -71,7 +71,7 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
         with:
-          ref: infrastructure
+          ref: project-2022-23t1-g1-team1-infrastructure
 
       - name: Verify Terraform version
         run: terraform --version
