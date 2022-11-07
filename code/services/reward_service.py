@@ -11,7 +11,6 @@
 # ? luxury
 
 import json
-import datetime
 
 # DELETE
 # ? luxury
@@ -35,7 +34,7 @@ REWARD_TABLE = DYNAMODB_CLIENT.Table(REWARD_TABLE_NAME)
 
 AWS_KEY_ID = os.environ.get("AWS_KEY_ID")
 AWS_SECRET = os.environ.get("AWS_SECRET")
-EMAIL_TOPIC_ARN = os.environ.get("EMAIL_TOPIC_ARN")
+SRC_EMAIL_ADDRESS = os.environ.get("SRC_EMAIL_ADDRESS")
 
 
 APIG_URL = os.environ.get(
@@ -208,7 +207,8 @@ def calculate_reward(transaction: dict) -> dict:
         reward = apply_policy(policy, transaction)
         put_reward(reward)
         LOGGER.info("Reward stored: %s", reward["reward_id"])
-        send_notification(reward)
+        if float(reward["reward_value"]) > 0.0:
+            send_notification(reward)
     except Exception as exception:
         LOGGER.error("ERROR: %s", repr(exception))
         return {
@@ -282,12 +282,31 @@ def send_notification(reward: dict):
     """Takes a reward dict, finds the email, then sends the notification"""
     try:
         email = get_user_email(reward["card_id"])
-        sns = boto3.client("sns",
-                   region_name=AWS_REGION,
-                   aws_access_key_id=AWS_KEY_ID,
-                   aws_secret_access_key=AWS_SECRET)
-
-        response = sns.subscribe(TopicArn=EMAIL_TOPIC_ARN, Protocol="email", Endpoint=email, ReturnSubscriptionArn=True)
+        if not email == "none":
+            LOGGER.info("Sending notification email")
+            client = boto3.client(service_name = "ses", aws_access_key_id= AWS_KEY_ID, aws_secret_access_key= AWS_SECRET)
+            response = client.send_email(
+                    Destination={
+                        "ToAddresses": [
+                            email,
+                        ],
+                    },
+                    Message={
+                        "Body": {
+                            "Html": {
+                                    "Data": "You have a new reward! View more at https://www.itsag1t1.com/\n ",
+                                    "Charset": "UTF-8"
+                                }
+                        },
+                        "Subject": {
+                            "Data": "Waftech Alert! You have a new reward from your purchase at " + reward["merchant_name"],
+                            "Charset": "UTF-8"
+                        },
+                    },
+                    Source=SRC_EMAIL_ADDRESS,
+                )
+        else:
+            LOGGER.info("User email not registered/found. Skipping sending email")
     except Exception as exception:
         LOGGER.error("ERROR: %s", repr(exception))
         return {
