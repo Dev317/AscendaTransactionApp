@@ -7,7 +7,6 @@ import requests
 
 # replace with apig of system as necessary
 APIG_URL = "https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/"
-# APIG_URL = "https://kd61m94cag.execute-api.ap-southeast-1.amazonaws.com/dev/"
 
 
 def invoke_lambda(post_request: dict, end_point: str):
@@ -17,16 +16,19 @@ def invoke_lambda(post_request: dict, end_point: str):
 
 
 # sets the start and end dates for all 4 campaigns and standard exclusions
-BASE_START_DATE = "09-06-2022"
-BASE_END_DATE = "11-06-2022"
+BASE_START_DATE = "01-06-2021"
+BASE_END_DATE = "31-12-2021"
 
-BASE_CAMPAIGNS = [
+PROMO_START_DATE = "01-10-2021"
+PROMO_END_DATE = "31-10-2021"
+
+PROMO_CAMPAIGNS = [
     {
         "campaign_name": "Grab promo",
-        "campaign_start_date": "10-06-2022",
+        "campaign_start_date": PROMO_START_DATE,
+        "campaign_end_date": PROMO_END_DATE,
         "campaign_description": "Grab promo",
         "card_type": "scis_shopping",
-        "campaign_end_date": "11-06-2022",
         "campaign_priority": "50",
         "campaign_conditions": [
             {
@@ -39,10 +41,10 @@ BASE_CAMPAIGNS = [
     },
     {
         "campaign_name": "Kaligo.com promo",
-        "campaign_start_date": "10-06-2022",
+        "campaign_start_date": PROMO_START_DATE,
+        "campaign_end_date": PROMO_END_DATE,
         "campaign_description": "Kaligo.com promo",
         "card_type": "scis_premiummiles",
-        "campaign_end_date": "11-06-2022",
         "campaign_priority": "50",
         "campaign_conditions": [
             {
@@ -54,10 +56,10 @@ BASE_CAMPAIGNS = [
     },
     {
         "campaign_name": "Kaligo.com promo",
-        "campaign_start_date": "10-06-2022",
+        "campaign_start_date": PROMO_START_DATE,
+        "campaign_end_date": PROMO_END_DATE,
         "campaign_description": "Kaligo.com promo",
         "card_type": "scis_platinummiles",
-        "campaign_end_date": "11-06-2022",
         "campaign_priority": "50",
         "campaign_conditions": [
             {
@@ -69,10 +71,10 @@ BASE_CAMPAIGNS = [
     },
     {
         "campaign_name": "Shell petrol promo",
-        "campaign_start_date": "10-06-2022",
+        "campaign_start_date": "01-08-2021",
+        "campaign_end_date": "30-08-2021",
         "campaign_description": "Shell petrol promo",
         "card_type": "scis_freedom",
-        "campaign_end_date": "11-06-2022",
         "campaign_priority": "50",
         "campaign_conditions": [
             {
@@ -82,6 +84,25 @@ BASE_CAMPAIGNS = [
             }
         ],
     },
+    # {
+    #     "campaign_name": "Shopee promo",
+    #     "campaign_start_date": BASE_START_DATE,
+    #     "campaign_description": "Shopee promo",
+    #     "card_type": "scis_shopping",
+    #     "campaign_end_date": "10-06-2022",
+    #     "campaign_priority": "100",
+    #     "campaign_conditions": [
+    #         {
+    #             "merchant_name_include": ["Shopee"],
+    #             "percentage_of_amount": "5",
+    #             "calculation_reason": "Shopee Promo - 5 points per dollar with Shopee"
+    #         }
+    #     ]
+    # },
+
+]
+
+BASE_CAMPAIGNS = [
     {
         "campaign_name": "SCIS Shopping Card Base",
         "campaign_start_date": BASE_START_DATE,
@@ -103,21 +124,6 @@ BASE_CAMPAIGNS = [
             {"percentage_of_amount": "1", "calculation_reason": "1 point/SGD on spend"},
         ],
     },
-    # {
-    #     "campaign_name": "Shopee promo",
-    #     "campaign_start_date": BASE_START_DATE,
-    #     "campaign_description": "Shopee promo",
-    #     "card_type": "scis_shopping",
-    #     "campaign_end_date": "10-06-2022",
-    #     "campaign_priority": "100",
-    #     "campaign_conditions": [
-    #         {
-    #             "merchant_name_include": ["Shopee"],
-    #             "percentage_of_amount": "5",
-    #             "calculation_reason": "Shopee Promo - 5 points per dollar with Shopee"
-    #         }
-    #     ]
-    # },
     {
         "campaign_name": "Freedom Card Base",
         "campaign_start_date": BASE_START_DATE,
@@ -420,11 +426,12 @@ CARD_GROUPS = [
 
 def run():
 
-    create_campaigns(BASE_CAMPAIGNS)
-    create_exclusions(BASE_EXCLUSIONS)
-    create_users(TEST_USERS)
-    create_rewards(TEST_TRANSACTIONS)
-    create_card_groups(CARD_GROUPS)
+    # create_campaigns(BASE_CAMPAIGNS)
+    create_campaigns(PROMO_CAMPAIGNS)
+    # create_exclusions(BASE_EXCLUSIONS)
+    # create_users(TEST_USERS)
+    # create_rewards(TEST_TRANSACTIONS)
+    # create_card_groups(CARD_GROUPS)
     print("complete")
 
 
