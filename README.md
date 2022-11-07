@@ -163,3 +163,6 @@ There are 3 main branches that govern the production of Waftech application
 - If there is any update to the Amplify backend, please remember to push
 
   ```amplify push```
+  
+## Copyright
+G1T1 - CS302 - Semester 1 - 2022/2023
