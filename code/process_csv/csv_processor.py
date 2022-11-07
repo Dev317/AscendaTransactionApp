@@ -51,33 +51,40 @@ def get_data_from_file(bucket, key, start_byte, end_byte):
     if start_byte == 0:
         records.pop(0)
 
+    errored_transactions = []
     data = []
     for record in records:
         LOGGER.info(f"Reading {record}...")
         record = record.strip()
         record_data = record.split(",")
 
-        if record_data[4].strip('"') == "USD":
-            sgd_amount = float(USD_TO_SGD_RATE) * float(record_data[5].strip('"'))
-        else:
-            sgd_amount = float(record_data[5].strip('"'))
-        item = {
-            "id": str(record_data[0].strip('"')),
-            "transaction_id": str(record_data[1].strip('"')),
-            "merchant": str(record_data[2].strip('"')),
-            "mcc": int(record_data[3].strip('"')) if len(record_data[3]) > 0 else 0,
-            "currency": str(record_data[4].strip('"')),
-            "amount": float(record_data[5].strip('"')),
-            "sgd_amount": sgd_amount,
-            "transaction_date": str(record_data[6].strip('"')),
-            "card_id": str(record_data[7].strip('"')),
-            "card_pan": str(record_data[8].strip('"')),
-            "card_type": str(record_data[9].strip('"')),
-        }
-        data.append(item)
-        LOGGER.info("Processing: %s", item)
+        try:
+            if record_data[4].strip('"') == "USD":
+                sgd_amount = float(USD_TO_SGD_RATE) * float(record_data[5].strip('"'))
+            else:
+                sgd_amount = float(record_data[5].strip('"'))
+
+            item = {
+                "id": str(record_data[0].strip('"')),
+                "transaction_id": str(record_data[1].strip('"')),
+                "merchant": str(record_data[2].strip('"')),
+                "mcc": int(record_data[3].strip('"')) if len(record_data[3]) > 0 else 0,
+                "currency": str(record_data[4].strip('"')),
+                "amount": float(record_data[5].strip('"')),
+                "sgd_amount": sgd_amount,
+                "transaction_date": str(record_data[6].strip('"')),
+                "card_id": str(record_data[7].strip('"')),
+                "card_pan": str(record_data[8].strip('"')),
+                "card_type": str(record_data[9].strip('"')),
+            }
+            data.append(item)
+            LOGGER.info("Processing: %s", item)
+        except:
+            errored_transactions.append(record)
 
     LOGGER.info(f"Successfully processed {len(data)} records from {bucket}/{key}")
+    LOGGER.warning(f"Number of errored transactions: {len(errored_transactions)}")
+    LOGGER.warning("Errored transactions: %s", str(errored_transactions))
 
     new_start_byte = start_byte + last_newline + 1
     return (data, new_start_byte)
