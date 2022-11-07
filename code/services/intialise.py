@@ -382,6 +382,7 @@ CARD_GROUPS = [
     {
     "card_group": "scis_miles_group",
     "card_type": "scis_premiummiles",
+    "card_name": "SCIS Premium Miles Card",
     "group_name": "SCIS Miles Programme",
     "group_description": "Rack up miles, reap more rewards.",
     "unit_prefix": "",
@@ -390,6 +391,7 @@ CARD_GROUPS = [
     {
     "card_group": "scis_miles_group",
     "card_type": "scis_platinummiles",
+    "card_name": "SCIS Platinum Miles Card",
     "group_name": "SCIS Miles Programme",
     "group_description": "Rack up miles, reap more rewards.",
     "unit_prefix": "",
@@ -398,6 +400,7 @@ CARD_GROUPS = [
     {
     "card_group": "cashback_group",
     "card_type": "scis_shopping",
+    "card_name": "SCIS Shopping Card",
     "group_name": "Cashback Programmes",
     "group_description": "Earn some quick cashback with SCIS!",
     "unit_prefix": "$",
@@ -406,6 +409,7 @@ CARD_GROUPS = [
     {
     "card_group": "freedom_points_group",
     "card_type": "scis_freedom",
+    "card_name": "SCIS Freedom Card",
     "group_name": "SCIS Freedom",
     "group_description": "Experience financial freedom with Freedom Points",
     "unit_prefix": "",
