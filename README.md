@@ -21,7 +21,7 @@ There are 3 main branches that govern the production of Waftech application
     git switch  - project-2022-23t1-g1-team1-infrastructure
     ```
 
-- Configure AWS credentials, use the G1T1  access key and secret key (provided that [aws cli](https://aws.amazon.com/cli/) and [aws-vault](https://github.com/99designs/aws-vault) is installed)
+- Configure AWS credentials, use the G1T1's aws access key and aws secret access key (provided that [aws cli](https://aws.amazon.com/cli/) and [aws-vault](https://github.com/99designs/aws-vault) is installed)
 
     ```bash
     aws configure
