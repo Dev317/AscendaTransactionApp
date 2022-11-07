@@ -25,6 +25,8 @@ resource "aws_lambda_function" "user_lambda" {
   environment {
     variables = {
       APIG_URL = "https://${aws_api_gateway_rest_api.orchestrator_apigw.id}.execute-api.${var.apigw_region}.amazonaws.com/prod/"
+      AWS_KEY_ID = "${var.key_id}"
+      AWS_SECRET = "${var.secret}"
     }
   }
 

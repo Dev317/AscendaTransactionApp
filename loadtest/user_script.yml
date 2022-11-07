@@ -3,6 +3,8 @@
 # There is a lot more that Artillery can do.
 # You can find great documentation of the possibilities at:
 # https://artillery.io/docs/
+
+
 config:
   # this hostname will be used as a prefix for each URI in the flow unless a complete URI is specified
   target: "https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/"
@@ -15,7 +17,7 @@ config:
       rampTo: 700
       name: Ramp up load
   payload:
-    path: "txn.csv"
+    path: "user.csv"
     fields:
       - "action"
       - "user_id"

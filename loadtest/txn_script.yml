@@ -1,0 +1,46 @@
+  config:
+    target: "https://xxsnouhdr9.execute-api.ap-southeast-1.amazonaws.com/prod/"
+    phases:
+      - duration: 20
+        arrivalRate: 5
+        name: Warm up
+      - duration: 60
+        arrivalRate: 5
+        rampTo: 700
+        name: Ramp up
+    payload:
+      path: "txn.csv"
+      fields:
+        - "id"
+        - "card_id"
+        - "merchant"
+        - "mcc"
+        - "currency"
+        - "amount"
+        - "sgd_amount"
+        - "transaction_id"
+        - "transaction_date"
+        - "card_pan"
+        - "card_type"
+      loadAll: true
+      name: transaction # refer to the data as "transaction"
+  scenarios:
+    - flow:
+        - loop:
+          - post:
+              url: "/transaction"
+              json:
+                action: "single_create"
+                data:
+                  id: "{{ $loopElement.id}}"
+                  card_id: "{{ $loopElement.card_id}}"
+                  merchant: "{{ $loopElement.merchant}}"
+                  mcc: "{{ $loopElement.mcc}}"
+                  currency: "{{ $loopElement.currency}}"
+                  amount: "{{ $loopElement.amount}}"
+                  sgd_amount: "{{ $loopElement.sgd_amount}}"
+                  transaction_id: "{{ $loopElement.transaction_id}}"
+                  transaction_date: "{{ $loopElement.transaction_date}}"
+                  card_pan: "{{ $loopElement.card_pan}}"
+                  card_type: "{{ $loopElement.card_type}}"
+          over: transaction
