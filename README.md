@@ -191,6 +191,10 @@ There are 3 main branches that govern the production of Waftech application
 - If there is any update to the Amplify backend, please remember to push
 
   ```amplify push```
+ 
+## CORS error
+
+Please enable CORS in the API Gateway and redeploy all the API endpoints to prevent CORS error when calling from front-end client!
   
 ## Copyright
 G1T1 - CS302 - Semester 1 - 2022/2023
