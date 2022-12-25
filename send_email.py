@@ -1,7 +1,7 @@
 import boto3
 
-aws_access_key_id = 'AKIA2OKFRCBLZAAZCB7L'
-aws_secret_access_key = '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'
+aws_access_key_id = ''
+aws_secret_access_key = ''
 
 client = boto3.client(service_name='ses',
                         aws_access_key_id= aws_access_key_id,
